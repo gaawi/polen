@@ -1,0 +1,1513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="robots" content="noindex, nofollow">
+<title>Polen — Grant Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0c0d11;--s1:#14161e;--s2:#1c1f2b;--s3:#252837;
+  --bd:#2a2d3e;--bd2:#363a50;
+  --t:#e8eaf0;--td:#7b8098;--tf:#4e5168;
+  --ac:#7c6cf0;--acl:#a49afa;--acbg:rgba(124,108,240,.1);
+  --g:#34d399;--gbg:rgba(52,211,153,.1);
+  --r:#f87171;--rbg:rgba(248,113,113,.1);
+  --y:#fbbf24;--ybg:rgba(251,191,36,.1);
+  --b:#60a5fa;--bbg:rgba(96,165,250,.1);
+  --gr:#6b7280;--grbg:rgba(107,114,128,.1);
+  --o:#fb923c;--obg:rgba(251,146,60,.1);
+}
+
+/* Light mode overrides */
+html.light{
+  --bg:#f5f6fa;--s1:#ffffff;--s2:#f0f1f5;--s3:#e8e9ef;
+  --bd:#d8dae5;--bd2:#c8cad5;
+  --t:#1a1b2e;--td:#4a4d6a;--tf:#8b8ea8;
+  --ac:#6c5ce7;--acl:#7c6cf0;--acbg:rgba(108,92,231,.08);
+  --g:#16a34a;--gbg:rgba(22,163,74,.1);
+  --r:#dc2626;--rbg:rgba(220,38,38,.1);
+  --y:#ca8a04;--ybg:rgba(202,138,4,.1);
+  --b:#2563eb;--bbg:rgba(37,99,235,.1);
+  --gr:#6b7280;--grbg:rgba(107,114,128,.1);
+  --o:#ea580c;--obg:rgba(234,88,12,.1);
+}
+body{transition:background .2s,color .2s;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t);min-height:100vh;-webkit-font-smoothing:antialiased;}
+.app{height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+
+/* Top bar */
+.topbar{display:flex;align-items:center;gap:12px;padding:10px 20px;background:var(--s1);border-bottom:1px solid var(--bd);flex-shrink:0;flex-wrap:wrap;}
+.stat{display:flex;align-items:center;gap:5px;padding:4px 12px;border-radius:8px;background:var(--s2);font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;border:1px solid transparent;}
+.stat:hover{border-color:var(--bd2);}
+.stat.active{border-color:var(--ac);background:var(--acbg);}
+.stat .sv{font-size:14px;font-weight:800;}
+.stat.so .sv{color:var(--o);}
+.stat.sg .sv{color:var(--g);}
+.stat.sy .sv{color:var(--y);}
+.stat.sr .sv{color:var(--r);}
+.stat.sb .sv{color:var(--b);}
+.stat.sp .sv{color:var(--acl);}
+.topbar-actions{margin-left:auto;display:flex;gap:6px;align-items:center;}
+.btn{padding:6px 14px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;border:none;transition:all .1s;}
+.btn-pri{background:var(--ac);color:#fff;}.btn-pri:hover{background:var(--acl);}
+.btn-sec{background:var(--s2);color:var(--td);border:1px solid var(--bd);}.btn-sec:hover{color:var(--t);border-color:var(--ac);}
+
+/* Filters */
+.filters{display:flex;gap:6px;padding:10px 20px;background:var(--s1);border-bottom:1px solid var(--bd);flex-shrink:0;flex-wrap:wrap;align-items:center;}
+.search{background:var(--s2);border:1px solid var(--bd);color:var(--t);padding:7px 12px;border-radius:8px;font-size:12px;outline:none;width:260px;}
+.search:focus{border-color:var(--ac);}
+.search::placeholder{color:var(--tf);}
+.chip{padding:4px 10px;border-radius:16px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--bd);background:none;color:var(--td);transition:all .15s;}
+.chip.on{border-color:var(--ac);background:var(--acbg);color:var(--acl);}
+.chip:hover:not(.on){border-color:var(--bd2);color:var(--t);}
+
+/* Main scroll area */
+.main-area{flex:1;overflow:auto;padding:0;}
+
+/* LEVEL 1: Funder Folder */
+.funder{border-bottom:1px solid var(--bd);}
+.funder-row{display:flex;align-items:center;gap:0;padding:0;min-height:36px;cursor:pointer;transition:background .1s;user-select:none;}
+.funder-row:hover{background:rgba(124,108,240,.04);}
+.funder-row.open{background:var(--acbg);}
+
+/* Date block on the left */
+.fd-date{width:auto;flex-shrink:0;display:flex;align-items:center;gap:4px;padding:6px 10px;border-right:1px solid var(--bd);}
+.fd-date .fd-day{font-size:12px;font-weight:700;line-height:1;}
+.fd-date .fd-day.past{color:var(--tf);}
+.fd-date .fd-day.soon{color:var(--r);}
+.fd-date .fd-day.upcoming{color:var(--y);}
+.fd-date .fd-day.future{color:var(--t);}
+.fd-date .fd-month{display:none;}
+.fd-date .fd-year{display:none;}
+.fd-date .fd-rel{font-size:8px;font-weight:600;margin-top:0;}
+.fd-date .fd-rel.soon{color:var(--r);}
+.fd-date .fd-rel.upcoming{color:var(--y);}
+.fd-date .fd-rel.future{color:var(--td);}
+.fd-date .fd-rel.past{color:var(--tf);}
+.fd-type{font-size:7px;font-weight:700;padding:1px 5px;border-radius:3px;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap;margin-top:2px;}
+.fd-type.hard{background:var(--rbg);color:var(--r);}
+.fd-type.est{background:var(--ybg);color:var(--y);}
+
+/* Center content */
+.fd-center{flex:1;min-width:0;padding:4px 10px;display:flex;align-items:center;gap:8px;}
+.fd-top{display:flex;align-items:center;gap:6px;flex:1;min-width:0;}
+.funder-chevron{font-size:9px;color:var(--tf);transition:transform .2s;flex-shrink:0;}
+.funder-chevron.open{transform:rotate(90deg);color:var(--acl);}
+.funder-name{font-size:12px;font-weight:700;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.funder-counts{font-size:9px;color:var(--tf);font-weight:600;flex-shrink:0;}
+.fd-bottom{display:none;}
+
+/* Semáforo (year history circles) */
+.semaforo{display:flex;gap:3px;align-items:center;}
+.sem-yr{display:flex;flex-direction:column;align-items:center;gap:1px;}
+.sem-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.sem-dot.received{background:var(--g);}
+.sem-dot.denied{background:var(--r);}
+.sem-dot.waiting{background:var(--b);}
+.sem-dot.apply{background:var(--y);}
+.sem-dot.notapplied{background:var(--gr);opacity:.4;}
+.sem-dot.check{background:var(--y);opacity:.6;}
+.sem-dot.missed{background:var(--o);}
+.sem-dot.notelig{background:var(--gr);opacity:.5;}
+.sem-lbl{font-size:6px;color:var(--tf);font-weight:600;}
+
+/* Right side meta */
+.fd-right{display:flex;align-items:center;gap:6px;padding:4px 12px;flex-shrink:0;}
+.funder-stats{display:flex;gap:4px;}
+.funder-stats .ms{font-size:9px;font-weight:700;padding:2px 6px;border-radius:8px;}
+.ms-g{background:var(--gbg);color:var(--g);}
+.ms-r{background:var(--rbg);color:var(--r);}
+.ms-b{background:var(--bbg);color:var(--b);}
+.ms-y{background:var(--ybg);color:var(--y);}
+.ms-amt{background:var(--gbg);color:var(--g);font-variant-numeric:tabular-nums;}
+.fb-count{font-size:9px;color:var(--tf);}
+
+/* LEVEL 2: Grant table inside funder */
+.grants-panel{background:var(--s1);border-top:1px solid var(--bd);}
+.grants-table{width:100%;border-collapse:collapse;}
+.grants-table th{background:var(--s2);padding:5px 10px;text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--tf);font-weight:700;border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:3;}
+.grants-table td{padding:6px 10px;border-bottom:1px solid var(--bd);font-size:11px;vertical-align:middle;}
+.grants-table tr{cursor:pointer;transition:background .1s;}
+.grants-table tr:hover{background:rgba(124,108,240,.04);}
+.grants-table tr.g-sel{background:var(--acbg);}
+.g-deadline{font-weight:600;font-size:12px;white-space:nowrap;}
+.g-name{font-weight:600;max-width:320px;white-space:normal;word-break:break-word;line-height:1.3;}
+.g-year{font-size:12px;font-weight:700;color:var(--acl);}
+.g-amt{font-variant-numeric:tabular-nums;font-weight:700;color:var(--g);}
+
+/* Next Step badges */
+.ns{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:14px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap;}
+.ns::before{content:'';width:4px;height:4px;border-radius:50%;background:currentColor;}
+.ns-send{background:var(--obg);color:var(--o);}
+.ns-apply{background:var(--rbg);color:var(--r);}
+.ns-check{background:var(--ybg);color:var(--y);}
+.ns-waiting{background:var(--bbg);color:var(--b);}
+.ns-received{background:var(--gbg);color:var(--g);}
+.ns-denied{background:var(--rbg);color:var(--r);}
+.ns-notsent{background:var(--grbg);color:var(--gr);}
+.ns-missed{background:var(--obg);color:var(--o);}
+.ns-notelig{background:var(--grbg);color:var(--gr);}
+
+/* LEVEL 3: History panel */
+.hist-panel{background:var(--bg);padding:12px 20px 12px 40px;border-top:1px solid var(--bd);}
+.hist-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px 16px;margin-bottom:10px;}
+.hf{display:flex;flex-direction:column;}
+.hf .hl{font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--tf);margin-bottom:1px;}
+.hf .hv{font-size:12px;color:var(--td);}
+.hf.full{grid-column:1/-1;}
+
+/* Thermometer */
+.thermo{margin-top:8px;}
+.thermo-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--tf);margin-bottom:3px;}
+.thermo-bar{height:7px;background:var(--s2);border-radius:4px;position:relative;overflow:visible;}
+.thermo-fill{height:100%;border-radius:4px;}
+.thermo-fill.prog{background:linear-gradient(90deg,var(--g),var(--y));}
+.thermo-fill.end{background:linear-gradient(90deg,var(--g),var(--r));}
+.thermo-fill.done{background:var(--tf);}
+.thermo-fill.pre{background:var(--b);}
+.thermo-mk{position:absolute;top:-2px;width:3px;height:12px;background:#fff;border-radius:2px;z-index:2;box-shadow:0 0 6px rgba(255,255,255,.3);}
+.thermo-dates{display:flex;justify-content:space-between;margin-top:2px;font-size:9px;color:var(--tf);}
+.thermo-st{display:inline-flex;align-items:center;gap:4px;font-size:9px;font-weight:600;margin-top:3px;padding:2px 6px;border-radius:8px;}
+.thermo-st.pre{color:var(--b);background:var(--bbg);}
+.thermo-st.prog{color:var(--g);background:var(--gbg);}
+.thermo-st.end{color:var(--r);background:var(--rbg);}
+.thermo-st.done{color:var(--gr);background:var(--grbg);}
+/* Checkpoint flags on thermo bar */
+.thermo-cp{position:absolute;top:-10px;transform:translateX(-50%);z-index:3;cursor:default;}
+.thermo-cp .cp-flag{font-size:10px;line-height:1;}
+.cp-dl .cp-flag{color:var(--y);}
+.cp-rpt .cp-flag{color:var(--o);}
+/* Tags next to label */
+.thermo-tag{font-size:8px;font-weight:600;padding:1px 5px;border-radius:4px;white-space:nowrap;}
+.tg-dl{background:var(--ybg);color:var(--y);}
+.tg-rpt{background:var(--obg);color:var(--o);}
+
+/* Edit form */
+.erow{display:flex;gap:6px;margin-bottom:6px;}
+.erow select,.erow input,.erow textarea{background:var(--s2);border:1px solid var(--bd);color:var(--t);padding:5px 9px;border-radius:6px;font-size:11px;font-family:inherit;outline:none;flex:1;}
+.erow select:focus,.erow input:focus,.erow textarea:focus{border-color:var(--ac);}
+.erow textarea{min-height:40px;resize:vertical;}
+
+/* Timeline dots */
+.tl-entry{position:relative;padding-left:22px;margin-bottom:0;}
+.tl-dot{position:absolute;left:4px;top:4px;width:10px;height:10px;border-radius:50%;border:2px solid var(--bd);background:var(--s1);}
+.tl-dot.received{border-color:var(--g);background:var(--g);}
+.tl-dot.denied{border-color:var(--r);background:var(--r);}
+.tl-dot.waiting{border-color:var(--b);}
+.tl-line{position:absolute;left:8px;top:16px;bottom:-2px;width:2px;background:var(--bd);border-radius:1px;}
+.tl-card{background:var(--s2);border:1px solid var(--bd);border-radius:8px;padding:8px 12px;margin-bottom:8px;}
+/* Timeline action buttons (duplicate/delete) */
+.tl-action{background:none;border:none;cursor:pointer;font-size:11px;color:var(--tf);padding:2px 4px;border-radius:4px;opacity:0;transition:all .15s;line-height:1;}
+.tl-card:hover .tl-action{opacity:1;}
+.tl-action:hover{background:var(--s3);color:var(--td);}
+.tl-del:hover{color:var(--r);background:var(--rbg);}
+
+/* Modal */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(4px);}
+.modal{background:var(--s1);border:1px solid var(--bd);border-radius:14px;padding:24px;max-width:520px;width:92%;max-height:85vh;overflow-y:auto;}
+.modal h3{font-size:16px;margin-bottom:14px;}
+.mf{margin-bottom:10px;}
+.mf label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--td);margin-bottom:3px;}
+.mf input,.mf select,.mf textarea{width:100%;background:var(--s2);border:1px solid var(--bd);color:var(--t);padding:7px 11px;border-radius:7px;font-size:12px;font-family:inherit;outline:none;}
+.mf textarea{min-height:60px;resize:vertical;}
+.ma{display:flex;gap:6px;justify-content:flex-end;margin-top:14px;}
+
+/* Flat mode table (status filter) */
+.flat-table{width:100%;border-collapse:collapse;min-width:800px;}
+.flat-table th{background:var(--s2);padding:7px 10px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--tf);font-weight:700;border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:5;}
+.flat-table td{padding:6px 10px;border-bottom:1px solid var(--bd);font-size:12px;vertical-align:middle;}
+.flat-table tr{cursor:pointer;transition:background .1s;}
+.flat-table tr:hover{background:rgba(124,108,240,.04);}
+
+/* Spreadsheet editor - RESIZABLE COLUMNS */
+.sheet-wrap{flex:1;overflow:auto;}
+.sheet{width:100%;border-collapse:collapse;min-width:1200px;table-layout:fixed;}
+.sheet th{background:var(--s2);padding:4px 5px;text-align:left;font-size:8px;text-transform:uppercase;letter-spacing:.4px;color:var(--tf);font-weight:700;border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:5;white-space:nowrap;cursor:pointer;user-select:none;position:relative;overflow:hidden;}
+.sheet th:hover{color:var(--t);}
+.sheet th.so{color:var(--acl);}
+.sheet td{padding:0;border-bottom:1px solid var(--bd);border-right:1px solid var(--bd);font-size:8px;vertical-align:middle;overflow:hidden;}
+.sheet tr:nth-child(even){background:rgba(255,255,255,.01);}
+.sheet tr:hover{background:rgba(124,108,240,.04);}
+.sheet td input,.sheet td select{width:100%;background:transparent;border:none;color:var(--t);padding:3px 5px;font-size:8px;font-family:inherit;outline:none;min-height:22px;}
+.sheet td input:focus,.sheet td select:focus{background:var(--acbg);outline:1px solid var(--ac);}
+.sheet td input::placeholder{color:var(--tf);}
+.sheet td.cell-id{color:var(--tf);font-size:9px;padding:4px 6px;text-align:center;width:35px;}
+.sheet td.cell-del{width:28px;text-align:center;padding:0;}
+.sheet td.cell-del button{background:none;border:none;color:var(--tf);cursor:pointer;font-size:12px;padding:4px;}
+.sheet td.cell-del button:hover{color:var(--r);}
+.sheet .cell-found input{font-weight:600;}
+.sheet .cell-amt input{font-variant-numeric:tabular-nums;color:var(--g);}
+.sheet-toolbar{display:flex;gap:8px;align-items:center;padding:8px 20px;background:var(--s1);border-bottom:1px solid var(--bd);flex-shrink:0;}
+/* Column resize handle */
+.col-resize{position:absolute;right:0;top:0;bottom:0;width:5px;cursor:col-resize;background:transparent;z-index:10;}
+.col-resize:hover,.col-resize.active{background:var(--ac);}
+
+/* Program semáforo in grant table */
+.prog-sem{display:inline-flex;gap:2px;align-items:center;vertical-align:middle;margin-left:6px;}
+.prog-sem .sem-yr{display:flex;flex-direction:column;align-items:center;gap:0;}
+.prog-sem .sem-dot{width:8px;height:8px;}
+.prog-sem .sem-lbl{font-size:6px;}
+
+/* Link icon */
+.link-icon{color:var(--b);font-size:11px;text-decoration:none;opacity:.7;transition:opacity .15s;}
+.link-icon:hover{opacity:1;}
+/* Ver Convocatoria button */
+.btn-conv{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:8px;font-size:10px;font-weight:600;color:var(--b);background:var(--bbg);border:none;cursor:pointer;text-decoration:none;white-space:nowrap;transition:all .15s;}
+.btn-conv:hover{background:var(--b);color:#fff;}
+.btn-conv .conv-arrow{font-size:8px;transition:transform .15s;}
+.btn-conv:hover .conv-arrow{transform:translateX(2px);}
+.mob-right{display:none;}
+
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--bd);border-radius:3px;}
+
+/* Copy button */
+.copy-btn{background:none;border:none;cursor:pointer;padding:1px 3px;font-size:10px;opacity:0;transition:opacity .15s;color:var(--td);vertical-align:middle;line-height:1;flex-shrink:0;}
+.copy-btn:hover{color:var(--acl);}
+.funder-name:hover .copy-btn,.g-name:hover .copy-btn,.flat-fname:hover .copy-btn,.flat-gname:hover .copy-btn{opacity:1;}
+.copy-btn.copied{opacity:1;color:var(--g);}
+
+/* Active Grants view */
+.active-grid{padding:12px 16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px;}
+.active-card{background:var(--s1);border:1px solid var(--bd);border-radius:12px;padding:14px 16px;transition:border-color .15s;}
+.active-card:hover{border-color:var(--g);}
+.ac-top{display:flex;justify-content:space-between;gap:12px;margin-bottom:8px;}
+.ac-info{flex:1;min-width:0;}
+.ac-foundation{font-size:13px;font-weight:700;line-height:1.3;display:flex;align-items:center;gap:3px;}
+.ac-grant{font-size:11px;color:var(--td);margin-top:2px;display:flex;align-items:center;gap:3px;}
+.ac-project{font-size:10px;color:var(--tf);margin-top:2px;}
+.ac-amounts{text-align:right;flex-shrink:0;}
+.ac-amt{font-size:16px;font-weight:800;color:var(--g);font-variant-numeric:tabular-nums;}
+.ac-days{font-size:11px;font-weight:700;margin-top:2px;}
+.ac-report{font-size:9px;color:var(--td);margin-top:2px;}
+.ac-notes{font-size:10px;color:var(--tf);margin-top:8px;padding-top:8px;border-top:1px solid var(--bd);line-height:1.4;}
+
+/* ═══ Calendar / Upcoming View ═══ */
+.cal-view{padding:16px 20px;}
+.cal-season{margin-bottom:28px;}
+.cal-season-hdr{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid var(--bd);}
+.cal-season-name{font-size:20px;font-weight:800;color:var(--t);}
+.cal-season-name.current{color:var(--ac);}
+.cal-season-name.next{color:var(--y);}
+.cal-season-count{font-size:11px;font-weight:600;color:var(--tf);background:var(--s2);padding:2px 8px;border-radius:8px;}
+.cal-season-tag{font-size:9px;font-weight:700;color:var(--ac);background:var(--acbg);padding:2px 8px;border-radius:8px;text-transform:uppercase;letter-spacing:.5px;}
+.cal-season.closed{opacity:.5;}
+.cal-season.closed .cal-grant{opacity:.7;}
+
+/* Grant card — redesigned */
+.cal-grant{background:var(--s1);border:1px solid var(--bd);border-left:3px solid var(--bd2);border-radius:12px;margin-bottom:10px;padding:14px 16px;transition:border-color .15s;cursor:pointer;}
+.cal-grant:hover{border-color:var(--ac);border-left-color:var(--ac);}
+.cal-grant.cg-urgent{border-left-color:var(--r);}
+.cal-grant.cg-soon{border-left-color:var(--o);}
+.cal-grant.cg-ok{border-left-color:var(--y);}
+
+.cg-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px;}
+.cg-foundation{font-size:15px;font-weight:700;line-height:1.3;}
+.cg-program{font-size:12px;color:var(--td);margin-top:2px;}
+.cg-top-right{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.cg-season-sel{background:var(--s2);border:1px solid var(--bd);border-radius:6px;color:var(--t);font-size:14px;padding:2px 4px;cursor:pointer;outline:none;-webkit-appearance:none;appearance:none;text-align:center;width:32px;}
+.cg-season-sel:hover{border-color:var(--ac);}
+.cg-chevron{color:var(--tf);font-size:14px;}
+
+.cg-meta{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:8px;}
+.cg-meta-item{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--td);}
+.cg-meta-item .label{color:var(--tf);font-size:9px;text-transform:uppercase;letter-spacing:.3px;}
+.cg-meta-item .val{font-weight:600;}
+.cg-dl-type{font-size:8px;font-weight:800;padding:1px 6px;border-radius:4px;letter-spacing:.3px;}
+.cg-dl-type.hard{background:var(--rbg);color:var(--r);}
+.cg-dl-type.est{background:var(--grbg);color:var(--gr);}
+
+.cg-bottom{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.cg-history{display:flex;gap:3px;align-items:center;flex-wrap:wrap;flex:1;}
+.cg-yr{display:inline-flex;align-items:center;gap:3px;font-size:10px;color:var(--td);background:var(--s2);padding:2px 7px;border-radius:4px;}
+.cg-yr .sem-dot{width:6px;height:6px;}
+.cg-stats{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.cg-amt{font-size:12px;font-weight:700;color:var(--g);font-variant-numeric:tabular-nums;}
+.cg-rate{font-size:10px;color:var(--td);}
+.cg-web{font-size:10px;color:var(--b);text-decoration:none;opacity:.7;white-space:nowrap;}
+.cg-web:hover{opacity:1;}
+
+.cg-add-btn{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:5px 14px;border-radius:8px;border:1px dashed var(--bd2);background:transparent;color:var(--td);cursor:pointer;transition:all .15s;}
+.cg-add-btn:hover{border-color:var(--ac);color:var(--ac);background:var(--acbg);}
+.cg-search-btn,.cg-web-btn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;background:var(--s2);border:1px solid var(--bd);text-decoration:none;font-size:13px;transition:all .15s;}
+.cg-search-btn:hover{border-color:var(--ac);background:var(--acbg);}
+.cg-web-btn:hover{border-color:var(--b);background:var(--bbg);}
+
+.cal-empty{text-align:center;padding:40px 20px;color:var(--tf);font-size:13px;}
+.cal-empty-icon{font-size:32px;margin-bottom:8px;}
+
+/* ══════════════════════════════════════════════════
+   iOS-NATIVE MOBILE EXPERIENCE
+   Inspired by Apple Music / iOS Settings
+   ══════════════════════════════════════════════════ */
+@media(max-width:768px){
+  /* ── Safe area & system feel ── */
+  .app{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);}
+
+  /* ── Top bar: Large title style ── */
+  .topbar{
+    padding:14px 16px 8px;gap:0;flex-wrap:wrap;
+    background:var(--bg);border-bottom:none;
+  }
+  .topbar h1{font-size:28px;font-weight:800;letter-spacing:-.5px;width:100%;margin-bottom:6px;}
+  .topbar h1 span{color:var(--acl);display:inline;}
+  /* Stats as horizontal pill row below title */
+  .stat{
+    padding:3px 10px;font-size:10px;border-radius:20px;
+    background:var(--s2);gap:4px;
+  }
+  .stat .sv{font-size:13px;}
+  .stat span:not(.sv){display:inline;font-size:9px;}
+  .topbar-actions{margin-left:auto;gap:6px;}
+  .btn{padding:7px 14px;font-size:12px;border-radius:20px;font-weight:700;}
+  .theme-btn{padding:6px 10px;border-radius:20px;font-size:16px;}
+
+  /* ── Filters: segmented control + search ── */
+  .filters{
+    padding:0 16px 10px;gap:8px;flex-wrap:wrap;
+    background:var(--bg);border-bottom:none;
+  }
+  /* Search bar — iOS style */
+  .search{
+    width:100%;order:-1;
+    font-size:16px;padding:10px 14px;
+    border-radius:12px;border:none;
+    background:var(--s1);color:var(--t);
+    -webkit-appearance:none;
+  }
+  .search:focus{box-shadow:0 0 0 2px var(--ac);}
+  .search::placeholder{color:var(--tf);}
+  /* Chips → iOS segmented control look */
+  .chip{
+    padding:6px 12px;border-radius:20px;
+    font-size:12px;font-weight:600;
+    border:none;background:var(--s1);color:var(--td);
+    min-height:32px;display:inline-flex;align-items:center;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .chip.on{background:var(--ac);color:#fff;border:none;}
+  .chip:hover:not(.on){border:none;background:var(--s2);}
+
+  /* ── Save indicator ── */
+  .save-indicator{font-size:9px;}
+
+  /* ── Main scroll area ── */
+  .main-area{padding:0 0 80px;}
+
+  /* ════════════════════════════════════
+     GRANT LIST — iOS Card-style rows
+     ════════════════════════════════════ */
+  .flat-table{min-width:0!important;border-collapse:separate;border-spacing:0;}
+  .flat-table thead{display:none;}
+  .flat-table,.flat-table tbody{display:block;width:100%;}
+  .flat-table tr{
+    display:block;margin:6px 12px;
+    background:var(--s1);border-radius:14px;
+    padding:12px 14px;border:none;
+    position:relative;
+    -webkit-tap-highlight-color:transparent;
+    transition:transform .15s,box-shadow .15s;
+  }
+  .flat-table tr:active{transform:scale(.98);}
+  .flat-table tr.g-sel{background:var(--s2);box-shadow:0 0 0 1.5px var(--ac);}
+  .flat-table td{padding:0;border:none;font-size:12px;display:block;}
+
+  /* Row line 1: deadline */
+  .flat-table td.mob-line1{
+    display:flex;align-items:center;gap:6px;
+    width:100%;margin-bottom:4px;
+  }
+  .g-deadline{font-size:13px;font-weight:700;}
+  .fd-type{font-size:8px;padding:2px 6px;border-radius:4px;}
+  .fd-rel{font-size:10px!important;}
+
+  /* Row line 2: foundation */
+  .flat-table td.flat-fname{
+    font-size:15px;font-weight:700;line-height:1.3;
+    white-space:normal!important;overflow:visible!important;max-width:none!important;
+    margin-bottom:2px;
+  }
+
+  /* Row line 3: grant program + semáforo */
+  .flat-table td.flat-gname{
+    font-size:13px;color:var(--td);
+    white-space:normal!important;overflow:visible!important;max-width:none!important;
+    width:100%;margin-bottom:6px;line-height:1.3;
+  }
+
+  /* Hide desktop-only, show mobile combined */
+  .flat-table td.desk-only{display:none!important;}
+  .flat-table td.mob-right{
+    display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+    position:static;max-width:none;
+    padding-top:6px;border-top:1px solid var(--bd);
+  }
+  .flat-table td.mob-right .ns,.flat-table td.mob-right .ns-select{font-size:10px;padding:3px 10px;}
+  .flat-table td.mob-right .ms{font-size:10px;padding:2px 8px;border-radius:10px;}
+  .flat-table td.mob-hide{display:none;}
+
+  /* Expanded detail panel */
+  .flat-table td[colspan]{
+    display:block;width:100%;padding:0;
+    overflow:visible;margin:0 12px;
+    border-radius:0 0 14px 14px;
+  }
+
+  /* Semáforo */
+  .prog-sem .sem-dot{width:7px;height:7px;}
+  .prog-sem .sem-lbl{font-size:6px;}
+  .semaforo{gap:2px;}
+  .sem-dot{width:7px;height:7px;}
+
+  /* NS badges */
+  .ns{font-size:9px;padding:3px 10px;border-radius:20px;}
+
+  /* Copy btn visible on mobile */
+  .copy-btn{opacity:.4;font-size:11px;}
+
+  /* ════════════════════════════════════
+     TIMELINE — iOS card list
+     ════════════════════════════════════ */
+  .hist-panel{
+    padding:10px 0 6px;
+    background:transparent;border-top:none;
+  }
+  .tl-entry{padding-left:20px;margin-bottom:0;}
+  .tl-dot{left:2px;top:6px;width:10px;height:10px;}
+  .tl-line{left:6px;top:18px;width:2px;}
+  .tl-card{
+    padding:12px 14px;margin-bottom:8px;
+    border-radius:14px;border:none;
+    background:var(--s1);
+    box-shadow:0 1px 3px rgba(0,0,0,.12);
+    word-break:break-word;overflow-wrap:anywhere;
+  }
+  .tl-card .tl-header{flex-wrap:wrap;gap:6px!important;}
+  .tl-card .tl-header>span:first-child{font-size:18px!important;}
+  .tl-card .tl-meta{flex-wrap:wrap;gap:4px!important;}
+  .tl-card .tl-meta .ns-select{font-size:11px;padding:4px 12px;}
+  .tl-card .tl-grid{grid-template-columns:1fr!important;gap:4px!important;font-size:13px!important;}
+  .tl-card .tl-grid span[style]{font-size:10px!important;}
+
+  /* Thermo — slightly bigger for touch */
+  .thermo-bar{height:8px;border-radius:5px;}
+  .thermo-mk{height:14px;width:4px;top:-3px;}
+  .thermo-dates{font-size:10px;margin-top:3px;}
+  .thermo-st{font-size:10px;padding:3px 8px;margin-top:4px;}
+
+  /* ════════════════════════════════════
+     ACTIVE GRANTS — iOS cards
+     ════════════════════════════════════ */
+  .active-grid{padding:8px 12px;grid-template-columns:1fr;gap:10px;}
+  .active-card{
+    padding:14px 16px;border-radius:16px;
+    border:none;background:var(--s1);
+    box-shadow:0 1px 3px rgba(0,0,0,.12);
+  }
+  .active-card:hover{border-color:transparent;}
+  .ac-foundation{font-size:15px;}
+  .ac-grant{font-size:13px;}
+  .ac-amt{font-size:18px;}
+  .ac-days{font-size:13px;}
+  .ac-report{font-size:11px;}
+  .ac-top{flex-wrap:nowrap;}
+  .ac-notes{font-size:12px;}
+
+  /* ── Calendar view mobile ── */
+  .cal-view{padding:12px 12px;}
+  .cal-season-name{font-size:18px;}
+  .cal-grant{padding:12px 14px;}
+  .cg-foundation{font-size:14px;}
+  .cg-meta{gap:8px;}
+  .cg-bottom{flex-direction:column;align-items:flex-start;gap:6px;}
+  .cg-stats{width:100%;justify-content:space-between;}
+
+  /* ════════════════════════════════════
+     MODAL — iOS sheet style
+     ════════════════════════════════════ */
+  .modal-ov{align-items:flex-end;background:rgba(0,0,0,.4);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
+  .modal{
+    max-width:100%;width:100%;padding:20px 20px 30px;
+    border-radius:20px 20px 0 0;
+    max-height:90vh;
+    animation:slideUp .3s ease-out;
+  }
+  @keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+  .modal h3{font-size:20px;font-weight:700;margin-bottom:16px;}
+  .mf label{font-size:12px;margin-bottom:4px;}
+  .mf input,.mf select,.mf textarea{
+    font-size:16px;padding:10px 14px;border-radius:12px;
+    -webkit-appearance:none;
+  }
+  .ma{gap:10px;margin-top:20px;}
+  .ma .btn{padding:12px 20px;font-size:14px;border-radius:14px;}
+
+  /* ════════════════════════════════════
+     EDIT SHEET — horizontal scroll
+     ════════════════════════════════════ */
+  .sheet{min-width:700px;}
+  .sheet-toolbar{padding:6px 12px;flex-wrap:wrap;}
+
+  /* ── Click-to-edit popover ── */
+  .cte-pop{
+    min-width:240px;padding:10px;border-radius:14px;
+    box-shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  .cte-pop input,.cte-pop textarea{
+    font-size:16px;padding:10px 12px;border-radius:10px;
+    -webkit-appearance:none;
+  }
+  .cte-pop .cte-btns{margin-top:8px;gap:6px;}
+  .cte-pop .cte-btn{padding:6px 16px;font-size:12px;border-radius:10px;}
+  .cte-icon{opacity:.4;font-size:10px;}
+
+  /* ── Editable fields ── */
+  .ef{font-size:13px;padding:2px 4px;}
+  .ef-sm{font-size:12px;}
+  .ef-date{width:auto;font-size:12px;}
+  .ef-amt{width:auto;font-size:13px;}
+
+  /* ── Link icon ── */
+  .link-icon{font-size:13px;}
+}
+
+/* Small phones */
+@media(max-width:400px){
+  .topbar h1{font-size:24px;}
+  .stat{padding:3px 8px;font-size:9px;}
+  .stat .sv{font-size:12px;}
+  .flat-table td.flat-fname{font-size:14px;}
+  .flat-table td.flat-gname{font-size:12px;}
+  .chip{font-size:11px;padding:5px 10px;}
+}
+/* Theme toggle button */
+.theme-btn{background:var(--s2);border:1px solid var(--bd);color:var(--td);border-radius:8px;padding:5px 10px;font-size:14px;cursor:pointer;transition:all .15s;line-height:1;}
+.theme-btn:hover{border-color:var(--ac);color:var(--t);}
+
+/* Sheet multiline cells */
+.sheet td textarea{width:100%;background:transparent;border:none;color:var(--t);padding:3px 5px;font-size:8px;font-family:inherit;outline:none;min-height:28px;resize:none;overflow:hidden;line-height:1.35;display:block;}
+.sheet td textarea:focus{background:var(--acbg);outline:1px solid var(--ac);}
+.sheet td textarea::placeholder{color:var(--tf);}
+.sheet .cell-found textarea{font-weight:600;}
+/* Date cells: show formatted, hide native input */
+.sheet td.cell-date{cursor:pointer;padding:3px 5px;position:relative;}
+.sheet td.cell-date .date-disp{font-size:8px;color:var(--t);white-space:nowrap;}
+.sheet td.cell-date .date-hidden{position:absolute;opacity:0;width:0;height:0;overflow:hidden;pointer-events:none;}
+.sheet td.cell-date:hover{background:var(--acbg);}
+
+/* Clickable status select styled as badge */
+.ns-select{appearance:none;-webkit-appearance:none;border:none;cursor:pointer;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;padding:2px 8px;border-radius:14px;outline:none;font-family:inherit;text-align:center;}
+.ns-select.ns-apply{background:var(--rbg);color:var(--r);}
+.ns-select.ns-check{background:var(--ybg);color:var(--y);}
+.ns-select.ns-waiting{background:var(--bbg);color:var(--b);}
+.ns-select.ns-received{background:var(--gbg);color:var(--g);}
+.ns-select.ns-denied{background:var(--rbg);color:var(--r);}
+.ns-select.ns-notsent{background:var(--grbg);color:var(--gr);}
+.ns-select.ns-missed{background:var(--obg);color:var(--o);}
+.ns-select.ns-notelig{background:var(--grbg);color:var(--gr);}
+.ns-select:hover{opacity:.8;box-shadow:0 0 0 2px var(--ac);}
+/* Last saved indicator */
+.save-indicator{font-size:9px;color:var(--tf);margin-left:auto;display:flex;align-items:center;gap:4px;}
+.save-indicator .dot{width:6px;height:6px;border-radius:50%;display:inline-block;}
+.save-indicator .dot.ok{background:var(--g);}
+.save-indicator .dot.saving{background:var(--y);}
+.save-indicator .dot.local{background:var(--y);}
+.save-indicator .dot.err{background:var(--r);}
+
+/* Inline editable fields in Grant Tracker — click-to-edit */
+.ef{background:transparent;border:none;color:inherit;font:inherit;padding:0 2px;outline:none;width:100%;min-width:30px;cursor:text;}
+.ef:focus{border-bottom:1px solid var(--ac);background:var(--acbg);}
+.ef::placeholder{color:var(--tf);font-style:italic;}
+.ef-sm{font-size:10px;}
+.ef-date{width:90px;font-size:10px;color:var(--td);}
+.ef-amt{width:70px;font-size:11px;font-variant-numeric:tabular-nums;}
+.ef-note{font-size:10px;color:var(--tf);}
+/* Click-to-edit display value */
+.cte{cursor:pointer;display:inline-flex;align-items:center;gap:3px;min-height:18px;min-width:20px;padding:1px 3px;border-radius:4px;transition:background .1s;}
+.cte:hover{background:var(--acbg);}
+.cte-val{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.cte-empty{color:var(--tf);font-style:italic;font-size:10px;}
+.cte-icon{font-size:8px;color:var(--tf);opacity:0;transition:opacity .15s;flex-shrink:0;}
+.cte:hover .cte-icon{opacity:1;}
+/* Popover editor */
+.cte-pop{position:absolute;z-index:100;background:var(--s1);border:1px solid var(--ac);border-radius:8px;padding:6px;box-shadow:0 8px 24px rgba(0,0,0,.4);min-width:160px;}
+.cte-pop input,.cte-pop textarea{width:100%;background:var(--s2);border:1px solid var(--bd);color:var(--t);padding:6px 8px;border-radius:6px;font-size:12px;font-family:inherit;outline:none;}
+.cte-pop input:focus,.cte-pop textarea:focus{border-color:var(--ac);}
+.cte-pop textarea{min-height:50px;resize:vertical;}
+.cte-pop .cte-btns{display:flex;gap:4px;justify-content:flex-end;margin-top:4px;}
+.cte-pop .cte-btn{padding:3px 10px;border-radius:5px;font-size:10px;font-weight:600;cursor:pointer;border:none;}
+.cte-pop .cte-ok{background:var(--ac);color:#fff;}
+.cte-pop .cte-cancel{background:var(--s2);color:var(--td);border:1px solid var(--bd);}
+@media(max-width:768px){
+  .cte-icon{opacity:.4;}
+  .cte-pop{min-width:200px;left:8px!important;right:8px!important;max-width:calc(100vw - 16px);}
+}
+
+/* ── Login overlay ── */
+#login-overlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;}
+.login-box{background:var(--s1);border:1px solid var(--bd);border-radius:16px;padding:32px 28px;width:340px;max-width:92vw;}
+.login-box h2{font-size:22px;font-weight:800;margin-bottom:4px;color:var(--t);}
+.login-box p{font-size:12px;color:var(--td);margin-bottom:20px;}
+.login-box input{width:100%;background:var(--s2);border:1px solid var(--bd);color:var(--t);padding:10px 12px;border-radius:8px;font-size:13px;font-family:inherit;outline:none;margin-bottom:10px;display:block;}
+.login-box input:focus{border-color:var(--ac);}
+.login-box button{width:100%;padding:11px;background:var(--ac);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;transition:background .15s;}
+.login-box button:hover{background:var(--acl);}
+.login-box button:disabled{opacity:.5;cursor:not-allowed;}
+.login-err{font-size:11px;color:var(--r);margin-top:8px;text-align:center;}
+</style>
+</head>
+<body>
+<div id="login-overlay" style="display:none">
+  <div class="login-box">
+    <h2>Polen</h2>
+    <p>Grant Tracker — sign in to continue</p>
+    <input id="li-email" type="email" placeholder="Email" autocomplete="email"/>
+    <input id="li-pass" type="password" placeholder="Password" autocomplete="current-password"/>
+    <button id="li-btn" onclick="doLogin()">Sign in</button>
+    <div id="li-err" class="login-err"></div>
+  </div>
+</div>
+<div id="root"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script>
+// ── Polen config — fill in your Supabase project values ──
+const SUPABASE_URL  = 'YOUR_SUPABASE_URL';   // e.g. https://xxxx.supabase.co
+const SUPABASE_ANON = 'YOUR_SUPABASE_ANON_KEY';
+const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+// ── Auth helpers ──
+async function doLogin(){
+  const btn=document.getElementById('li-btn');
+  const err=document.getElementById('li-err');
+  const email=document.getElementById('li-email').value.trim();
+  const pass=document.getElementById('li-pass').value;
+  btn.disabled=true; err.textContent='';
+  const {error}=await _sb.auth.signInWithPassword({email,password:pass});
+  if(error){err.textContent=error.message;btn.disabled=false;}
+  // on success, auth state listener fires and loads the app
+}
+document.getElementById('li-email').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('li-pass').focus();});
+document.getElementById('li-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+
+// ── Data helpers ──
+async function loadFromSupabase(){
+  const {data,error}=await _sb.from('grants_blob').select('data').eq('id',1).single();
+  if(error&&error.code!=='PGRST116'){console.error('load',error);return[];}
+  return (data&&data.data)||[];
+}
+async function saveToServer(grants){
+  const {error}=await _sb.from('grants_blob').upsert({id:1,data:grants},{onConflict:'id'});
+  if(error){console.error('save',error);return{ok:false,msg:error.message};}
+  return{ok:true,msg:'Saved '+grants.length+' entries'};
+}
+function exportJSON(d){
+  const blob=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='grants-data.json';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+}
+
+// ── Boot: wait for session, then render ──
+_sb.auth.onAuthStateChange(async(event,session)=>{
+  const overlay=document.getElementById('login-overlay');
+  if(session){
+    overlay.style.display='none';
+    // only start once
+    if(!window._appStarted){
+      window._appStarted=true;
+      const grants=await loadFromSupabase();
+      startApp(grants);
+    }
+  } else {
+    overlay.style.display='flex';
+  }
+});
+</script>
+<script type="text/babel">
+const {useState,useMemo,useCallback,useRef,useEffect}=React;
+const STEPS=['01 Apply on deadline','02 Check','03 Waiting Results','05 Received','04 Denied','06 Not Applied','07 Missed Deadline','08 Not Eligible'];
+const STEP_SHORT={'00 Send Proposal':'Apply','01 Apply on deadline':'Apply','02 Check':'Check','03 Waiting Results':'Waiting','04 Denied':'Denied','05 Received':'Received','06 Not Applied':'Not Applied','07 Missed Deadline':'Missed','08 Not Eligible':'Not Eligible'};
+const STEP_CSS={'00 Send Proposal':'ns-apply','01 Apply on deadline':'ns-apply','02 Check':'ns-check','03 Waiting Results':'ns-waiting','04 Denied':'ns-denied','05 Received':'ns-received','06 Not Applied':'ns-notsent','07 Missed Deadline':'ns-missed','08 Not Eligible':'ns-notelig'};
+
+function CopyBtn({text}){
+  const[copied,setCopied]=useState(false);
+  const copy=e=>{
+    e.stopPropagation();
+    navigator.clipboard.writeText(text).then(()=>{setCopied(true);setTimeout(()=>setCopied(false),1500);});
+  };
+  return <button className={`copy-btn${copied?' copied':''}`} onClick={copy} title={copied?'Copied!':'Copy name'}>{copied?'✓':'⧉'}</button>;
+}
+
+// Click-to-edit: shows formatted value, opens popover on click.
+function DField({value,onChange,className,type,placeholder,style,label,multiline}){
+  const[editing,setEditing]=useState(false);
+  const[local,setLocal]=useState(value||'');
+  const wrapRef=useRef(null);
+  const inputRef=useRef(null);
+
+  const open=e=>{
+    e.stopPropagation();
+    setLocal(value||'');
+    setEditing(true);
+  };
+  const save=()=>{
+    const v=type==='number'?(local?parseFloat(local):null):local;
+    if((local||'')!==(value||''))onChange(v);
+    setEditing(false);
+  };
+  const cancel=()=>setEditing(false);
+
+  useEffect(()=>{
+    if(editing&&inputRef.current){inputRef.current.focus();inputRef.current.select&&inputRef.current.select();}
+  },[editing]);
+
+  // Close on click outside
+  useEffect(()=>{
+    if(!editing)return;
+    const h=e=>{if(wrapRef.current&&!wrapRef.current.contains(e.target))save();};
+    document.addEventListener('mousedown',h);document.addEventListener('touchstart',h);
+    return()=>{document.removeEventListener('mousedown',h);document.removeEventListener('touchstart',h);};
+  });
+
+  // Format display value
+  const display=()=>{
+    if(!value&&value!==0)return null;
+    if(type==='date'&&value){try{const[y,m,dd]=value.split('-').map(Number);const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return `${months[m-1]} ${dd}, ${y}`;}catch(e){return value;}}
+    if(type==='number'&&value!=null)return typeof value==='number'?'$'+value.toLocaleString():value;
+    return String(value);
+  };
+  const disp=display();
+  const isEmpty=!disp;
+  const isAmt=className&&className.includes('ef-amt');
+  const isDate=type==='date';
+  const isNote=className&&(className.includes('ef-note')||className.includes('ef-sm'));
+
+  return(
+    <span style={{position:'relative',display:'inline-block',...(style||{})}} ref={wrapRef}>
+      {!editing?(
+        <span className="cte" onClick={open} title={label||placeholder||'Click to edit'}>
+          {isEmpty?<span className="cte-empty">{placeholder||'—'}</span>:
+           <span className="cte-val" style={isAmt?{fontWeight:700,fontVariantNumeric:'tabular-nums',color:'var(--g)'}:isDate?{fontSize:10,color:'var(--td)'}:isNote?{fontSize:10,color:'var(--tf)'}:{}}>{disp}</span>}
+          <span className="cte-icon">✎</span>
+        </span>
+      ):(
+        <div className="cte-pop" onClick={e=>e.stopPropagation()} style={{top:'100%',left:0}}>
+          {label&&<div style={{fontSize:9,textTransform:'uppercase',letterSpacing:'.4px',color:'var(--tf)',marginBottom:3}}>{label}</div>}
+          {multiline?
+            <textarea ref={inputRef} value={local} onChange={e=>setLocal(e.target.value)} placeholder={placeholder} onKeyDown={e=>{if(e.key==='Escape')cancel();}}/>:
+            <input ref={inputRef} type={type||'text'} value={local} onChange={e=>setLocal(e.target.value)} placeholder={placeholder}
+              onKeyDown={e=>{if(e.key==='Enter')save();if(e.key==='Escape')cancel();}}/>
+          }
+          <div className="cte-btns">
+            <button className="cte-btn cte-cancel" onClick={cancel}>Esc</button>
+            <button className="cte-btn cte-ok" onClick={save}>OK</button>
+          </div>
+        </div>
+      )}
+    </span>
+  );
+}
+function fmt(n){return n?'$'+n.toLocaleString('en-US',{maximumFractionDigits:0}):'—';}
+function parseDeadline(d){if(!d)return null;const p=new Date(d+'T00:00:00');return isNaN(p.getTime())?null:p;}
+function daysUntil(d){const dt=parseDeadline(d);if(!dt)return 9999;return Math.ceil((dt-new Date())/864e5);}
+function dlClass(days){if(days<0)return'past';if(days<=7)return'soon';if(days<=30)return'upcoming';return'future';}
+function fmtDate(d){const dt=parseDeadline(d);if(!dt)return'—';return dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
+function fmtDateShort(d){const dt=parseDeadline(d);if(!dt)return'—';return dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'});}
+
+// Thermometer
+const MO={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+function pDate(s){if(!s)return null;const m=s.trim().replace(/\./g,'').match(/([A-Za-z]+)\s+(\d{1,2}),?\s*(\d{2,4})/);if(m){const mo=MO[m[1].toLowerCase().substring(0,3)];if(mo!==undefined){let y=parseInt(m[3]);if(y<100)y+=2000;return new Date(y,mo,parseInt(m[2]));}}return null;}
+function pPeriod(p){if(!p)return null;const pts=p.split(/\s*(?:–|—|to|-)\s*/);if(pts.length<2)return null;const s=pDate(pts[0]),e=pDate(pts[pts.length-1]);return s&&e?{start:s,end:e}:null;}
+function Thermo({period,deadline,reportDeadline}){
+  const p=pPeriod(period);if(!p)return null;
+  const now=new Date(),{start:s,end:e}=p,tot=e-s;if(tot<=0)return null;
+  const pct=Math.max(0,Math.min(100,(now-s)/tot*100));
+  let label,sc,fc;
+  if(now<s){const d=Math.ceil((s-now)/864e5);label=d<=30?`Starts ${d}d`:'Not started';sc='pre';fc='pre';}
+  else if(now>e){label='Ended';sc='done';fc='done';}
+  else{const d=Math.ceil((e-now)/864e5);label=d<=30?`${d}d left`:`${Math.round(pct)}% · ${d}d left`;sc=d<=30?'end':'prog';fc=d<=30?'end':'prog';}
+  const fd=d=>d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'});
+  // Checkpoint positions for deadline and report deadline
+  const dlDate=deadline?parseDeadline(deadline):null;
+  const dlPct=dlDate&&dlDate>=s&&dlDate<=e?((dlDate-s)/tot*100):null;
+  const rdDate=reportDeadline?parseDeadline(reportDeadline):null;
+  const rdPct=rdDate&&rdDate>=s&&rdDate<=e?((rdDate-s)/tot*100):null;
+  return(<div className="thermo">
+    <div style={{display:'flex',alignItems:'center',gap:10,flexWrap:'wrap'}}>
+      <span className="thermo-lbl" style={{margin:0}}>Grant Period</span>
+      {deadline&&<span className="thermo-tag tg-dl">⚑ Deadline {fmtDateShort(deadline)}</span>}
+      {reportDeadline&&<span className="thermo-tag tg-rpt">⚑ Report {fmtDateShort(reportDeadline)}</span>}
+    </div>
+    <div className="thermo-bar">
+      <div className={`thermo-fill ${fc}`} style={{width:Math.max(pct,2)+'%'}}/>
+      {now>=s&&now<=e&&<div className="thermo-mk" style={{left:pct+'%'}}/>}
+      {dlPct!=null&&<div className="thermo-cp cp-dl" style={{left:dlPct+'%'}} title={'Deadline: '+fmtDate(deadline)}><span className="cp-flag">⚑</span></div>}
+      {rdPct!=null&&<div className="thermo-cp cp-rpt" style={{left:rdPct+'%'}} title={'Report: '+fmtDate(reportDeadline)}><span className="cp-flag">⚑</span></div>}
+    </div>
+    <div className="thermo-dates"><span>{fd(s)}</span><span>{fd(e)}</span></div>
+    <span className={`thermo-st ${sc}`}>{label}</span>
+  </div>);
+}
+
+// ── AppEntry: timeline entry for individual applications ──
+function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
+  const yr=e.deadline?e.deadline.substring(0,4):'?';
+  const dotCls=e.nextStep==='05 Received'?'received':e.nextStep==='04 Denied'?'denied':e.nextStep==='03 Waiting Results'?'waiting':'';
+  const L=({children})=><span style={{fontSize:8,textTransform:'uppercase',letterSpacing:'.4px',color:'var(--tf)',display:'block',marginBottom:1}}>{children}</span>;
+  return(
+    <div className="tl-entry">
+      <div className={`tl-dot ${dotCls}`}/>
+      {!isLast&&<div className="tl-line"/>}
+      <div className="tl-card">
+        <div className="tl-header" style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:3}}>
+          <div style={{display:'flex',alignItems:'center',gap:6}}>
+            <span style={{fontSize:14,fontWeight:800,color:'var(--acl)'}}>{yr}</span>
+            <button className="tl-action" title="Duplicate" onClick={ev=>{ev.stopPropagation();onDuplicate(e.id);}}>⧉</button>
+            <button className="tl-action tl-del" title="Delete" onClick={ev=>{ev.stopPropagation();onDelete(e.id);}}>✕</button>
+          </div>
+          <div className="tl-meta" style={{display:'flex',gap:5,alignItems:'center'}}>
+            <StatusBadge entryId={e.id} currentStep={e.nextStep} onChangeStatus={onChangeStatus}/>
+            <DField className="ef ef-amt" type="number" value={e.amount||''} placeholder="Req $" label="Amount Requested" onChange={v=>onChangeField(e.id,'amount',v)}/>
+            <DField className="ef ef-amt" type="number" value={e.amountReceived||''} placeholder="Recv $" label="Amount Received" style={{fontSize:10}} onChange={v=>onChangeField(e.id,'amountReceived',v)}/>
+          </div>
+        </div>
+        <div className="tl-grid" style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'2px 14px',fontSize:11}}>
+          <div><L>Deadline</L><DField className="ef ef-date" type="date" value={e.deadline||''} label="Deadline" onChange={v=>onChangeField(e.id,'deadline',v)}/></div>
+          <div><L>Grant Period</L><DField className="ef ef-sm" value={e.eligiblePeriod||''} placeholder="Jan 1 – Dec 31, 2026" label="Grant Period" onChange={v=>onChangeField(e.id,'eligiblePeriod',v)}/></div>
+          <div><L>Project</L><DField className="ef" value={e.projectDates||''} placeholder="Project name" label="Project" onChange={v=>onChangeField(e.id,'projectDates',v)}/></div>
+          <div><L>Report Deadline</L><DField className="ef ef-date" type="date" value={e.reportDeadline||''} label="Report Deadline" onChange={v=>onChangeField(e.id,'reportDeadline',v)}/></div>
+          <div><L>Web / Link</L><DField className="ef ef-sm" value={e.web||''} placeholder="https://..." label="Link" onChange={v=>onChangeField(e.id,'web',v)}/></div>
+          <div><L>Deadline Type</L><span style={{cursor:'pointer',display:'inline-block'}} onClick={ev=>{ev.stopPropagation();onChangeField(e.id,'deadlineType',e.deadlineType==='DDLNE!'?'Estimated':'DDLNE!');}}><span className={`fd-type ${e.deadlineType==='DDLNE!'?'hard':'est'}`}>{e.deadlineType==='DDLNE!'?'Hard Deadline':'Estimated'}</span></span></div>
+          <div style={{gridColumn:'1/-1'}}><L>Notes</L><DField className="ef ef-note" value={e.notes||e.improvements||''} placeholder="Notes..." label="Notes" multiline={true} onChange={v=>onChangeField(e.id,'notes',v)}/></div>
+        </div>
+        {e.web&&<a href={e.web} target="_blank" rel="noreferrer" className="btn-conv" onClick={ev=>ev.stopPropagation()} style={{marginTop:6}}>Ver Convocatoria <span className="conv-arrow">→</span></a>}
+        {e.eligiblePeriod&&<Thermo period={e.eligiblePeriod} deadline={e.deadline} reportDeadline={e.reportDeadline}/>}
+      </div>
+    </div>
+  );
+}
+
+// ── COMPONENTS ──
+
+// Clickable status badge — works everywhere
+function StatusBadge({entryId,currentStep,onChangeStatus}){
+  return(
+    <select className={`ns-select ${STEP_CSS[currentStep]||'ns-check'}`}
+      value={currentStep}
+      onClick={e=>e.stopPropagation()}
+      onChange={e=>{e.stopPropagation();onChangeStatus(entryId,e.target.value);}}>
+      {STEPS.map(st=><option key={st} value={st}>{STEP_SHORT[st]}</option>)}
+    </select>
+  );
+}
+
+// ── Spreadsheet Editor with resizable columns ──
+function EditSheet({data,setData,search}){
+  const[sortCol,setSortCol]=useState('foundation');
+  const[sortDir,setSortDir]=useState('asc');
+  const[colWidths,setColWidths]=useState({
+    id:35,foundation:170,grant:150,projectDates:120,deadline:100,deadlineType:70,season:70,nextStep:78,amount:85,amountReceived:85,eligiblePeriodStart:90,eligiblePeriodEnd:90,reportDeadline:95,source:55,web:120,notes:140,del:28
+  });
+  const resizing=useRef(null);
+
+  useEffect(()=>{
+    const onMove=e=>{
+      if(!resizing.current)return;
+      const{col,startX,startW}=resizing.current;
+      const diff=e.clientX-startX;
+      setColWidths(prev=>({...prev,[col]:Math.max(40,startW+diff)}));
+    };
+    const onUp=()=>{resizing.current=null;document.body.style.cursor='';};
+    document.addEventListener('mousemove',onMove);
+    document.addEventListener('mouseup',onUp);
+    return()=>{document.removeEventListener('mousemove',onMove);document.removeEventListener('mouseup',onUp);};
+  },[]);
+
+  const startResize=(col,e)=>{
+    e.stopPropagation();
+    e.preventDefault();
+    resizing.current={col,startX:e.clientX,startW:colWidths[col]};
+    document.body.style.cursor='col-resize';
+  };
+
+  const rows=useMemo(()=>{
+    let r=[...data];
+    if(search){const q=search.toLowerCase();r=r.filter(g=>g.foundation.toLowerCase().includes(q)||(g.grant||'').toLowerCase().includes(q)||(g.notes||'').toLowerCase().includes(q)||(g.projectDates||'').toLowerCase().includes(q));}
+    r.sort((a,b)=>{
+      let va,vb;
+      if(sortCol==='deadline'||sortCol==='eligiblePeriodStart'||sortCol==='eligiblePeriodEnd'||sortCol==='reportDeadline'){va=a[sortCol]||'';vb=b[sortCol]||'';}
+      else if(sortCol==='amount'||sortCol==='amountReceived'){va=a[sortCol]||0;vb=b[sortCol]||0;}
+      else{va=(a[sortCol]||'').toLowerCase?.()??a[sortCol]??'';vb=(b[sortCol]||'').toLowerCase?.()??b[sortCol]??'';}
+      if(va<vb)return sortDir==='asc'?-1:1;
+      if(va>vb)return sortDir==='asc'?1:-1;
+      return 0;
+    });
+    return r;
+  },[data,search,sortCol,sortDir]);
+
+  const upd=(id,key,val)=>{
+    setData(prev=>prev.map(g=>g.id===id?{...g,[key]:val}:g));
+  };
+  // Helper: update eligiblePeriod from start/end dates
+  const updPeriod=(id,which,val)=>{
+    setData(prev=>prev.map(g=>{
+      if(g.id!==id)return g;
+      // Parse existing period to get start/end
+      const parts=(g.eligiblePeriod||'').split(/\s*(?:–|—|to|-)\s*/);
+      let startStr=parts[0]||'';
+      let endStr=parts.length>1?parts[parts.length-1]:'';
+      if(which==='start'){
+        // Convert date input value to readable string
+        if(val){const d=new Date(val+'T00:00:00');startStr=d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}else startStr='';
+      }else{
+        if(val){const d=new Date(val+'T00:00:00');endStr=d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}else endStr='';
+      }
+      const newPeriod=startStr&&endStr?`${startStr} – ${endStr}`:startStr||endStr;
+      return {...g,eligiblePeriod:newPeriod};
+    }));
+  };
+  // Parse eligiblePeriod to get start/end dates for input
+  const parsePeriodDates=(period)=>{
+    if(!period)return{start:'',end:''};
+    const pts=period.split(/\s*(?:–|—|to|-)\s*/);
+    const toISO=(s)=>{const d=pDate(s);return d?d.toISOString().substring(0,10):''};
+    return{start:toISO(pts[0]||''),end:pts.length>1?toISO(pts[pts.length-1]):''}
+  };
+  const del=(id)=>{
+    if(confirm('Delete this entry?'))setData(prev=>prev.filter(g=>g.id!==id));
+  };
+  const doSort=c=>{if(sortCol===c)setSortDir(d=>d==='asc'?'desc':'asc');else{setSortCol(c);setSortDir('asc');}};
+  const AR=({c})=><span style={{marginLeft:2,opacity:sortCol===c?1:.3,fontSize:7}}>{sortCol===c?(sortDir==='asc'?'▲':'▼'):'↕'}</span>;
+  const RH=({col})=><div className="col-resize" onMouseDown={e=>startResize(col,e)}/>;
+
+  return(
+    <div className="sheet-wrap">
+      <table className="sheet">
+        <thead><tr>
+          <th style={{width:colWidths.id}}>#</th>
+          <th onClick={()=>doSort('foundation')} className={sortCol==='foundation'?'so':''} style={{width:colWidths.foundation}}>Foundation <AR c="foundation"/><RH col="foundation"/></th>
+          <th onClick={()=>doSort('grant')} className={sortCol==='grant'?'so':''} style={{width:colWidths.grant}}>Grant Program <AR c="grant"/><RH col="grant"/></th>
+          <th onClick={()=>doSort('projectDates')} className={sortCol==='projectDates'?'so':''} style={{width:colWidths.projectDates}}>Project <AR c="projectDates"/><RH col="projectDates"/></th>
+          <th onClick={()=>doSort('deadline')} className={sortCol==='deadline'?'so':''} style={{width:colWidths.deadline}}>Deadline <AR c="deadline"/><RH col="deadline"/></th>
+          <th style={{width:colWidths.deadlineType}}>Type<RH col="deadlineType"/></th>
+          <th onClick={()=>doSort('season')} className={sortCol==='season'?'so':''} style={{width:colWidths.season}}>Season <AR c="season"/><RH col="season"/></th>
+          <th onClick={()=>doSort('nextStep')} className={sortCol==='nextStep'?'so':''} style={{width:colWidths.nextStep}}>Status <AR c="nextStep"/><RH col="nextStep"/></th>
+          <th onClick={()=>doSort('amount')} className={sortCol==='amount'?'so':''} style={{width:colWidths.amount}}>Requested <AR c="amount"/><RH col="amount"/></th>
+          <th onClick={()=>doSort('amountReceived')} className={sortCol==='amountReceived'?'so':''} style={{width:colWidths.amountReceived}}>Received <AR c="amountReceived"/><RH col="amountReceived"/></th>
+          <th style={{width:colWidths.eligiblePeriodStart}}>Period Start<RH col="eligiblePeriodStart"/></th>
+          <th style={{width:colWidths.eligiblePeriodEnd}}>Period End<RH col="eligiblePeriodEnd"/></th>
+          <th onClick={()=>doSort('reportDeadline')} className={sortCol==='reportDeadline'?'so':''} style={{width:colWidths.reportDeadline}}>Report DL <AR c="reportDeadline"/><RH col="reportDeadline"/></th>
+          <th style={{width:colWidths.source}} title="Upcoming = tracked. Past = historical.">Track<RH col="source"/></th>
+          <th style={{width:colWidths.web}}>Link<RH col="web"/></th>
+          <th style={{width:colWidths.notes}}>Notes<RH col="notes"/></th>
+          <th style={{width:colWidths.del}}></th>
+        </tr></thead>
+        <tbody>
+          {rows.map((g,i)=>{
+            const pd=parsePeriodDates(g.eligiblePeriod);
+            return(
+            <tr key={g.id}>
+              <td className="cell-id">{i+1}</td>
+              <td className="cell-found"><textarea value={g.foundation} onChange={e=>upd(g.id,'foundation',e.target.value)} rows={1} onInput={e=>{e.target.style.height='auto';e.target.style.height=e.target.scrollHeight+'px';}}/></td>
+              <td><textarea value={g.grant||''} onChange={e=>upd(g.id,'grant',e.target.value)} placeholder="—" rows={1} onInput={e=>{e.target.style.height='auto';e.target.style.height=e.target.scrollHeight+'px';}}/></td>
+              <td><textarea value={g.projectDates||''} onChange={e=>upd(g.id,'projectDates',e.target.value)} placeholder="Project name" rows={1} onInput={e=>{e.target.style.height='auto';e.target.style.height=e.target.scrollHeight+'px';}}/></td>
+              <td className="cell-date" onClick={ev=>{const inp=ev.currentTarget.querySelector('input');if(inp)inp.showPicker?.();}}><span className="date-disp">{g.deadline?fmtDate(g.deadline):'—'}</span><input type="date" value={g.deadline||''} onChange={e=>upd(g.id,'deadline',e.target.value)} className="date-hidden"/></td>
+              <td><select value={g.deadlineType||'Estimated'} onChange={e=>upd(g.id,'deadlineType',e.target.value)}><option value="DDLNE!">Hard</option><option value="Estimated">Est.</option></select></td>
+              <td><select value={g.season||''} onChange={e=>upd(g.id,'season',e.target.value)} style={{fontSize:9}}><option value="">—</option><option value="Spring">🌱 Spr</option><option value="Summer">☀️ Sum</option><option value="Fall">🍂 Fall</option><option value="Winter">❄️ Win</option><option value="Closed">🚫 Closed</option></select></td>
+              <td><select value={g.nextStep} onChange={e=>upd(g.id,'nextStep',e.target.value)} style={{fontSize:9}}>{STEPS.map(st=><option key={st} value={st}>{STEP_SHORT[st]}</option>)}</select></td>
+              <td className="cell-amt"><input type="number" value={g.amount||''} onChange={e=>upd(g.id,'amount',e.target.value?parseFloat(e.target.value):null)} placeholder="—"/></td>
+              <td className="cell-amt"><input type="number" value={g.amountReceived||''} onChange={e=>upd(g.id,'amountReceived',e.target.value?parseFloat(e.target.value):null)} placeholder="—"/></td>
+              <td className="cell-date" onClick={ev=>{const inp=ev.currentTarget.querySelector('input');if(inp)inp.showPicker?.();}}><span className="date-disp">{pd.start?fmtDate(pd.start):'—'}</span><input type="date" value={pd.start} onChange={e=>updPeriod(g.id,'start',e.target.value)} className="date-hidden"/></td>
+              <td className="cell-date" onClick={ev=>{const inp=ev.currentTarget.querySelector('input');if(inp)inp.showPicker?.();}}><span className="date-disp">{pd.end?fmtDate(pd.end):'—'}</span><input type="date" value={pd.end} onChange={e=>updPeriod(g.id,'end',e.target.value)} className="date-hidden"/></td>
+              <td className="cell-date" onClick={ev=>{const inp=ev.currentTarget.querySelector('input');if(inp)inp.showPicker?.();}}><span className="date-disp">{g.reportDeadline?fmtDate(g.reportDeadline):'—'}</span><input type="date" value={g.reportDeadline||''} onChange={e=>upd(g.id,'reportDeadline',e.target.value)} className="date-hidden"/></td>
+              <td><select value={g.source||'historical'} onChange={e=>upd(g.id,'source',e.target.value)} style={{fontSize:9}}><option value="calendar">Up</option><option value="historical">Past</option></select></td>
+              <td><textarea value={g.web||''} onChange={e=>upd(g.id,'web',e.target.value)} placeholder="https://..." rows={1} style={{fontSize:10}} onInput={e=>{e.target.style.height='auto';e.target.style.height=e.target.scrollHeight+'px';}}/></td>
+              <td><textarea value={g.notes||''} onChange={e=>upd(g.id,'notes',e.target.value)} placeholder="—" rows={1} onInput={e=>{e.target.style.height='auto';e.target.style.height=e.target.scrollHeight+'px';}}/></td>
+              <td className="cell-del"><button onClick={()=>del(g.id)} title="Delete">✕</button></td>
+            </tr>
+          );})}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+// ── DATA LOADING ──
+function startApp(data){
+  const root=ReactDOM.createRoot(document.getElementById('root'));
+  root.render(<App initialGrants={data}/>);
+}
+// startApp is called by the Supabase auth listener above after login
+// saveToServer and exportJSON are defined in the config <script> block above
+
+
+
+
+// ── APP ──
+function App({initialGrants}){
+  const[data,setData]=useState(()=>initialGrants.map(g=>({...g})));
+  const[saveMsg,setSaveMsg]=useState(null);
+  const[lastSaved,setLastSaved]=useState(null);
+  const[saveStatus,setSaveStatus]=useState('ok'); // ok, local, err
+  const[search,setSearch]=useState('');
+  const[statusFilter,setStatusFilter]=useState('all');
+  const[showAdd,setShowAdd]=useState(false);
+  const[addPrefill,setAddPrefill]=useState(null);
+  const[editMode,setEditMode]=useState(false);
+  const[activeView,setActiveView]=useState(false); // "Active Grants" view
+  const[calendarView,setCalendarView]=useState(false); // "Upcoming/Calendar" view
+  const[isDark,setIsDark]=useState(true);
+  useEffect(()=>{document.documentElement.classList.toggle('light',!isDark);},[isDark]);
+
+  // Auto-save: localStorage instantly + server after 2s debounce
+  const saveTimer=useRef(null);
+  const firstRender=useRef(true);
+  useEffect(()=>{
+    if(firstRender.current){firstRender.current=false;return;}
+    setLastSaved(new Date());
+    setSaveStatus('saving');
+    if(saveTimer.current)clearTimeout(saveTimer.current);
+    saveTimer.current=setTimeout(async()=>{
+      const r=await saveToServer(data);
+      if(r.ok){setSaveStatus('ok');setLastSaved(new Date());setSaveMsg(null);}
+      else{setSaveStatus('local');setSaveMsg(r.msg);}
+    },2000);
+    return()=>{if(saveTimer.current)clearTimeout(saveTimer.current);};
+  },[data]);
+
+  // Group entries by grant program (foundation + grant combo)
+  const programGroups=useMemo(()=>{
+    let r=[...data];
+    if(statusFilter==='apply')r=r.filter(g=>g.nextStep==='01 Apply on deadline'||g.nextStep==='00 Send Proposal');
+    else if(statusFilter!=='all')r=r.filter(g=>g.nextStep===statusFilter);
+    if(search){
+      const q=search.toLowerCase();
+      r=r.filter(g=>(g.foundation||'').toLowerCase().includes(q)||(g.grant||'').toLowerCase().includes(q)||(g.notes||'').toLowerCase().includes(q)||(g.projectDates||'').toLowerCase().includes(q));
+    }
+    // Group by foundation + grant
+    const groups={};
+    r.forEach(g=>{
+      const key=(g.foundation||'').trim()+'|||'+(g.grant||'').trim();
+      if(!groups[key])groups[key]={key,foundation:(g.foundation||'').trim(),grant:(g.grant||'').trim(),entries:[]};
+      groups[key].entries.push(g);
+    });
+    const now=new Date();now.setHours(0,0,0,0);
+    // For each group, compute stats and find next deadline
+    return Object.values(groups).map(grp=>{
+      grp.entries.sort((a,b)=>(b.deadline||'').localeCompare(a.deadline||'')); // newest first
+      const futureEntries=grp.entries.filter(e=>e.deadline&&new Date(e.deadline+'T00:00:00')>=now).sort((a,b)=>a.deadline.localeCompare(b.deadline));
+      grp.nextDeadline=futureEntries[0]||null;
+      grp.primary=grp.entries[0];
+      grp.received=grp.entries.filter(e=>e.nextStep==='05 Received').length;
+      grp.denied=grp.entries.filter(e=>e.nextStep==='04 Denied').length;
+      grp.waiting=grp.entries.filter(e=>e.nextStep==='03 Waiting Results').length;
+      grp.totalAmt=grp.entries.filter(e=>e.nextStep==='05 Received').reduce((s,e)=>s+(e.amountReceived||e.amount||0),0);
+      return grp;
+    }).sort((a,b)=>{
+      // Groups with future deadlines first (soonest), then past (most recent)
+      const aD=a.nextDeadline?a.nextDeadline.deadline:'9999';
+      const bD=b.nextDeadline?b.nextDeadline.deadline:'9999';
+      const aFut=a.nextDeadline&&new Date(aD+'T00:00:00')>=now;
+      const bFut=b.nextDeadline&&new Date(bD+'T00:00:00')>=now;
+      if(aFut&&!bFut)return -1;
+      if(!aFut&&bFut)return 1;
+      if(aFut&&bFut)return aD.localeCompare(bD);
+      // Both past: most recent first
+      const aR=a.primary.deadline||'';
+      const bR=b.primary.deadline||'';
+      return bR.localeCompare(aR);
+    });
+  },[data,statusFilter,search]);
+
+  // Active Grants: awarded + currently within grant period
+  const activeGrants=useMemo(()=>{
+    const now=new Date();
+    return data.filter(g=>{
+      if(g.nextStep!=='05 Received')return false;
+      const p=pPeriod(g.eligiblePeriod);
+      if(!p)return false; // no period = can't determine if active
+      return now>=p.start&&now<=p.end;
+    }).sort((a,b)=>{
+      // Sort by period end date (soonest ending first)
+      const pa=pPeriod(a.eligiblePeriod), pb=pPeriod(b.eligiblePeriod);
+      return(pa?pa.end:new Date('9999'))-(pb?pb.end:new Date('9999'));
+    });
+  },[data]);
+
+  // Calendar view: only shows grant programs that have an explicit season field
+  const calendarData=useMemo(()=>{
+    const SEASONS=[
+      {key:'Spring',name:'Spring',emoji:'🌱'},
+      {key:'Summer',name:'Summer',emoji:'☀️'},
+      {key:'Fall',name:'Fall',emoji:'🍂'},
+      {key:'Winter',name:'Winter',emoji:'❄️'},
+      {key:'Closed',name:'Closed',emoji:'🚫'}
+    ];
+    const seasonKeyToIdx={Spring:0,Summer:1,Fall:2,Winter:3,Closed:4};
+    const monthToSeason=m=>m>=2&&m<=4?0:m>=5&&m<=7?1:m>=8&&m<=10?2:3;
+    const curYear=new Date().getFullYear();
+    // Build program map — only include entries that have a season field
+    const progMap={};
+    data.forEach(g=>{
+      const hasSeason=g.season&&seasonKeyToIdx[g.season]!==undefined;
+      const key=(g.foundation||'').trim()+'|||'+(g.grant||'').trim();
+      // Initialize program if any entry of it has a season
+      if(hasSeason&&!progMap[key])progMap[key]={foundation:(g.foundation||'').trim(),grant:(g.grant||'').trim(),entries:[],web:g.web||'',season:g.season};
+      // If program already exists (season was set on another entry), also collect this entry for history
+      if(progMap[key]){
+        if(g.deadline){
+          const d=new Date(g.deadline+'T00:00:00');
+          progMap[key].entries.push({month:d.getMonth(),day:d.getDate(),year:d.getFullYear(),status:g.nextStep,amount:g.amountReceived||g.amount||0,deadline:g.deadline,deadlineType:g.deadlineType||''});
+        }
+        if(g.web&&!progMap[key].web)progMap[key].web=g.web;
+        if(hasSeason)progMap[key].season=g.season;
+      }
+    });
+    const bySeason=[[],[],[],[],[]];
+    Object.values(progMap).forEach(prog=>{
+      if(!prog.season||seasonKeyToIdx[prog.season]===undefined)return;
+      const si=seasonKeyToIdx[prog.season];
+      const received=prog.entries.filter(e=>e.status==='05 Received').length;
+      const totalApps=prog.entries.length;
+      const rate=totalApps>0?Math.round(received/totalApps*100):0;
+      const totalAmt=prog.entries.filter(e=>e.status==='05 Received').reduce((s,e)=>s+e.amount,0);
+      const history=prog.entries.slice().sort((a,b)=>a.year-b.year||a.month-b.month);
+      const thisYearEntries=prog.entries.filter(e=>e.year===curYear);
+      const trackedStatuses=['01 Apply on deadline','00 Send Proposal','03 Waiting Results','05 Received','04 Denied','08 Not Eligible'];
+      const isTracked=thisYearEntries.some(e=>trackedStatuses.includes(e.status));
+      // Skip if already tracked this year (apply/waiting/received/denied)
+      if(isTracked)return;
+      // Compute last known deadline for reference
+      const lastEntry=history.length>0?history[history.length-1]:null;
+      const lastDeadline=lastEntry?lastEntry.deadline:null;
+      const lastDLType=lastEntry?lastEntry.deadlineType:'';
+      const lastMonth=lastEntry?lastEntry.month:null;
+      const lastDay=lastEntry?lastEntry.day:null;
+      const lastYear=lastEntry?lastEntry.year:null;
+      // Estimated next deadline based on historical avg
+      const avgMonth=lastMonth;
+      const avgDay=lastDay;
+      bySeason[si].push({
+        foundation:prog.foundation,grant:prog.grant,web:prog.web,
+        totalApps,received,rate,totalAmt,history,
+        lastDeadline,lastDLType,lastMonth,lastDay,lastYear,avgMonth,avgDay
+      });
+    });
+    bySeason.forEach(arr=>arr.sort((a,b)=>(a.foundation||'').localeCompare(b.foundation||'')));
+    const now=new Date();
+    const curSeason=monthToSeason(now.getMonth());
+    const result=[];
+    for(let i=0;i<4;i++){
+      const si=(curSeason+i)%4;
+      const s=SEASONS[si];
+      if(bySeason[si].length>0){
+        result.push({...s,isCurrent:si===curSeason,isNext:si===(curSeason+1)%4,grants:bySeason[si]});
+      }
+    }
+    // Closed always at the end
+    if(bySeason[4].length>0){
+      result.push({...SEASONS[4],isCurrent:false,isNext:false,grants:bySeason[4]});
+    }
+    return result;
+  },[data]);
+
+  const stats=useMemo(()=>({
+    total:data.length,
+    apply:data.filter(g=>g.nextStep==='01 Apply on deadline'||g.nextStep==='00 Send Proposal').length,
+    waiting:data.filter(g=>g.nextStep==='03 Waiting Results').length,
+    received:data.filter(g=>g.nextStep==='05 Received').length,
+    denied:data.filter(g=>g.nextStep==='04 Denied').length,
+    active:activeGrants.length,
+    totalAmt:data.filter(g=>g.nextStep==='05 Received').reduce((s,g)=>s+(g.amountReceived||g.amount||0),0),
+    activeAmt:activeGrants.reduce((s,g)=>s+(g.amountReceived||g.amount||0),0),
+  }),[data,activeGrants]);
+
+  const changeStatus=useCallback((id,newStep)=>setData(p=>p.map(g=>g.id===id?{...g,nextStep:newStep}:g)),[]);
+  const changeField=useCallback((id,field,val)=>setData(p=>p.map(g=>g.id===id?{...g,[field]:val}:g)),[]);
+  const changeProgramSeason=useCallback((foundation,grant,newSeason)=>{
+    const f=(foundation||'').trim(), gr=(grant||'').trim();
+    setData(p=>p.map(g=>(g.foundation||'').trim()===f&&(g.grant||'').trim()===gr?{...g,season:newSeason}:g));
+  },[]);
+  const add=useCallback(g=>setData(p=>[g,...p]),[]);
+  const delEntry=useCallback(id=>{if(confirm('Delete this grant entry?'))setData(p=>p.filter(g=>g.id!==id));},[]);
+  const dupEntry=useCallback(id=>{setData(p=>{const src=p.find(g=>g.id===id);if(!src)return p;const copy={...src,id:Date.now(),notes:(src.notes||'')+' (copy)'};return[copy,...p];});},[]);
+  const[expRow,setExpRow]=useState(null);
+
+  return(
+    <div className="app">
+      <div className="topbar">
+        <img src="logo.png" alt="" style={{height:36}}/>
+        <div className="topbar-actions">
+          <button className="theme-btn" onClick={()=>window.location.reload()} title="Reload from server">🔄</button>
+          <button className="theme-btn" onClick={()=>{_sb.auth.signOut();}} title="Sign out">⎋</button>
+          <button className="theme-btn" onClick={()=>setIsDark(d=>!d)} title="Toggle light/dark">{isDark?'☀️':'🌙'}</button>
+          <button className="btn btn-pri" onClick={()=>setShowAdd(true)}>+ Add Grant</button>
+        </div>
+      </div>
+
+      <div className="filters">
+        <input className="search" placeholder="Search foundation, grant program, notes..." value={search} onChange={e=>setSearch(e.target.value)}/>
+        <div style={{display:'flex',gap:4,flexWrap:'wrap'}}>
+          {[['all','All',stats.total],['apply','Apply',stats.apply],['03 Waiting Results','Waiting',stats.waiting],['05 Received','Awarded',stats.received],['04 Denied','Denied',stats.denied]].map(([k,l,c])=>
+            <button key={k} className={`chip ${statusFilter===k&&!editMode&&!activeView&&!calendarView?'on':''}`} onClick={()=>{setStatusFilter(k);setEditMode(false);setActiveView(false);setCalendarView(false);setExpRow(null);}}>{l}{k!=='all'&&c>0&&<span style={{opacity:.6,marginLeft:3,fontSize:10}}>{c}</span>}</button>
+          )}
+          <button className={`chip ${activeView&&!editMode&&!calendarView?'on':''}`} onClick={()=>{setActiveView(!activeView);setEditMode(false);setCalendarView(false);setExpRow(null);}} style={activeView?{borderColor:'var(--g)',background:'var(--gbg)',color:'var(--g)'}:{}}>✦ Active ({stats.active})</button>
+          <button className={`chip ${calendarView&&!editMode?'on':''}`} onClick={()=>{setCalendarView(!calendarView);setEditMode(false);setActiveView(false);setExpRow(null);}} style={calendarView?{borderColor:'var(--o)',background:'var(--obg)',color:'var(--o)'}:{}}>📅 Upcoming {calendarData.reduce((s,m)=>s+m.grants.length,0)>0&&<span style={{background:'var(--obg)',color:'var(--o)',padding:'0 5px',borderRadius:6,fontSize:10,fontWeight:700,marginLeft:2}}>{calendarData.reduce((s,m)=>s+m.grants.length,0)}</span>}</button>
+          <span style={{width:1,height:16,background:'var(--bd)',margin:'0 4px'}}/>
+          <button className={`chip ${editMode?'on':''}`} onClick={()=>{setEditMode(!editMode);setActiveView(false);setCalendarView(false);}} style={editMode?{borderColor:'var(--y)',background:'var(--ybg)',color:'var(--y)'}:{}}>✏ Edit All</button>
+          {editMode&&<>
+            <button className="chip" onClick={async()=>{const r=await saveToServer(data);setSaveMsg(r.msg);setTimeout(()=>setSaveMsg(null),2500);}} style={{borderColor:'var(--g)',background:'var(--gbg)',color:'var(--g)',fontWeight:700}}>💾 Save</button>
+            <button className="chip" onClick={()=>exportJSON(data)} style={{borderColor:'var(--b)',color:'var(--b)'}}>⬇ JSON</button>
+            <label className="chip" style={{borderColor:'var(--y)',color:'var(--y)',cursor:'pointer'}}>⬆ Import<input type="file" accept=".json" style={{display:'none'}} onChange={e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(Array.isArray(d)){setData(d);setSaveMsg('Imported '+d.length);setTimeout(()=>setSaveMsg(null),2000);}}catch(err){alert('Invalid JSON');}};rd.readAsText(f);e.target.value='';}}/></label>
+            {saveMsg&&<span style={{fontSize:10,color:'var(--g)',fontWeight:600}}>{saveMsg}</span>}
+          </>}
+        </div>
+        <span style={{fontSize:11,color:'var(--tf)',marginLeft:'auto'}}>
+          {editMode?`${data.length} entries`:calendarView?`${calendarData.reduce((s,m)=>s+m.grants.length,0)} programs · ${calendarData.length} seasons`:activeView?`${activeGrants.length} active · ${fmt(stats.activeAmt)}`:`${programGroups.length} programs · ${programGroups.reduce((s,g)=>s+g.entries.length,0)} grants`}
+          {lastSaved&&<span className="save-indicator"><span className={`dot ${saveStatus}`}/>{saveStatus==='ok'?'Saved':saveStatus==='saving'?'Saving...':'Error'} · {lastSaved.toLocaleTimeString()}</span>}
+        </span>
+      </div>
+
+      <div className="main-area">
+        {editMode?(
+          <EditSheet data={data} setData={setData} search={search}/>
+        ):calendarView?(
+          <div className="cal-view">
+            {calendarData.length===0?(
+              <div className="cal-empty">
+                <div className="cal-empty-icon">✓</div>
+                All grant programs are tracked for {new Date().getFullYear()}. Nothing to check.
+              </div>
+            ):calendarData.map(se=>(
+              <div key={se.name} className={`cal-season${se.key==='Closed'?' closed':''}`}>
+                <div className="cal-season-hdr">
+                  <span className={`cal-season-name ${se.isCurrent?'current':se.isNext?'next':''}`}>{se.emoji} {se.name}</span>
+                  <span className="cal-season-count">{se.grants.length}</span>
+                  {se.isCurrent&&<span className="cal-season-tag">Now</span>}
+                  {se.isNext&&<span className="cal-season-tag" style={{background:'var(--ybg)',color:'var(--y)'}}>Next</span>}
+                </div>
+                {se.grants.map((g,gi)=>{
+                  const goToTimeline=()=>{const k=(g.foundation||'').trim()+'|||'+(g.grant||'').trim();setCalendarView(false);setStatusFilter('all');setSearch('');setExpRow(k);};
+                  const MSHORT=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                  return(
+                  <div key={gi} className="cal-grant" onClick={goToTimeline}>
+                    <div className="cg-top">
+                      <div>
+                        <div className="cg-foundation">{g.foundation}</div>
+                        <div className="cg-program">{g.grant||'—'}</div>
+                      </div>
+                      <div className="cg-top-right">
+                        <select className="cg-season-sel" value={se.key} onClick={e=>e.stopPropagation()} onChange={e=>{e.stopPropagation();changeProgramSeason(g.foundation,g.grant,e.target.value);}}>
+                          <option value="Spring">🌱</option><option value="Summer">☀️</option><option value="Fall">🍂</option><option value="Winter">❄️</option><option value="Closed">🚫</option>
+                        </select>
+                        <span className="cg-chevron">›</span>
+                      </div>
+                    </div>
+                    {g.lastDeadline&&(
+                      <div className="cg-meta">
+                        <div className="cg-meta-item"><span className="label">Last deadline</span> <span className="val">{MSHORT[g.lastMonth]} {g.lastDay}, {g.lastYear}</span></div>
+                        <span className={`cg-dl-type ${g.lastDLType==='DDLNE!'?'hard':'est'}`}>{g.lastDLType==='DDLNE!'?'HARD':'EST'}</span>
+                        {g.totalAmt>0&&<div className="cg-meta-item"><span className="label">Won</span> <span className="val" style={{color:'var(--g)'}}>{fmt(g.totalAmt)}</span></div>}
+                      </div>
+                    )}
+                    <div className="cg-bottom">
+                      <div className="cg-history">
+                        {g.history.map((h,hi)=>{
+                          const cls=h.status==='05 Received'?'received':h.status==='04 Denied'?'denied':h.status==='03 Waiting Results'?'waiting':h.status==='07 Missed Deadline'?'missed':h.status==='08 Not Eligible'?'notelig':'check';
+                          return <span key={hi} className="cg-yr"><span className={`sem-dot ${cls}`}/>{String(h.year).slice(-2)}</span>;
+                        })}
+                        <span className="cg-rate">{g.received}/{g.totalApps}</span>
+                      </div>
+                      <div style={{display:'flex',gap:6,alignItems:'center'}}>
+                        <a className="cg-search-btn" href={'https://www.google.com/search?q='+encodeURIComponent((g.foundation||'')+' '+(g.grant||'')+' grant '+new Date().getFullYear())} target="_blank" rel="noreferrer" onClick={e=>e.stopPropagation()} title="Search on Google">🔍</a>
+                        {g.web&&<a className="cg-web-btn" href={g.web} target="_blank" rel="noreferrer" onClick={e=>e.stopPropagation()} title="Open website">🔗</a>}
+                        <button className="cg-add-btn" onClick={e=>{e.stopPropagation();setAddPrefill({foundation:g.foundation,grant:g.grant,web:g.web||'',season:se.key});setShowAdd(true);}}>
+                          + Add {new Date().getFullYear()}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );})}
+              </div>
+            ))}
+          </div>
+        ):activeView?(
+          <div className="active-grid">
+            {activeGrants.length===0?(
+              <div style={{textAlign:'center',padding:40,color:'var(--tf)'}}>No active grants with a defined grant period right now.</div>
+            ):activeGrants.map(g=>{
+              const p=pPeriod(g.eligiblePeriod);
+              const daysLeft=p?Math.ceil((p.end-new Date())/864e5):null;
+              return(
+                <div key={g.id} className="active-card">
+                  <div className="ac-top">
+                    <div className="ac-info">
+                      <div className="ac-foundation">{g.foundation}<CopyBtn text={g.foundation}/></div>
+                      <div className="ac-grant">{g.grant||'—'}{g.grant&&<CopyBtn text={g.grant}/>}</div>
+                      {g.projectDates&&<div className="ac-project">{g.projectDates}</div>}
+                    </div>
+                    <div className="ac-amounts">
+                      <div className="ac-amt">{fmt(g.amountReceived||g.amount)}</div>
+                      {daysLeft!=null&&<div className="ac-days" style={{color:daysLeft<=30?'var(--r)':daysLeft<=90?'var(--y)':'var(--g)'}}>{daysLeft}d left</div>}
+                      {g.reportDeadline&&<div className="ac-report">Report: {fmtDateShort(g.reportDeadline)}</div>}
+                    </div>
+                  </div>
+                  <Thermo period={g.eligiblePeriod} deadline={g.deadline} reportDeadline={g.reportDeadline}/>
+                  {g.notes&&<div className="ac-notes">{g.notes}</div>}
+                </div>
+              );
+            })}
+          </div>
+        ):(
+          <div style={{overflowX:'auto',WebkitOverflowScrolling:'touch'}}>
+          <table className="flat-table">
+            <thead><tr>
+              <th style={{width:110}}>Deadline</th>
+              <th>Foundation</th>
+              <th>Grant Program</th>
+              <th style={{width:75}}>Status</th>
+              <th style={{width:60}}>Apps</th>
+              <th style={{width:80}}>Results</th>
+              <th style={{width:80}}>Amount</th>
+              <th style={{width:120}}></th>
+            </tr></thead>
+            <tbody>
+              {programGroups.map(grp=>{
+                const nd=grp.nextDeadline||grp.primary;
+                const days=nd&&nd.deadline?daysUntil(nd.deadline):9999;
+                const dc=dlClass(days);
+                const isExp=expRow===grp.key;
+                const relStr=days<0?`${Math.abs(days)}d ago`:days===0?'Today':days<=60?`${days}d`:`${Math.round(days/30)}mo`;
+                const latestStep=grp.primary.nextStep;
+                const dType=nd?nd.deadlineType:'';
+                // Semáforo: year history dots
+                const semEntries=grp.entries.slice().sort((a,b)=>(a.deadline||'').localeCompare(b.deadline||''));
+                return(
+                  <React.Fragment key={grp.key}>
+                  <tr className={isExp?'g-sel':''} onClick={()=>setExpRow(isExp?null:grp.key)} style={{cursor:'pointer'}}>
+                    {/* Line 1: deadline + status + amount (on mobile: all in one flex row) */}
+                    <td className="mob-line1">
+                      <span style={{fontSize:10,color:'var(--tf)',transition:'transform .2s',display:'inline-block',transform:isExp?'rotate(90deg)':'rotate(0deg)'}}>▶</span>
+                      {nd&&nd.deadline?(
+                        <span className={`g-deadline ${dc}`}>{fmtDateShort(nd.deadline)}</span>
+                      ):(
+                        <span className="g-deadline" style={{color:'var(--tf)'}}>—</span>
+                      )}
+                      {nd&&nd.deadline&&<span className={`fd-rel ${dc}`} style={{fontSize:8,fontWeight:600,whiteSpace:'nowrap'}}>{relStr}</span>}
+                      {dType&&<span className={`fd-type ${dType==='DDLNE!'?'hard':'est'}`}>{dType==='DDLNE!'?'Hard':'Est.'}</span>}
+                    </td>
+                    {/* Line 2: Foundation */}
+                    <td className="flat-fname" style={{fontWeight:600,maxWidth:220,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>
+                      {grp.foundation}<CopyBtn text={grp.foundation}/>
+                    </td>
+                    {/* Line 3: Grant program + semáforo */}
+                    <td className="flat-gname">
+                      <span className="g-name" style={{display:'inline'}}>{grp.grant||'—'}{grp.grant&&<CopyBtn text={grp.grant}/>}</span>
+                      <span className="prog-sem" style={{marginLeft:6}}>
+                        {semEntries.map(e=>{
+                          const yr=e.deadline?e.deadline.substring(2,4):'?';
+                          const cls=e.nextStep==='05 Received'?'received':e.nextStep==='04 Denied'?'denied':e.nextStep==='03 Waiting Results'?'waiting':e.nextStep==='07 Missed Deadline'?'missed':e.nextStep==='08 Not Eligible'?'notelig':e.nextStep==='02 Check'?'check':'apply';
+                          return <span key={e.id} className="sem-yr"><span className={`sem-dot ${cls}`}/><span className="sem-lbl">{yr}</span></span>;
+                        })}
+                      </span>
+                    </td>
+                    {/* Desktop-only separate cells */}
+                    <td className="desk-only"><span className={`ns ${STEP_CSS[latestStep]||'ns-check'}`}>{STEP_SHORT[latestStep]||latestStep}</span></td>
+                    <td className="desk-only" style={{fontSize:10,color:'var(--td)'}}>{grp.entries.length} app{grp.entries.length>1?'s':''}</td>
+                    <td className="desk-only">
+                      <div style={{display:'flex',gap:3}}>
+                        {grp.received>0&&<span className="ms ms-g">✓{grp.received}</span>}
+                        {grp.waiting>0&&<span className="ms ms-b">⏳{grp.waiting}</span>}
+                        {grp.denied>0&&<span className="ms ms-r">✗{grp.denied}</span>}
+                      </div>
+                    </td>
+                    <td className="desk-only" style={{fontVariantNumeric:'tabular-nums',fontWeight:700,color:'var(--g)',fontSize:11}}>{grp.totalAmt>0?fmt(grp.totalAmt):''}</td>
+                    <td className="desk-only" style={{textAlign:'center'}}>
+                      {grp.primary.web&&<a href={grp.primary.web} target="_blank" rel="noreferrer" className="btn-conv" onClick={e=>e.stopPropagation()}>Ver Convocatoria <span className="conv-arrow">→</span></a>}
+                    </td>
+                    {/* Mobile-only: combined right-side stats */}
+                    <td className="mob-right">
+                      <span className={`ns ${STEP_CSS[latestStep]||'ns-check'}`}>{STEP_SHORT[latestStep]||latestStep}</span>
+                      <span style={{fontSize:9,color:'var(--td)'}}>{grp.entries.length}</span>
+                      {grp.received>0&&<span className="ms ms-g" style={{fontSize:8}}>✓{grp.received}</span>}
+                      {grp.waiting>0&&<span className="ms ms-b" style={{fontSize:8}}>⏳{grp.waiting}</span>}
+                      {grp.denied>0&&<span className="ms ms-r" style={{fontSize:8}}>✗{grp.denied}</span>}
+                      {grp.totalAmt>0&&<span style={{fontVariantNumeric:'tabular-nums',fontWeight:700,color:'var(--g)',fontSize:9}}>{fmt(grp.totalAmt)}</span>}
+                    </td>
+                  </tr>
+                  {isExp&&(
+                    <tr><td colSpan={9} style={{padding:0}}>
+                      <div className="hist-panel" onClick={e=>e.stopPropagation()}>
+                        {/* Application Timeline */}
+                        <div>
+                          <div style={{fontSize:10,fontWeight:700,textTransform:'uppercase',letterSpacing:'.4px',color:'var(--tf)',marginBottom:8}}>
+                            Application Timeline ({grp.entries.length})
+                          </div>
+                          {grp.entries.map((e,i)=><AppEntry key={e.id} e={e} isLast={i===grp.entries.length-1} onChangeStatus={changeStatus} onChangeField={changeField} onDelete={delEntry} onDuplicate={dupEntry}/>)}
+                        </div>
+                      </div>
+                    </td></tr>
+                  )}
+                  </React.Fragment>
+                );
+              })}
+            </tbody>
+          </table>
+          </div>
+        )}
+      </div>
+
+      {showAdd&&(
+        <div className="modal-ov" onClick={()=>setShowAdd(false)}>
+          <div className="modal" onClick={e=>e.stopPropagation()}>
+            <AddModal onClose={()=>{setShowAdd(false);setAddPrefill(null);}} onAdd={add} prefill={addPrefill}/>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AddModal({onClose,onAdd,prefill}){
+  const pf=prefill||{};
+  const[f,sF]=useState({id:Date.now(),deadline:'',deadlineType:'Estimated',foundation:pf.foundation||'',grant:pf.grant||'',nextStep:'02 Check',web:pf.web||'',notes:'',amount:null,amountReceived:null,eligiblePeriod:'',projectDates:'',improvements:'',source:'calendar',reportDeadline:'',season:pf.season||''});
+  const s=(k,v)=>sF(p=>({...p,[k]:v}));
+  return(
+    <>
+      <h3>Add Grant</h3>
+      <div className="mf"><label>Foundation *</label><input value={f.foundation} onChange={e=>s('foundation',e.target.value)} placeholder="Foundation name"/></div>
+      <div className="mf"><label>Grant program</label><input value={f.grant} onChange={e=>s('grant',e.target.value)} placeholder="Specific grant name"/></div>
+      <div className="mf"><label>Deadline *</label><input type="date" value={f.deadline} onChange={e=>s('deadline',e.target.value)}/></div>
+      <div style={{display:'flex',gap:8}}>
+        <div className="mf" style={{flex:1}}><label>Type</label><select value={f.deadlineType} onChange={e=>s('deadlineType',e.target.value)}><option value="DDLNE!">Hard Deadline</option><option value="Estimated">Estimated Deadline</option></select></div>
+        <div className="mf" style={{flex:1}}><label>Status</label><select value={f.nextStep} onChange={e=>s('nextStep',e.target.value)}>{STEPS.map(st=><option key={st} value={st}>{STEP_SHORT[st]}</option>)}</select></div>
+        <div className="mf" style={{flex:1}}><label>Season</label><select value={f.season||''} onChange={e=>s('season',e.target.value)}><option value="">—</option><option value="Spring">🌱 Spring</option><option value="Summer">☀️ Summer</option><option value="Fall">🍂 Fall</option><option value="Winter">❄️ Winter</option><option value="Closed">🚫 Closed</option></select></div>
+      </div>
+      <div style={{display:'flex',gap:8}}>
+        <div className="mf" style={{flex:1}}><label>Amount Requested ($)</label><input type="number" value={f.amount||''} onChange={e=>s('amount',e.target.value?parseFloat(e.target.value):null)}/></div>
+        <div className="mf" style={{flex:1}}><label>Amount Received ($)</label><input type="number" value={f.amountReceived||''} onChange={e=>s('amountReceived',e.target.value?parseFloat(e.target.value):null)}/></div>
+      </div>
+      <div className="mf"><label>Web / Link</label><input value={f.web} onChange={e=>s('web',e.target.value)} placeholder="https://..."/></div>
+      <div className="mf"><label>Report Deadline</label><input type="date" value={f.reportDeadline} onChange={e=>s('reportDeadline',e.target.value)}/></div>
+      <div className="mf"><label>Notes</label><textarea value={f.notes} onChange={e=>s('notes',e.target.value)}/></div>
+      <div className="ma">
+        <button className="btn btn-sec" onClick={onClose}>Cancel</button>
+        <button className="btn btn-pri" onClick={()=>{if(f.foundation.trim()){onAdd(f);onClose();}}}>Add</button>
+      </div>
+    </>
+  );
+}
+
+// App is started by the data loader above
+</script>
+</body>
+</html>
