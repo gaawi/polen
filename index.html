@@ -717,15 +717,18 @@ function exportJSON(d){
 }
 
 // ── Boot: wait for session, then render ──
+// _pendingGrants holds grants loaded before Babel finishes compiling
+window._pendingGrants=null;
 _sb.auth.onAuthStateChange(async(event,session)=>{
   const overlay=document.getElementById('login-overlay');
   if(session){
     overlay.style.display='none';
-    // only start once
     if(!window._appStarted){
       window._appStarted=true;
       const grants=await loadFromSupabase();
-      startApp(grants);
+      // If Babel already finished, startApp is defined; otherwise store for later
+      if(typeof startApp==='function'){startApp(grants);}
+      else{window._pendingGrants=grants;}
     }
   } else {
     overlay.style.display='flex';
@@ -1046,8 +1049,8 @@ function startApp(data){
   const root=ReactDOM.createRoot(document.getElementById('root'));
   root.render(<App initialGrants={data}/>);
 }
-// startApp is called by the Supabase auth listener above after login
-// saveToServer and exportJSON are defined in the config <script> block above
+// If auth fired before Babel finished, grants are waiting in _pendingGrants
+if(window._pendingGrants!==null){startApp(window._pendingGrants);}
 
 
 
