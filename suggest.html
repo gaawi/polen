@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Suggest a Grant</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',system-ui,sans-serif;background:#0c0d11;color:#e8eaf0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+.card{background:#14161e;border:1px solid #2a2d3e;border-radius:16px;padding:32px 28px;width:100%;max-width:520px;}
+h1{font-size:22px;font-weight:800;margin-bottom:4px;}
+.sub{font-size:13px;color:#7b8098;margin-bottom:24px;line-height:1.5;}
+.field{margin-bottom:14px;}
+label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:#7b8098;margin-bottom:4px;font-weight:600;}
+input,textarea{width:100%;background:#1c1f2b;border:1px solid #2a2d3e;color:#e8eaf0;padding:10px 12px;border-radius:8px;font-size:13px;font-family:inherit;outline:none;}
+input:focus,textarea:focus{border-color:#7c6cf0;}
+textarea{min-height:80px;resize:vertical;}
+button{width:100%;padding:12px;background:#7c6cf0;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;margin-top:8px;transition:background .15s;}
+button:hover{background:#a49afa;}
+button:disabled{opacity:.5;cursor:not-allowed;}
+.msg{text-align:center;padding:16px;border-radius:10px;margin-top:16px;font-size:13px;font-weight:600;}
+.msg.ok{background:rgba(52,211,153,.1);color:#34d399;border:1px solid rgba(52,211,153,.2);}
+.msg.err{background:rgba(248,113,113,.1);color:#f87171;border:1px solid rgba(248,113,113,.2);}
+.req{color:#f87171;}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Suggest a Grant</h1>
+  <p class="sub">Know a grant that should be on the radar? Submit it here and it'll go into the review queue.</p>
+
+  <div class="field">
+    <label>Foundation / Organization <span class="req">*</span></label>
+    <input id="foundation" type="text" placeholder="e.g. New Music USA"/>
+  </div>
+  <div class="field">
+    <label>Grant Program Name</label>
+    <input id="grant_name" type="text" placeholder="e.g. Organization Fund"/>
+  </div>
+  <div class="field">
+    <label>Deadline (approx.)</label>
+    <input id="deadline" type="date"/>
+  </div>
+  <div class="field">
+    <label>Website / Link</label>
+    <input id="web" type="url" placeholder="https://..."/>
+  </div>
+  <div class="field">
+    <label>Notes</label>
+    <textarea id="notes" placeholder="Amount, eligibility requirements, why it's relevant..."></textarea>
+  </div>
+
+  <button id="btn" onclick="submit()">Submit Suggestion</button>
+  <div id="msg"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+const SUPABASE_URL  = 'https://aqehbiyjofsxavndjfjj.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxZWhiaXlqb2ZzeGF2bmRqZmpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3NjUwMzUsImV4cCI6MjA5NDM0MTAzNX0.WgMseUQ6YbtZPjjx1i_VuRXTpSI7n9OD6QLUImmmPU0';
+const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+async function submit(){
+  const foundation = document.getElementById('foundation').value.trim();
+  const msg = document.getElementById('msg');
+  const btn = document.getElementById('btn');
+
+  if(!foundation){
+    msg.className='msg err';
+    msg.textContent='Foundation name is required.';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+  msg.textContent = '';
+
+  const {error} = await _sb.from('suggestions').insert({
+    foundation,
+    grant_name: document.getElementById('grant_name').value.trim()||null,
+    deadline:   document.getElementById('deadline').value||null,
+    web:        document.getElementById('web').value.trim()||null,
+    notes:      document.getElementById('notes').value.trim()||null,
+  });
+
+  if(error){
+    msg.className='msg err';
+    msg.textContent='Error: '+error.message;
+    btn.disabled=false;
+    btn.textContent='Submit Suggestion';
+  } else {
+    msg.className='msg ok';
+    msg.textContent='✓ Suggestion submitted! Thank you.';
+    btn.textContent='Submitted';
+    document.getElementById('foundation').value='';
+    document.getElementById('grant_name').value='';
+    document.getElementById('deadline').value='';
+    document.getElementById('web').value='';
+    document.getElementById('notes').value='';
+    setTimeout(()=>{btn.disabled=false;btn.textContent='Submit another';},2000);
+  }
+}
+
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.metaKey)submit();});
+</script>
+</body>
+</html>
