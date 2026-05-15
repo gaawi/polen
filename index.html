@@ -702,9 +702,20 @@ async function doLogin(){
     if(!window._appStarted){
       window._appStarted=true;
       btn.textContent='Loading...';
-      const grants=await loadFromSupabase();
-      if(typeof startApp==='function'){startApp(grants);}
-      else{window._pendingGrants=grants;}
+      try{
+        const grants=await loadFromSupabase();
+        if(typeof startApp==='function'){
+          startApp(grants);
+        } else {
+          throw new Error('startApp not defined — Babel may not have compiled yet');
+        }
+      }catch(e){
+        document.getElementById('login-overlay').style.display='flex';
+        document.getElementById('li-err').textContent='Error: '+e.message;
+        btn.disabled=false; btn.textContent='Sign in';
+        window._appStarted=false;
+        console.error('startApp failed:',e);
+      }
     }
   }
 }
