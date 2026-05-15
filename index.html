@@ -690,10 +690,23 @@ async function doLogin(){
   const err=document.getElementById('li-err');
   const email=document.getElementById('li-email').value.trim();
   const pass=document.getElementById('li-pass').value;
-  btn.disabled=true; err.textContent='';
+  btn.disabled=true; err.textContent=''; btn.textContent='Signing in...';
   const {error}=await _sb.auth.signInWithPassword({email,password:pass});
-  if(error){err.textContent=error.message;btn.disabled=false;}
-  // on success, auth state listener fires and loads the app
+  if(error){
+    err.textContent=error.message;
+    btn.disabled=false;
+    btn.textContent='Sign in';
+  } else {
+    // Hide overlay and load app directly — don't wait for onAuthStateChange
+    document.getElementById('login-overlay').style.display='none';
+    if(!window._appStarted){
+      window._appStarted=true;
+      btn.textContent='Loading...';
+      const grants=await loadFromSupabase();
+      if(typeof startApp==='function'){startApp(grants);}
+      else{window._pendingGrants=grants;}
+    }
+  }
 }
 document.getElementById('li-email').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('li-pass').focus();});
 document.getElementById('li-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
