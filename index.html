@@ -7,407 +7,716 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="robots" content="noindex, nofollow">
 <title>Polen — Grant Tracker</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0e0d0a;--panel:#15130f;--panel-2:#1c1a14;--panel-3:#26221a;
-  --ink:#f4ede0;--ink-2:#c8c1b3;--ink-3:#8a8475;--ink-4:#5c5749;--ink-5:#3a3629;
-  --rule:#2a2620;--rule-2:#3a3528;
-  --accent:#ffd233;--accent-2:#ffe680;--accent-soft:#3a3015;
-  --ok:#6ee08e;--ok-bg:rgba(110,224,142,.10);
-  --warn:#ffa848;--warn-bg:rgba(255,168,72,.10);
-  --danger:#ff6b6b;--danger-bg:rgba(255,107,107,.10);
-  --info:#7dafff;--info-bg:rgba(125,175,255,.10);
-  --mute:#7a7568;--mute-bg:rgba(122,117,104,.08);
+  --bg:#0e0d0a;--s1:#15130f;--s2:#1c1a14;--s3:#26221a;
+  --bd:#2a2620;--bd2:#3a3528;
+  --t:#f4ede0;--td:#8a8475;--tf:#5c5749;
+  --ac:#ffd233;--acl:#ffe680;--acbg:rgba(255,210,51,.08);
+  --g:#6ee08e;--gbg:rgba(110,224,142,.10);
+  --r:#ff6b6b;--rbg:rgba(255,107,107,.10);
+  --y:#ffa848;--ybg:rgba(255,168,72,.10);
+  --b:#7dafff;--bbg:rgba(125,175,255,.10);
+  --gr:#7a7568;--grbg:rgba(122,117,104,.08);
+  --o:#ffa848;--obg:rgba(255,168,72,.10);
   --font-mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,monospace;
-  --font-display:'Space Grotesk',system-ui,sans-serif;
 }
+
+/* Light mode overrides */
 html.light{
-  --bg:#f5f2ec;--panel:#fbf8f1;--panel-2:#efeadd;--panel-3:#e3ddca;
-  --ink:#0e0d0a;--ink-2:#2a2820;--ink-3:#5a5446;--ink-4:#8b8475;--ink-5:#b8b1a0;
-  --rule:#d4cdb8;--rule-2:#bfb69e;
-  --accent:#d39400;--accent-2:#b07a00;--accent-soft:#f4e4b3;
-  --ok:#2d8f4a;--ok-bg:rgba(45,143,74,.10);
-  --warn:#b85c00;--warn-bg:rgba(184,92,0,.10);
-  --danger:#c83434;--danger-bg:rgba(200,52,52,.10);
-  --info:#2d5dbb;--info-bg:rgba(45,93,187,.10);
+  --bg:#f5f2ec;--s1:#fbf8f1;--s2:#efeadd;--s3:#e3ddca;
+  --bd:#d4cdb8;--bd2:#bfb69e;
+  --t:#0e0d0a;--td:#5a5446;--tf:#8b8475;
+  --ac:#d39400;--acl:#b07a00;--acbg:rgba(211,148,0,.08);
+  --g:#2d8f4a;--gbg:rgba(45,143,74,.10);
+  --r:#c83434;--rbg:rgba(200,52,52,.10);
+  --y:#b85c00;--ybg:rgba(184,92,0,.10);
+  --b:#2d5dbb;--bbg:rgba(45,93,187,.10);
+  --gr:#6b7280;--grbg:rgba(107,114,128,.08);
+  --o:#b85c00;--obg:rgba(184,92,0,.10);
 }
+body{transition:background .2s,color .2s;}
 *{margin:0;padding:0;box-sizing:border-box;}
-html,body{background:var(--bg);color:var(--ink);font-family:var(--font-mono);font-size:12px;line-height:1.45;-webkit-font-smoothing:antialiased;letter-spacing:-.005em;}
-body{min-height:100vh;}
-button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;font-size:inherit;}
-input,textarea,select{font-family:inherit;font-size:inherit;color:inherit;background:none;border:none;outline:none;}
-a{color:inherit;text-decoration:none;}
-::selection{background:var(--accent);color:#000;}
+body{font-family:var(--font-mono);background:var(--bg);color:var(--t);min-height:100vh;-webkit-font-smoothing:antialiased;font-size:12px;line-height:1.45;letter-spacing:-.005em;}
+.app{height:100vh;display:flex;flex-direction:column;overflow:hidden;}
 
-/* ── Login ── */
-#login-overlay{display:none;position:fixed;inset:0;background:var(--bg);z-index:100;align-items:center;justify-content:center;}
-.login-box{width:100%;max-width:320px;background:var(--panel);border:1px solid var(--rule);padding:28px 24px;}
-.login-logo{display:flex;align-items:center;gap:12px;margin-bottom:22px;}
-.login-logo-icon{width:13px;height:13px;background:var(--accent);flex-shrink:0;box-shadow:5px 0 0 -1px var(--accent),0 5px 0 -1px var(--accent),5px 5px 0 -1px var(--accent);}
-.login-logo-text{font-family:var(--font-display);font-weight:700;font-size:18px;letter-spacing:-.02em;line-height:1;}
-.login-logo-sub{font-size:9px;color:var(--ink-4);text-transform:uppercase;letter-spacing:.12em;margin-top:2px;}
-.login-box input{display:block;width:100%;background:var(--panel-2);border:1px solid var(--rule);color:var(--ink);padding:9px 11px;font-size:12px;outline:none;margin-bottom:8px;font-family:var(--font-mono);}
-.login-box input:focus{border-color:var(--accent);}
-.login-box input::placeholder{color:var(--ink-4);}
-#li-btn{width:100%;padding:10px;margin-top:4px;background:var(--accent);color:#000;font-size:12px;font-weight:700;border:none;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .1s;cursor:pointer;}
-#li-btn:hover{background:var(--accent-2);}
-#li-btn:disabled{opacity:.6;cursor:not-allowed;}
-.login-err{font-size:11px;color:var(--danger);margin-top:8px;min-height:14px;}
-.spinner{width:11px;height:11px;border:2px solid rgba(0,0,0,.25);border-top-color:#000;border-radius:50%;animation:spin .7s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg);}}
+/* Top bar */
+.topbar{display:flex;align-items:center;gap:8px;padding:8px 16px;background:var(--s1);border-bottom:1px solid var(--bd);flex-shrink:0;flex-wrap:wrap;}
+.stat{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:3px;background:var(--s2);font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;border:1px solid transparent;}
+.stat:hover{border-color:var(--bd2);}
+.stat.active{border-color:var(--ac);background:var(--acbg);}
+.stat .sv{font-size:13px;font-weight:700;}
+.stat.so .sv{color:var(--o);}
+.stat.sg .sv{color:var(--g);}
+.stat.sy .sv{color:var(--y);}
+.stat.sr .sv{color:var(--r);}
+.stat.sb .sv{color:var(--b);}
+.stat.sp .sv{color:var(--acl);}
+.topbar-actions{margin-left:auto;display:flex;gap:6px;align-items:center;}
+.btn{padding:5px 12px;border-radius:3px;font-size:11px;font-weight:700;cursor:pointer;border:none;transition:all .1s;font-family:var(--font-mono);}
+.btn-pri{background:var(--ac);color:#000;}.btn-pri:hover{background:var(--acl);}
+.btn-sec{background:var(--s2);color:var(--td);border:1px solid var(--bd);}.btn-sec:hover{color:var(--t);border-color:var(--ac);}
 
-/* ── Loading ── */
-#loading-screen{display:none;position:fixed;inset:0;background:var(--bg);z-index:99;align-items:center;justify-content:center;flex-direction:column;gap:14px;}
-.loading-spinner{width:18px;height:18px;border:2px solid var(--rule);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;}
-.loading-text{font-size:10px;color:var(--ink-4);text-transform:uppercase;letter-spacing:.12em;}
+/* Filters */
+.filters{display:flex;gap:6px;padding:8px 16px;background:var(--s1);border-bottom:1px solid var(--bd);flex-shrink:0;flex-wrap:wrap;align-items:center;}
+.search{background:var(--s2);border:1px solid var(--bd);color:var(--t);padding:6px 10px;border-radius:3px;font-size:12px;outline:none;width:240px;font-family:var(--font-mono);}
+.search:focus{border-color:var(--ac);}
+.search::placeholder{color:var(--tf);}
+.chip{padding:4px 10px;border-radius:3px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--bd);background:none;color:var(--td);transition:all .15s;font-family:var(--font-mono);}
+.chip.on{border-color:var(--ac);background:var(--acbg);color:var(--acl);}
+.chip:hover:not(.on){border-color:var(--bd2);color:var(--t);}
 
-/* ── App shell ── */
-.app{min-height:100vh;display:flex;flex-direction:column;}
+/* Main scroll area */
+.main-area{flex:1;overflow:auto;padding:0;}
 
-/* ── Top bar ── */
-.tbar{display:flex;align-items:stretch;height:42px;background:var(--panel);border-bottom:1px solid var(--rule);position:sticky;top:0;z-index:20;}
-.tb-brand{display:flex;align-items:center;gap:10px;padding:0 16px;border-right:1px solid var(--rule);flex-shrink:0;}
-.tb-logo{width:12px;height:12px;background:var(--accent);flex-shrink:0;box-shadow:5px 0 0 -1px var(--accent),0 5px 0 -1px var(--accent),5px 5px 0 -1px var(--accent);}
-.tb-name{font-family:var(--font-display);font-weight:700;letter-spacing:-.02em;font-size:15px;line-height:1;}
-.tb-tag{font-size:9px;color:var(--ink-4);text-transform:uppercase;letter-spacing:.12em;}
-.tb-stats{display:flex;flex:1;}
-.tb-stat{display:flex;flex-direction:column;justify-content:center;padding:4px 14px;border-right:1px solid var(--rule);min-width:0;cursor:default;}
-.tb-stat-label{font-size:9px;color:var(--ink-4);text-transform:uppercase;letter-spacing:.1em;}
-.tb-stat-val{font-size:13px;font-weight:600;color:var(--ink);letter-spacing:-.01em;line-height:1.2;}
-.tb-stat-val .x{color:var(--ink-4);font-weight:400;}
-.tb-stat-val.urgent{color:var(--danger);}
-.tb-stat-val.ok{color:var(--ok);}
-.tb-stat-val.accent{color:var(--accent);}
-.tb-stat-val.warn{color:var(--warn);}
-.tb-actions{display:flex;align-items:center;gap:4px;padding:0 10px;}
-.tb-btn{padding:5px 10px;font-size:11px;font-weight:500;border:1px solid var(--rule);background:var(--panel-2);color:var(--ink-2);transition:all .1s;cursor:pointer;}
-.tb-btn:hover{border-color:var(--accent);color:var(--ink);}
-.tb-btn.primary{background:var(--accent);color:#000;border-color:var(--accent);font-weight:700;}
-.tb-btn.primary:hover{background:var(--accent-2);}
-.tb-iconbtn{width:29px;height:29px;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--ink-3);position:relative;}
-.tb-iconbtn:hover{color:var(--ink);background:var(--panel-2);}
-.tb-badge{position:absolute;top:2px;right:2px;min-width:13px;height:13px;background:var(--danger);color:#fff;border-radius:50%;font-size:8px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 2px;}
+/* LEVEL 1: Funder Folder */
+.funder{border-bottom:1px solid var(--bd);}
+.funder-row{display:flex;align-items:center;gap:0;padding:0;min-height:36px;cursor:pointer;transition:background .1s;user-select:none;}
+.funder-row:hover{background:rgba(255,210,51,.04);}
+.funder-row.open{background:var(--acbg);}
 
-/* ── Tab bar ── */
-.tabs{display:flex;align-items:stretch;height:36px;background:var(--panel);border-bottom:1px solid var(--rule);position:sticky;top:42px;z-index:19;}
-.tab{display:flex;align-items:center;gap:7px;padding:0 15px;font-size:11px;font-weight:500;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em;border-right:1px solid var(--rule);position:relative;transition:all .1s;cursor:pointer;background:none;border-top:none;border-bottom:none;border-left:none;}
-.tab:hover{color:var(--ink);background:var(--panel-2);}
-.tab.active{color:var(--accent);background:var(--bg);}
-.tab.active::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--accent);}
-.tab .num{font-size:10px;color:var(--ink-4);font-weight:400;}
-.tab.active .num{color:var(--accent);}
-.tab .pulse{width:5px;height:5px;background:var(--danger);flex-shrink:0;animation:pulse 1.8s ease infinite;}
-@keyframes pulse{0%,100%{opacity:.3;}50%{opacity:1;}}
-.tab-spacer{flex:1;}
-.tab-right{display:flex;align-items:center;gap:8px;padding:0 14px;border-left:1px solid var(--rule);font-size:11px;color:var(--ink-3);}
-.tab-search{background:transparent;border:none;outline:none;width:160px;color:var(--ink);font-size:11px;font-family:var(--font-mono);}
-.tab-search::placeholder{color:var(--ink-4);}
+/* Date block on the left */
+.fd-date{width:auto;flex-shrink:0;display:flex;align-items:center;gap:4px;padding:6px 10px;border-right:1px solid var(--bd);}
+.fd-date .fd-day{font-size:12px;font-weight:700;line-height:1;}
+.fd-date .fd-day.past{color:var(--tf);}
+.fd-date .fd-day.soon{color:var(--r);}
+.fd-date .fd-day.upcoming{color:var(--y);}
+.fd-date .fd-day.future{color:var(--t);}
+.fd-date .fd-month{display:none;}
+.fd-date .fd-year{display:none;}
+.fd-date .fd-rel{font-size:8px;font-weight:600;margin-top:0;}
+.fd-date .fd-rel.soon{color:var(--r);}
+.fd-date .fd-rel.upcoming{color:var(--y);}
+.fd-date .fd-rel.future{color:var(--td);}
+.fd-date .fd-rel.past{color:var(--tf);}
+.fd-type{font-size:7px;font-weight:700;padding:1px 5px;border-radius:2px;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap;margin-top:2px;}
+.fd-type.hard{background:var(--rbg);color:var(--r);}
+.fd-type.est{background:var(--ybg);color:var(--y);}
 
-/* ── Main ── */
-.main{flex:1;overflow:auto;}
+/* Center content */
+.fd-center{flex:1;min-width:0;padding:4px 10px;display:flex;align-items:center;gap:8px;}
+.fd-top{display:flex;align-items:center;gap:6px;flex:1;min-width:0;}
+.funder-chevron{font-size:9px;color:var(--tf);transition:transform .2s;flex-shrink:0;}
+.funder-chevron.open{transform:rotate(90deg);color:var(--ac);}
+.funder-name{font-size:12px;font-weight:700;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.funder-counts{font-size:9px;color:var(--tf);font-weight:600;flex-shrink:0;}
+.fd-bottom{display:none;}
 
-/* ── Page heading ── */
-.ph{display:flex;align-items:baseline;justify-content:space-between;padding:15px 24px 10px;border-bottom:1px solid var(--rule);gap:20px;flex-wrap:wrap;}
-.ph-left{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;}
-.ph-eye{font-size:10px;color:var(--ink-4);text-transform:uppercase;letter-spacing:.12em;}
-.ph-title{font-family:var(--font-display);font-weight:700;font-size:26px;line-height:1;letter-spacing:-.02em;color:var(--ink);}
-.ph-title .a{color:var(--accent);}
-.ph-sub{font-size:11px;color:var(--ink-3);}
-.ph-sub .urgent{color:var(--danger);font-weight:600;}
+/* Semáforo (year history circles) */
+.semaforo{display:flex;gap:3px;align-items:center;}
+.sem-yr{display:flex;flex-direction:column;align-items:center;gap:1px;}
+.sem-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.sem-dot.received{background:var(--g);}
+.sem-dot.denied{background:var(--r);}
+.sem-dot.waiting{background:var(--b);}
+.sem-dot.apply{background:var(--y);}
+.sem-dot.notapplied{background:var(--gr);opacity:.4;}
+.sem-dot.check{background:var(--y);opacity:.6;}
+.sem-dot.missed{background:var(--o);}
+.sem-dot.notelig{background:var(--gr);opacity:.5;}
+.sem-lbl{font-size:6px;color:var(--tf);font-weight:600;}
 
-/* ── Chips (Library) ── */
-.chips{display:flex;gap:0;align-items:center;flex-wrap:wrap;}
-.chip{padding:5px 11px;font-size:10px;font-weight:500;color:var(--ink-3);background:var(--panel);border:1px solid var(--rule);border-right:none;text-transform:uppercase;letter-spacing:.08em;transition:all .1s;cursor:pointer;}
-.chip:last-child{border-right:1px solid var(--rule);}
-.chip:hover{color:var(--ink);background:var(--panel-2);}
-.chip.on{background:var(--accent);color:#000;border-color:var(--accent);font-weight:600;}
-.chip .n{margin-left:5px;opacity:.6;font-weight:400;}
+/* Right side meta */
+.fd-right{display:flex;align-items:center;gap:6px;padding:4px 12px;flex-shrink:0;}
+.funder-stats{display:flex;gap:4px;}
+.funder-stats .ms{font-size:9px;font-weight:700;padding:2px 6px;border-radius:2px;}
+.ms-g{background:var(--gbg);color:var(--g);}
+.ms-r{background:var(--rbg);color:var(--r);}
+.ms-b{background:var(--bbg);color:var(--b);}
+.ms-y{background:var(--ybg);color:var(--y);}
+.ms-amt{background:var(--gbg);color:var(--g);font-variant-numeric:tabular-nums;}
+.fb-count{font-size:9px;color:var(--tf);}
 
-/* ── Grant row ── */
-.grow{display:grid;grid-template-columns:84px minmax(0,1fr) 120px 100px 70px 100px;align-items:center;border-bottom:1px solid var(--rule);transition:background .08s;cursor:pointer;min-height:38px;}
-.grow:hover{background:var(--panel-2);}
-.grow.urgent{box-shadow:inset 2px 0 0 var(--danger);}
-.grow.soon{box-shadow:inset 2px 0 0 var(--warn);}
-.grow.row-ok{box-shadow:inset 2px 0 0 var(--ok);}
-.grow.muted{opacity:.5;}
-.grow > div{padding:6px 11px;min-width:0;overflow:hidden;}
-.grow .gd{border-right:1px solid var(--rule);}
-.gr-date{font-size:11px;color:var(--ink-2);font-weight:500;display:flex;flex-direction:column;line-height:1.15;}
-.gr-date .day{color:var(--ink);font-weight:600;}
-.gr-date .rel{font-size:9px;color:var(--ink-4);text-transform:uppercase;letter-spacing:.05em;margin-top:1px;}
-.gr-date .rel.urgent{color:var(--danger);}
-.gr-date .rel.soon{color:var(--warn);}
-.gr-name{display:flex;flex-direction:column;line-height:1.2;min-width:0;}
-.gr-name .fdn{color:var(--ink);font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--font-display);letter-spacing:-.01em;}
-.gr-name .prog{color:var(--ink-3);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
-.gr-name .proj{color:var(--ink-4);font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;font-style:italic;}
-.gr-amt{font-size:13px;color:var(--ink);font-weight:600;text-align:right;font-variant-numeric:tabular-nums;}
-.gr-amt .c{color:var(--ink-4);font-weight:400;margin-right:1px;}
-.gr-amt.received{color:var(--ok);}
-.gr-amt.none{color:var(--ink-4);font-weight:400;}
+/* LEVEL 2: Grant table inside funder */
+.grants-panel{background:var(--s1);border-top:1px solid var(--bd);}
+.grants-table{width:100%;border-collapse:collapse;}
+.grants-table th{background:var(--s2);padding:5px 10px;text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--tf);font-weight:700;border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:3;}
+.grants-table td{padding:6px 10px;border-bottom:1px solid var(--bd);font-size:11px;vertical-align:middle;}
+.grants-table tr{cursor:pointer;transition:background .1s;}
+.grants-table tr:hover{background:rgba(255,210,51,.04);}
+.grants-table tr.g-sel{background:var(--acbg);}
+.g-deadline{font-weight:600;font-size:12px;white-space:nowrap;}
+.g-name{font-weight:600;max-width:320px;white-space:normal;word-break:break-word;line-height:1.3;}
+.g-year{font-size:12px;font-weight:700;color:var(--ac);}
+.g-amt{font-variant-numeric:tabular-nums;font-weight:700;color:var(--g);}
 
-/* ── Status ── */
-.st{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;}
-.st::before{content:'';width:7px;height:7px;flex-shrink:0;}
-.st.drafting{color:var(--warn);}.st.drafting::before{background:var(--warn);}
-.st.submitted{color:var(--info);}.st.submitted::before{background:var(--info);}
-.st.awarded{color:var(--ok);}.st.awarded::before{background:var(--ok);}
-.st.declined{color:var(--danger);}.st.declined::before{background:var(--danger);}
-.st.missed{color:var(--mute);}.st.missed::before{background:var(--mute);}
-.st.watching{color:var(--accent);}.st.watching::before{background:var(--accent);}
+/* Next Step badges */
+.ns{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:2px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap;}
+.ns::before{content:'';width:4px;height:4px;border-radius:50%;background:currentColor;}
+.ns-send{background:var(--obg);color:var(--o);}
+.ns-apply{background:var(--rbg);color:var(--r);}
+.ns-check{background:var(--ybg);color:var(--y);}
+.ns-waiting{background:var(--bbg);color:var(--b);}
+.ns-received{background:var(--gbg);color:var(--g);}
+.ns-denied{background:var(--rbg);color:var(--r);}
+.ns-notsent{background:var(--grbg);color:var(--gr);}
+.ns-missed{background:var(--obg);color:var(--o);}
+.ns-notelig{background:var(--grbg);color:var(--gr);}
 
-/* ── Type tag ── */
-.tg{display:inline-block;font-size:9px;font-weight:600;padding:2px 5px;text-transform:uppercase;letter-spacing:.05em;background:var(--panel-2);color:var(--ink-3);border:1px solid var(--rule);}
-.tg.hard{color:var(--danger);border-color:rgba(255,107,107,.3);background:var(--danger-bg);}
+/* LEVEL 3: History panel */
+.hist-panel{background:var(--bg);padding:12px 20px 12px 40px;border-top:1px solid var(--bd);}
+.hist-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px 16px;margin-bottom:10px;}
+.hf{display:flex;flex-direction:column;}
+.hf .hl{font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--tf);margin-bottom:1px;}
+.hf .hv{font-size:12px;color:var(--td);}
+.hf.full{grid-column:1/-1;}
 
-/* ── Sparkline ── */
-.spark{display:inline-flex;gap:2px;align-items:center;}
-.spark .blip{width:6px;height:14px;}
-.spark .blip.awarded{background:var(--ok);}
-.spark .blip.declined{background:var(--danger);}
-.spark .blip.submitted{background:var(--info);}
-.spark .blip.missed,.spark .blip.watching{background:var(--mute);opacity:.4;}
-.spark .blip.drafting{background:var(--warn);opacity:.7;}
-.spark .yr{font-size:9px;color:var(--ink-4);margin-left:3px;}
+/* Thermometer */
+.thermo{margin-top:8px;}
+.thermo-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--tf);margin-bottom:3px;}
+.thermo-bar{height:7px;background:var(--s2);border-radius:2px;position:relative;overflow:visible;}
+.thermo-fill{height:100%;border-radius:2px;}
+.thermo-fill.prog{background:linear-gradient(90deg,var(--g),var(--y));}
+.thermo-fill.end{background:linear-gradient(90deg,var(--g),var(--r));}
+.thermo-fill.done{background:var(--tf);}
+.thermo-fill.pre{background:var(--b);}
+.thermo-mk{position:absolute;top:-2px;width:3px;height:12px;background:var(--t);border-radius:1px;z-index:2;}
+.thermo-dates{display:flex;justify-content:space-between;margin-top:2px;font-size:9px;color:var(--tf);}
+.thermo-st{display:inline-flex;align-items:center;gap:4px;font-size:9px;font-weight:600;margin-top:3px;padding:2px 6px;border-radius:2px;}
+.thermo-st.pre{color:var(--b);background:var(--bbg);}
+.thermo-st.prog{color:var(--g);background:var(--gbg);}
+.thermo-st.end{color:var(--r);background:var(--rbg);}
+.thermo-st.done{color:var(--gr);background:var(--grbg);}
+/* Checkpoint flags on thermo bar */
+.thermo-cp{position:absolute;top:-10px;transform:translateX(-50%);z-index:3;cursor:default;}
+.thermo-cp .cp-flag{font-size:10px;line-height:1;}
+.cp-dl .cp-flag{color:var(--y);}
+.cp-rpt .cp-flag{color:var(--o);}
+/* Tags next to label */
+.thermo-tag{font-size:8px;font-weight:600;padding:1px 5px;border-radius:2px;white-space:nowrap;}
+.tg-dl{background:var(--ybg);color:var(--y);}
+.tg-rpt{background:var(--obg);color:var(--o);}
 
-/* ── Table header ── */
-.thead{display:grid;grid-template-columns:84px minmax(0,1fr) 120px 100px 70px 100px;background:var(--panel);border-bottom:1px solid var(--rule);position:sticky;top:78px;z-index:10;}
-.thead > div{padding:7px 11px;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--ink-4);font-weight:600;border-right:1px solid var(--rule);}
-.thead > div:last-child{border-right:none;}
-.t-end{text-align:right;}
+/* Edit form */
+.erow{display:flex;gap:6px;margin-bottom:6px;}
+.erow select,.erow input,.erow textarea{background:var(--s2);border:1px solid var(--bd);color:var(--t);padding:5px 9px;border-radius:2px;font-size:11px;font-family:var(--font-mono);outline:none;flex:1;}
+.erow select:focus,.erow input:focus,.erow textarea:focus{border-color:var(--ac);}
+.erow textarea{min-height:40px;resize:vertical;}
 
-/* ── Library section divider ── */
-.lsec{background:var(--panel);padding:7px 24px;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);display:flex;align-items:center;gap:14px;}
-.lsec .name{font-family:var(--font-display);font-weight:600;font-size:13px;color:var(--ink);letter-spacing:-.01em;}
-.lsec .meta{font-size:10px;color:var(--ink-4);text-transform:uppercase;letter-spacing:.08em;margin-left:auto;}
-.lsec .meta strong{color:var(--ink-2);font-weight:600;}
+/* Timeline dots */
+.tl-entry{position:relative;padding-left:22px;margin-bottom:0;}
+.tl-dot{position:absolute;left:4px;top:4px;width:10px;height:10px;border-radius:50%;border:2px solid var(--bd);background:var(--s1);}
+.tl-dot.received{border-color:var(--g);background:var(--g);}
+.tl-dot.denied{border-color:var(--r);background:var(--r);}
+.tl-dot.waiting{border-color:var(--b);}
+.tl-line{position:absolute;left:8px;top:16px;bottom:-2px;width:2px;background:var(--bd);border-radius:1px;}
+.tl-card{background:var(--s2);border:1px solid var(--bd);border-radius:3px;padding:8px 12px;margin-bottom:8px;}
+/* Timeline action buttons (duplicate/delete) */
+.tl-action{background:none;border:none;cursor:pointer;font-size:11px;color:var(--tf);padding:2px 4px;border-radius:2px;opacity:0;transition:all .15s;line-height:1;}
+.tl-card:hover .tl-action{opacity:1;}
+.tl-action:hover{background:var(--s3);color:var(--td);}
+.tl-del:hover{color:var(--r);background:var(--rbg);}
 
-/* ── KPI strip ── */
-.kpi-strip{display:grid;grid-template-columns:repeat(5,1fr);border-bottom:1px solid var(--rule);}
-.kpi{padding:12px 16px;border-right:1px solid var(--rule);display:flex;flex-direction:column;gap:2px;background:var(--panel);}
-.kpi:last-child{border-right:none;}
-.kpi-label{font-size:9px;color:var(--ink-4);text-transform:uppercase;letter-spacing:.12em;}
-.kpi-val{font-family:var(--font-display);font-weight:700;font-size:28px;line-height:1;color:var(--ink);letter-spacing:-.03em;font-variant-numeric:tabular-nums;}
-.kpi-val .c{font-family:var(--font-mono);font-weight:500;font-size:12px;color:var(--ink-4);margin-right:2px;vertical-align:3px;}
-.kpi-val.urgent{color:var(--danger);}
-.kpi-val.ok{color:var(--ok);}
-.kpi-val.accent{color:var(--accent);}
-.kpi-sub{font-size:10px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.05em;}
-.kpi-sub.urgent{color:var(--danger);}
-.kpi-sub.ok{color:var(--ok);}
-
-/* ── Section header ── */
-.shead{display:flex;align-items:baseline;justify-content:space-between;padding:12px 24px 6px;gap:14px;border-top:1px solid var(--rule);background:var(--bg);}
-.shead.first{border-top:none;}
-.shead-title{font-family:var(--font-display);font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--ink);}
-.shead-title.urgent{color:var(--danger);}
-.shead-title .accent{color:var(--accent);}
-.shead-meta{font-size:10px;color:var(--ink-4);text-transform:uppercase;letter-spacing:.08em;}
-
-/* ── Thermometer ── */
-.thermo{padding:8px 12px;background:var(--panel-2);border-top:1px solid var(--rule);}
-.thermo-head{display:flex;align-items:center;justify-content:space-between;font-size:9px;color:var(--ink-4);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;}
-.thermo-head .st-tag{font-weight:600;color:var(--ink-2);}
-.thermo-head .st-tag.urgent{color:var(--danger);}
-.thermo-head .st-tag.ok{color:var(--ok);}
-.thermo-bar{position:relative;height:4px;background:var(--rule);overflow:visible;}
-.thermo-fill{height:100%;background:var(--accent);}
-.thermo-fill.ok{background:var(--ok);}
-.thermo-fill.urgent{background:var(--danger);}
-.thermo-fill.done{background:var(--ink-4);}
-.thermo-fill.pre{background:var(--info);}
-.thermo-now{position:absolute;top:-3px;width:2px;height:10px;background:var(--ink);transform:translateX(-1px);}
-.thermo-flag{position:absolute;top:-12px;transform:translateX(-50%);font-size:8px;font-weight:600;display:flex;flex-direction:column;align-items:center;}
-.thermo-flag .ft{width:1px;height:10px;background:currentColor;margin-top:1px;}
-.thermo-flag.dl{color:var(--warn);}
-.thermo-flag.rpt{color:var(--accent);}
-.thermo-dates{display:flex;justify-content:space-between;margin-top:4px;font-size:9px;color:var(--ink-4);}
-
-/* ── Drawer ── */
-.dr-bg{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:50;}
-.dr{position:fixed;top:0;right:0;bottom:0;width:min(500px,92vw);background:var(--panel);border-left:1px solid var(--rule);z-index:51;overflow-y:auto;display:flex;flex-direction:column;}
-.dr-head{padding:16px 20px 14px;border-bottom:1px solid var(--rule);background:var(--bg);position:relative;}
-.dr-close{position:absolute;top:10px;right:12px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;background:var(--panel-2);color:var(--ink-3);font-size:13px;cursor:pointer;border:none;}
-.dr-close:hover{background:var(--accent);color:#000;}
-.dr-eye{font-size:9px;color:var(--ink-4);text-transform:uppercase;letter-spacing:.12em;margin-bottom:5px;}
-.dr-title{font-family:var(--font-display);font-weight:700;font-size:19px;line-height:1.15;letter-spacing:-.02em;margin-bottom:3px;}
-.dr-fdn{font-size:11px;color:var(--ink-3);}
-.dr-meta{display:flex;align-items:center;gap:12px;margin-top:10px;flex-wrap:wrap;font-size:11px;color:var(--ink-3);}
-.dr-body{padding:16px 20px;flex:1;}
-.dr-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 20px;}
-.dr-f .l{font-size:9px;color:var(--ink-4);text-transform:uppercase;letter-spacing:.12em;margin-bottom:2px;}
-.dr-f .v{font-size:12px;color:var(--ink);font-weight:500;}
-.dr-f .v.amt{font-size:17px;font-family:var(--font-display);font-weight:700;letter-spacing:-.01em;}
-.dr-f .v.amt.ok{color:var(--ok);}
-.dr-f.full{grid-column:1/-1;}
-.dr-notes{margin-top:12px;padding:10px 12px;background:var(--panel-2);border-left:2px solid var(--accent);font-size:11px;color:var(--ink-2);line-height:1.6;}
-.dr-notes .l{font-size:9px;color:var(--ink-4);text-transform:uppercase;letter-spacing:.12em;margin-bottom:3px;}
-.dr-hist{margin-top:12px;}
-.dr-hist-row{display:grid;grid-template-columns:44px 1fr auto;gap:10px;padding:5px 0;border-bottom:1px solid var(--rule);align-items:center;font-size:11px;}
-.dr-hist-row:last-child{border-bottom:none;}
-.dr-hist-row .yr{color:var(--ink-2);font-weight:600;}
-.dr-hist-row .amt-h{color:var(--ok);font-weight:600;font-variant-numeric:tabular-nums;}
-
-/* ── Insights ── */
-.ig{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--rule);}
-.ig-cell{padding:16px 20px;border-right:1px solid var(--rule);background:var(--panel);}
-.ig-cell:last-child{border-right:none;}
-.ig-cell h3{font-size:9px;color:var(--ink-4);text-transform:uppercase;letter-spacing:.12em;font-weight:600;margin-bottom:8px;}
-.ig-cell .big{font-family:var(--font-display);font-weight:700;font-size:34px;line-height:1;letter-spacing:-.03em;color:var(--ink);font-variant-numeric:tabular-nums;}
-.ig-cell .big .c{font-family:var(--font-mono);font-size:13px;color:var(--ink-4);font-weight:500;margin-right:2px;vertical-align:3px;}
-.ig-cell .sub{font-size:10px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em;margin-top:4px;}
-.ig-cell .sub strong{color:var(--ok);font-weight:600;}
-.ig-row{display:grid;grid-template-columns:repeat(2,1fr);border-bottom:1px solid var(--rule);}
-.ig-row .ig-cell{padding:18px 22px;}
-.bars{display:flex;flex-direction:column;gap:6px;margin-top:8px;}
-.bar-row{display:grid;grid-template-columns:1fr 60px;align-items:center;gap:10px;}
-.bar-row .bl{display:flex;align-items:center;gap:8px;}
-.bar-row .bl-name{color:var(--ink-2);font-size:10px;flex-shrink:0;width:80px;text-transform:uppercase;letter-spacing:.05em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.bar-row .bl-track{flex:1;height:12px;background:var(--bg);}
-.bar-row .bl-fill{height:100%;background:var(--accent);}
-.bar-row .bl-fill.ok{background:var(--ok);}
-.bar-row .bl-fill.danger{background:var(--danger);}
-.bar-row .bl-fill.info{background:var(--info);}
-.bar-row .bl-fill.warn{background:var(--warn);}
-.bar-row .bl-fill.mute{background:var(--ink-4);}
-.bar-row .num{font-size:11px;color:var(--ink);font-weight:600;text-align:right;font-variant-numeric:tabular-nums;}
-
-/* ── Active cards ── */
-.active-card{border:1px solid var(--rule);margin:10px 24px;background:var(--panel);cursor:pointer;transition:border-color .1s;}
-.active-card:hover{border-color:var(--ok);}
-.active-card-head{padding:12px 14px;border-bottom:1px solid var(--rule);}
-.ac-fdn{font-family:var(--font-display);font-weight:700;font-size:14px;color:var(--ink);}
-.ac-grant{font-size:12px;color:var(--ink-3);margin-top:2px;}
-.ac-proj{font-size:10px;color:var(--ink-4);margin-top:1px;font-style:italic;}
-.ac-meta{display:flex;align-items:center;gap:14px;margin-top:8px;flex-wrap:wrap;}
-.ac-amt{font-family:var(--font-display);font-weight:700;font-size:19px;color:var(--ok);font-variant-numeric:tabular-nums;}
-.ac-days{font-size:11px;font-weight:600;}
-.ac-rpt{font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;}
-
-/* ── Footer ── */
-.fbar{display:flex;align-items:center;gap:12px;padding:5px 18px;height:26px;background:var(--panel);border-top:1px solid var(--rule);font-size:10px;color:var(--ink-4);text-transform:uppercase;letter-spacing:.1em;position:sticky;bottom:0;}
-.fbar .dot{width:5px;height:5px;background:var(--ok);}
-.fbar .right{margin-left:auto;display:flex;gap:10px;}
-
-/* ── Empty state ── */
-.empty{padding:50px 24px;text-align:center;color:var(--ink-4);font-size:11px;text-transform:uppercase;letter-spacing:.1em;}
-.empty .ico{font-size:30px;color:var(--ink-5);margin-bottom:10px;}
-
-/* ── Modal overlay ── */
-.mo{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:60;display:flex;align-items:center;justify-content:center;padding:20px;}
-.modal{background:var(--panel);border:1px solid var(--rule);width:100%;max-width:480px;max-height:88vh;overflow-y:auto;padding:22px;}
-.modal h3{font-family:var(--font-display);font-size:15px;font-weight:700;margin-bottom:16px;}
-.mf{margin-bottom:11px;}
-.mf label{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--ink-4);margin-bottom:3px;font-weight:600;}
-.mf input,.mf select,.mf textarea{width:100%;background:var(--panel-2);border:1px solid var(--rule);color:var(--ink);padding:7px 9px;font-size:12px;outline:none;font-family:var(--font-mono);}
-.mf input:focus,.mf select:focus,.mf textarea:focus{border-color:var(--accent);}
-.mf select option{background:var(--panel);}
+/* Modal */
+.modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(4px);}
+.modal{background:var(--s1);border:1px solid var(--bd);border-radius:4px;padding:24px;max-width:520px;width:92%;max-height:85vh;overflow-y:auto;}
+.modal h3{font-size:14px;margin-bottom:14px;font-weight:700;letter-spacing:-.01em;}
+.mf{margin-bottom:10px;}
+.mf label{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--td);margin-bottom:3px;}
+.mf input,.mf select,.mf textarea{width:100%;background:var(--s2);border:1px solid var(--bd);color:var(--t);padding:7px 10px;border-radius:2px;font-size:12px;font-family:var(--font-mono);outline:none;}
 .mf textarea{min-height:60px;resize:vertical;}
-.mf-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.ma{display:flex;gap:8px;margin-top:16px;justify-content:flex-end;}
+.ma{display:flex;gap:6px;justify-content:flex-end;margin-top:14px;}
 
-/* ── Edit sheet (full-screen) ── */
-.sheet-mo{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:65;display:flex;flex-direction:column;}
-.sheet-mo-head{display:flex;align-items:center;padding:0 16px;height:42px;background:var(--panel);border-bottom:1px solid var(--rule);gap:12px;flex-shrink:0;}
-.sheet-mo-head .title{font-family:var(--font-display);font-weight:700;font-size:14px;}
-.sheet-mo-body{flex:1;overflow:auto;}
-.sheet-wrap{overflow-x:auto;}
-.sheet{border-collapse:collapse;width:100%;font-size:11px;}
-.sheet th,.sheet td{padding:4px 7px;border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);white-space:nowrap;}
-.sheet th{background:var(--panel);font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-4);position:sticky;top:0;z-index:5;cursor:pointer;user-select:none;}
-.sheet th.so{color:var(--accent);}
-.sheet tr:hover td{background:var(--panel-2);}
-.sheet input,.sheet textarea,.sheet select{background:transparent;border:none;outline:none;width:100%;padding:0;font-size:11px;color:var(--ink);resize:none;font-family:var(--font-mono);}
-.sheet input:focus,.sheet textarea:focus,.sheet select:focus{background:var(--accent-soft);}
-.cell-id{color:var(--ink-4);font-size:10px;text-align:right;}
-.cell-amt{text-align:right;font-variant-numeric:tabular-nums;}
-.cell-date .date-disp{cursor:pointer;color:var(--ink-2);}
-.date-hidden{position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;}
-.cell-del button{color:var(--danger);font-size:10px;padding:0 4px;}
-.col-resize{position:absolute;right:0;top:0;bottom:0;width:4px;cursor:col-resize;z-index:6;}
-.col-resize:hover{background:var(--accent);}
-th{position:relative;}
+/* Flat mode table (status filter) */
+.flat-table{width:100%;border-collapse:collapse;min-width:800px;}
+.flat-table th{background:var(--s2);padding:7px 10px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--tf);font-weight:700;border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:5;}
+.flat-table td{padding:6px 10px;border-bottom:1px solid var(--bd);font-size:12px;vertical-align:middle;}
+.flat-table tr{cursor:pointer;transition:background .1s;}
+.flat-table tr:hover{background:rgba(255,210,51,.04);}
 
-/* ── Edit in drawer ── */
-.dr-edit-form .mf{margin-bottom:10px;}
-.dr-edit-form input,.dr-edit-form select,.dr-edit-form textarea{width:100%;background:var(--panel-2);border:1px solid var(--rule);color:var(--ink);padding:7px 9px;font-size:12px;outline:none;font-family:var(--font-mono);}
-.dr-edit-form input:focus,.dr-edit-form select:focus,.dr-edit-form textarea:focus{border-color:var(--accent);}
-.dr-edit-form select option{background:var(--panel);}
-.dr-edit-form textarea{min-height:55px;resize:vertical;}
-.dr-edit-form .mf label{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--ink-4);margin-bottom:3px;font-weight:600;}
+/* Spreadsheet editor - RESIZABLE COLUMNS */
+.sheet-wrap{flex:1;overflow:auto;}
+.sheet{width:100%;border-collapse:collapse;min-width:1200px;table-layout:fixed;}
+.sheet th{background:var(--s2);padding:4px 5px;text-align:left;font-size:8px;text-transform:uppercase;letter-spacing:.4px;color:var(--tf);font-weight:700;border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:5;white-space:nowrap;cursor:pointer;user-select:none;position:relative;overflow:hidden;}
+.sheet th:hover{color:var(--t);}
+.sheet th.so{color:var(--acl);}
+.sheet td{padding:0;border-bottom:1px solid var(--bd);border-right:1px solid var(--bd);font-size:8px;vertical-align:middle;overflow:hidden;}
+.sheet tr:nth-child(even){background:rgba(255,255,255,.01);}
+.sheet tr:hover{background:rgba(255,210,51,.04);}
+.sheet td input,.sheet td select{width:100%;background:transparent;border:none;color:var(--t);padding:3px 5px;font-size:8px;font-family:var(--font-mono);outline:none;min-height:22px;}
+.sheet td input:focus,.sheet td select:focus{background:var(--acbg);outline:1px solid var(--ac);}
+.sheet td input::placeholder{color:var(--tf);}
+.sheet td.cell-id{color:var(--tf);font-size:9px;padding:4px 6px;text-align:center;width:35px;}
+.sheet td.cell-del{width:28px;text-align:center;padding:0;}
+.sheet td.cell-del button{background:none;border:none;color:var(--tf);cursor:pointer;font-size:12px;padding:4px;}
+.sheet td.cell-del button:hover{color:var(--r);}
+.sheet .cell-found input{font-weight:600;}
+.sheet .cell-amt input{font-variant-numeric:tabular-nums;color:var(--g);}
+.sheet-toolbar{display:flex;gap:8px;align-items:center;padding:8px 16px;background:var(--s1);border-bottom:1px solid var(--bd);flex-shrink:0;}
+/* Column resize handle */
+.col-resize{position:absolute;right:0;top:0;bottom:0;width:5px;cursor:col-resize;background:transparent;z-index:10;}
+.col-resize:hover,.col-resize.active{background:var(--ac);}
 
-/* ── Responsive ── */
-@media(max-width:1100px){
-  .grow,.thead{grid-template-columns:80px minmax(0,1fr) 120px 100px;}
-  .col-hide-md{display:none!important;}
-  .ig{grid-template-columns:repeat(2,1fr);}
-  .ig-row{grid-template-columns:1fr;}
+/* Program semáforo in grant table */
+.prog-sem{display:inline-flex;gap:2px;align-items:center;vertical-align:middle;margin-left:6px;}
+.prog-sem .sem-yr{display:flex;flex-direction:column;align-items:center;gap:0;}
+.prog-sem .sem-dot{width:8px;height:8px;}
+.prog-sem .sem-lbl{font-size:6px;}
+
+/* Link icon */
+.link-icon{color:var(--b);font-size:11px;text-decoration:none;opacity:.7;transition:opacity .15s;}
+.link-icon:hover{opacity:1;}
+/* Ver Convocatoria button */
+.btn-conv{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:2px;font-size:10px;font-weight:600;color:var(--b);background:var(--bbg);border:none;cursor:pointer;text-decoration:none;white-space:nowrap;transition:all .15s;font-family:var(--font-mono);}
+.btn-conv:hover{background:var(--b);color:#fff;}
+.btn-conv .conv-arrow{font-size:8px;transition:transform .15s;}
+.btn-conv:hover .conv-arrow{transform:translateX(2px);}
+.mob-right{display:none;}
+
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--bd);border-radius:3px;}
+
+/* Copy button */
+.copy-btn{background:none;border:none;cursor:pointer;padding:1px 3px;font-size:10px;opacity:0;transition:opacity .15s;color:var(--td);vertical-align:middle;line-height:1;flex-shrink:0;}
+.copy-btn:hover{color:var(--ac);}
+.funder-name:hover .copy-btn,.g-name:hover .copy-btn,.flat-fname:hover .copy-btn,.flat-gname:hover .copy-btn{opacity:1;}
+.copy-btn.copied{opacity:1;color:var(--g);}
+
+/* Active Grants view */
+.active-grid{padding:12px 16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px;}
+.active-card{background:var(--s1);border:1px solid var(--bd);border-radius:3px;padding:14px 16px;transition:border-color .15s;}
+.active-card:hover{border-color:var(--g);}
+.ac-top{display:flex;justify-content:space-between;gap:12px;margin-bottom:8px;}
+.ac-info{flex:1;min-width:0;}
+.ac-foundation{font-size:13px;font-weight:700;line-height:1.3;display:flex;align-items:center;gap:3px;}
+.ac-grant{font-size:11px;color:var(--td);margin-top:2px;display:flex;align-items:center;gap:3px;}
+.ac-project{font-size:10px;color:var(--tf);margin-top:2px;}
+.ac-amounts{text-align:right;flex-shrink:0;}
+.ac-amt{font-size:16px;font-weight:800;color:var(--g);font-variant-numeric:tabular-nums;}
+.ac-days{font-size:11px;font-weight:700;margin-top:2px;}
+.ac-report{font-size:9px;color:var(--td);margin-top:2px;}
+.ac-notes{font-size:10px;color:var(--tf);margin-top:8px;padding-top:8px;border-top:1px solid var(--bd);line-height:1.4;}
+
+/* ═══ Calendar / Upcoming View ═══ */
+.cal-view{padding:16px 20px;}
+.cal-season{margin-bottom:28px;}
+.cal-season-hdr{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid var(--bd);}
+.cal-season-name{font-size:18px;font-weight:700;color:var(--t);}
+.cal-season-name.current{color:var(--ac);}
+.cal-season-name.next{color:var(--y);}
+.cal-season-count{font-size:11px;font-weight:600;color:var(--tf);background:var(--s2);padding:2px 8px;border-radius:2px;}
+.cal-season-tag{font-size:9px;font-weight:700;color:var(--ac);background:var(--acbg);padding:2px 8px;border-radius:2px;text-transform:uppercase;letter-spacing:.5px;}
+.cal-season.closed{opacity:.5;}
+.cal-season.closed .cal-grant{opacity:.7;}
+
+/* Grant card */
+.cal-grant{background:var(--s1);border:1px solid var(--bd);border-left:3px solid var(--bd2);border-radius:3px;margin-bottom:10px;padding:14px 16px;transition:border-color .15s;cursor:pointer;}
+.cal-grant:hover{border-color:var(--ac);border-left-color:var(--ac);}
+.cal-grant.cg-urgent{border-left-color:var(--r);}
+.cal-grant.cg-soon{border-left-color:var(--o);}
+.cal-grant.cg-ok{border-left-color:var(--y);}
+
+.cg-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px;}
+.cg-foundation{font-size:15px;font-weight:700;line-height:1.3;}
+.cg-program{font-size:12px;color:var(--td);margin-top:2px;}
+.cg-top-right{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.cg-season-sel{background:var(--s2);border:1px solid var(--bd);border-radius:2px;color:var(--t);font-size:14px;padding:2px 4px;cursor:pointer;outline:none;-webkit-appearance:none;appearance:none;text-align:center;width:32px;}
+.cg-season-sel:hover{border-color:var(--ac);}
+.cg-chevron{color:var(--tf);font-size:14px;}
+
+.cg-meta{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:8px;}
+.cg-meta-item{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--td);}
+.cg-meta-item .label{color:var(--tf);font-size:9px;text-transform:uppercase;letter-spacing:.3px;}
+.cg-meta-item .val{font-weight:600;}
+.cg-dl-type{font-size:8px;font-weight:800;padding:1px 6px;border-radius:2px;letter-spacing:.3px;}
+.cg-dl-type.hard{background:var(--rbg);color:var(--r);}
+.cg-dl-type.est{background:var(--grbg);color:var(--gr);}
+
+.cg-bottom{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.cg-history{display:flex;gap:3px;align-items:center;flex-wrap:wrap;flex:1;}
+.cg-yr{display:inline-flex;align-items:center;gap:3px;font-size:10px;color:var(--td);background:var(--s2);padding:2px 7px;border-radius:2px;}
+.cg-yr .sem-dot{width:6px;height:6px;}
+.cg-stats{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.cg-amt{font-size:12px;font-weight:700;color:var(--g);font-variant-numeric:tabular-nums;}
+.cg-rate{font-size:10px;color:var(--td);}
+.cg-web{font-size:10px;color:var(--b);text-decoration:none;opacity:.7;white-space:nowrap;}
+.cg-web:hover{opacity:1;}
+
+.cg-add-btn{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:5px 12px;border-radius:2px;border:1px dashed var(--bd2);background:transparent;color:var(--td);cursor:pointer;transition:all .15s;font-family:var(--font-mono);}
+.cg-add-btn:hover{border-color:var(--ac);color:var(--ac);background:var(--acbg);}
+.cg-search-btn,.cg-web-btn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:2px;background:var(--s2);border:1px solid var(--bd);text-decoration:none;font-size:13px;transition:all .15s;}
+.cg-search-btn:hover{border-color:var(--ac);background:var(--acbg);}
+.cg-web-btn:hover{border-color:var(--b);background:var(--bbg);}
+
+.cal-empty{text-align:center;padding:40px 20px;color:var(--tf);font-size:13px;}
+.cal-empty-icon{font-size:32px;margin-bottom:8px;}
+
+/* ══════════════════════════════════════════════════
+   iOS-NATIVE MOBILE EXPERIENCE
+   Inspired by Apple Music / iOS Settings
+   ══════════════════════════════════════════════════ */
+@media(max-width:768px){
+  /* ── Safe area & system feel ── */
+  .app{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);}
+
+  /* ── Top bar: Large title style ── */
+  .topbar{
+    padding:14px 16px 8px;gap:0;flex-wrap:wrap;
+    background:var(--bg);border-bottom:none;
+  }
+  .topbar h1{font-size:28px;font-weight:800;letter-spacing:-.5px;width:100%;margin-bottom:6px;}
+  .topbar h1 span{color:var(--acl);display:inline;}
+  /* Stats as horizontal pill row below title */
+  .stat{
+    padding:3px 10px;font-size:10px;border-radius:20px;
+    background:var(--s2);gap:4px;
+  }
+  .stat .sv{font-size:13px;}
+  .stat span:not(.sv){display:inline;font-size:9px;}
+  .topbar-actions{margin-left:auto;gap:6px;}
+  .btn{padding:7px 14px;font-size:12px;border-radius:20px;font-weight:700;}
+  .theme-btn{padding:6px 10px;border-radius:20px;font-size:16px;}
+
+  /* ── Filters: segmented control + search ── */
+  .filters{
+    padding:0 16px 10px;gap:8px;flex-wrap:wrap;
+    background:var(--bg);border-bottom:none;
+  }
+  /* Search bar — iOS style */
+  .search{
+    width:100%;order:-1;
+    font-size:16px;padding:10px 14px;
+    border-radius:12px;border:none;
+    background:var(--s1);color:var(--t);
+    -webkit-appearance:none;
+  }
+  .search:focus{box-shadow:0 0 0 2px var(--ac);}
+  .search::placeholder{color:var(--tf);}
+  /* Chips → iOS segmented control look */
+  .chip{
+    padding:6px 12px;border-radius:20px;
+    font-size:12px;font-weight:600;
+    border:none;background:var(--s1);color:var(--td);
+    min-height:32px;display:inline-flex;align-items:center;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .chip.on{background:var(--ac);color:#fff;border:none;}
+  .chip:hover:not(.on){border:none;background:var(--s2);}
+
+  /* ── Save indicator ── */
+  .save-indicator{font-size:9px;}
+
+  /* ── Main scroll area ── */
+  .main-area{padding:0 0 80px;}
+
+  /* ════════════════════════════════════
+     GRANT LIST — iOS Card-style rows
+     ════════════════════════════════════ */
+  .flat-table{min-width:0!important;border-collapse:separate;border-spacing:0;}
+  .flat-table thead{display:none;}
+  .flat-table,.flat-table tbody{display:block;width:100%;}
+  .flat-table tr{
+    display:block;margin:6px 12px;
+    background:var(--s1);border-radius:14px;
+    padding:12px 14px;border:none;
+    position:relative;
+    -webkit-tap-highlight-color:transparent;
+    transition:transform .15s,box-shadow .15s;
+  }
+  .flat-table tr:active{transform:scale(.98);}
+  .flat-table tr.g-sel{background:var(--s2);box-shadow:0 0 0 1.5px var(--ac);}
+  .flat-table td{padding:0;border:none;font-size:12px;display:block;}
+
+  /* Row line 1: deadline */
+  .flat-table td.mob-line1{
+    display:flex;align-items:center;gap:6px;
+    width:100%;margin-bottom:4px;
+  }
+  .g-deadline{font-size:13px;font-weight:700;}
+  .fd-type{font-size:8px;padding:2px 6px;border-radius:4px;}
+  .fd-rel{font-size:10px!important;}
+
+  /* Row line 2: foundation */
+  .flat-table td.flat-fname{
+    font-size:15px;font-weight:700;line-height:1.3;
+    white-space:normal!important;overflow:visible!important;max-width:none!important;
+    margin-bottom:2px;
+  }
+
+  /* Row line 3: grant program + semáforo */
+  .flat-table td.flat-gname{
+    font-size:13px;color:var(--td);
+    white-space:normal!important;overflow:visible!important;max-width:none!important;
+    width:100%;margin-bottom:6px;line-height:1.3;
+  }
+
+  /* Hide desktop-only, show mobile combined */
+  .flat-table td.desk-only{display:none!important;}
+  .flat-table td.mob-right{
+    display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+    position:static;max-width:none;
+    padding-top:6px;border-top:1px solid var(--bd);
+  }
+  .flat-table td.mob-right .ns,.flat-table td.mob-right .ns-select{font-size:10px;padding:3px 10px;}
+  .flat-table td.mob-right .ms{font-size:10px;padding:2px 8px;border-radius:10px;}
+  .flat-table td.mob-hide{display:none;}
+
+  /* Expanded detail panel */
+  .flat-table td[colspan]{
+    display:block;width:100%;padding:0;
+    overflow:visible;margin:0 12px;
+    border-radius:0 0 14px 14px;
+  }
+
+  /* Semáforo */
+  .prog-sem .sem-dot{width:7px;height:7px;}
+  .prog-sem .sem-lbl{font-size:6px;}
+  .semaforo{gap:2px;}
+  .sem-dot{width:7px;height:7px;}
+
+  /* NS badges */
+  .ns{font-size:9px;padding:3px 10px;border-radius:20px;}
+
+  /* Copy btn visible on mobile */
+  .copy-btn{opacity:.4;font-size:11px;}
+
+  /* ════════════════════════════════════
+     TIMELINE — iOS card list
+     ════════════════════════════════════ */
+  .hist-panel{
+    padding:10px 0 6px;
+    background:transparent;border-top:none;
+  }
+  .tl-entry{padding-left:20px;margin-bottom:0;}
+  .tl-dot{left:2px;top:6px;width:10px;height:10px;}
+  .tl-line{left:6px;top:18px;width:2px;}
+  .tl-card{
+    padding:12px 14px;margin-bottom:8px;
+    border-radius:14px;border:none;
+    background:var(--s1);
+    box-shadow:0 1px 3px rgba(0,0,0,.12);
+    word-break:break-word;overflow-wrap:anywhere;
+  }
+  .tl-card .tl-header{flex-wrap:wrap;gap:6px!important;}
+  .tl-card .tl-header>span:first-child{font-size:18px!important;}
+  .tl-card .tl-meta{flex-wrap:wrap;gap:4px!important;}
+  .tl-card .tl-meta .ns-select{font-size:11px;padding:4px 12px;}
+  .tl-card .tl-grid{grid-template-columns:1fr!important;gap:4px!important;font-size:13px!important;}
+  .tl-card .tl-grid span[style]{font-size:10px!important;}
+
+  /* Thermo — slightly bigger for touch */
+  .thermo-bar{height:8px;border-radius:5px;}
+  .thermo-mk{height:14px;width:4px;top:-3px;}
+  .thermo-dates{font-size:10px;margin-top:3px;}
+  .thermo-st{font-size:10px;padding:3px 8px;margin-top:4px;}
+
+  /* ════════════════════════════════════
+     ACTIVE GRANTS — iOS cards
+     ════════════════════════════════════ */
+  .active-grid{padding:8px 12px;grid-template-columns:1fr;gap:10px;}
+  .active-card{
+    padding:14px 16px;border-radius:16px;
+    border:none;background:var(--s1);
+    box-shadow:0 1px 3px rgba(0,0,0,.12);
+  }
+  .active-card:hover{border-color:transparent;}
+  .ac-foundation{font-size:15px;}
+  .ac-grant{font-size:13px;}
+  .ac-amt{font-size:18px;}
+  .ac-days{font-size:13px;}
+  .ac-report{font-size:11px;}
+  .ac-top{flex-wrap:nowrap;}
+  .ac-notes{font-size:12px;}
+
+  /* ── Calendar view mobile ── */
+  .cal-view{padding:12px 12px;}
+  .cal-season-name{font-size:18px;}
+  .cal-grant{padding:12px 14px;}
+  .cg-foundation{font-size:14px;}
+  .cg-meta{gap:8px;}
+  .cg-bottom{flex-direction:column;align-items:flex-start;gap:6px;}
+  .cg-stats{width:100%;justify-content:space-between;}
+
+  /* ════════════════════════════════════
+     MODAL — iOS sheet style
+     ════════════════════════════════════ */
+  .modal-ov{align-items:flex-end;background:rgba(0,0,0,.4);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);}
+  .modal{
+    max-width:100%;width:100%;padding:20px 20px 30px;
+    border-radius:20px 20px 0 0;
+    max-height:90vh;
+    animation:slideUp .3s ease-out;
+  }
+  @keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+  .modal h3{font-size:20px;font-weight:700;margin-bottom:16px;}
+  .mf label{font-size:12px;margin-bottom:4px;}
+  .mf input,.mf select,.mf textarea{
+    font-size:16px;padding:10px 14px;border-radius:12px;
+    -webkit-appearance:none;
+  }
+  .ma{gap:10px;margin-top:20px;}
+  .ma .btn{padding:12px 20px;font-size:14px;border-radius:14px;}
+
+  /* ════════════════════════════════════
+     EDIT SHEET — horizontal scroll
+     ════════════════════════════════════ */
+  .sheet{min-width:700px;}
+  .sheet-toolbar{padding:6px 12px;flex-wrap:wrap;}
+
+  /* ── Click-to-edit popover ── */
+  .cte-pop{
+    min-width:240px;padding:10px;border-radius:14px;
+    box-shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  .cte-pop input,.cte-pop textarea{
+    font-size:16px;padding:10px 12px;border-radius:10px;
+    -webkit-appearance:none;
+  }
+  .cte-pop .cte-btns{margin-top:8px;gap:6px;}
+  .cte-pop .cte-btn{padding:6px 16px;font-size:12px;border-radius:10px;}
+  .cte-icon{opacity:.4;font-size:10px;}
+
+  /* ── Editable fields ── */
+  .ef{font-size:13px;padding:2px 4px;}
+  .ef-sm{font-size:12px;}
+  .ef-date{width:auto;font-size:12px;}
+  .ef-amt{width:auto;font-size:13px;}
+
+  /* ── Link icon ── */
+  .link-icon{font-size:13px;}
 }
-@media(max-width:900px){
-  .tb-stats{display:none;}
-  .kpi-strip{grid-template-columns:repeat(3,1fr);}
-  .kpi:nth-child(n+4){display:none;}
+
+/* Small phones */
+@media(max-width:400px){
+  .topbar h1{font-size:24px;}
+  .stat{padding:3px 8px;font-size:9px;}
+  .stat .sv{font-size:12px;}
+  .flat-table td.flat-fname{font-size:14px;}
+  .flat-table td.flat-gname{font-size:12px;}
+  .chip{font-size:11px;padding:5px 10px;}
 }
-@media(max-width:680px){
-  .grow,.thead{grid-template-columns:66px minmax(0,1fr) 90px;}
-  .col-hide-sm{display:none!important;}
-  .kpi-strip{grid-template-columns:repeat(2,1fr);}
-  .ph{padding:12px 16px 8px;}
-  .ph-title{font-size:20px;}
-  .lsec,.shead{padding-left:14px;padding-right:14px;}
-  .active-card{margin-left:0;margin-right:0;}
-  .tb-name{display:none;}
+/* Theme toggle button */
+.theme-btn{background:var(--s2);border:1px solid var(--bd);color:var(--td);border-radius:3px;padding:5px 10px;font-size:14px;cursor:pointer;transition:all .15s;line-height:1;}
+.theme-btn:hover{border-color:var(--ac);color:var(--t);}
+
+/* Sheet multiline cells */
+.sheet td textarea{width:100%;background:transparent;border:none;color:var(--t);padding:3px 5px;font-size:8px;font-family:var(--font-mono);outline:none;min-height:28px;resize:none;overflow:hidden;line-height:1.35;display:block;}
+.sheet td textarea:focus{background:var(--acbg);outline:1px solid var(--ac);}
+.sheet td textarea::placeholder{color:var(--tf);}
+.sheet .cell-found textarea{font-weight:600;}
+/* Date cells: show formatted, hide native input */
+.sheet td.cell-date{cursor:pointer;padding:3px 5px;position:relative;}
+.sheet td.cell-date .date-disp{font-size:8px;color:var(--t);white-space:nowrap;}
+.sheet td.cell-date .date-hidden{position:absolute;opacity:0;width:0;height:0;overflow:hidden;pointer-events:none;}
+.sheet td.cell-date:hover{background:var(--acbg);}
+
+/* Clickable status select styled as badge */
+.ns-select{appearance:none;-webkit-appearance:none;border:none;cursor:pointer;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;padding:2px 8px;border-radius:2px;outline:none;font-family:var(--font-mono);text-align:center;}
+.ns-select.ns-apply{background:var(--rbg);color:var(--r);}
+.ns-select.ns-check{background:var(--ybg);color:var(--y);}
+.ns-select.ns-waiting{background:var(--bbg);color:var(--b);}
+.ns-select.ns-received{background:var(--gbg);color:var(--g);}
+.ns-select.ns-denied{background:var(--rbg);color:var(--r);}
+.ns-select.ns-notsent{background:var(--grbg);color:var(--gr);}
+.ns-select.ns-missed{background:var(--obg);color:var(--o);}
+.ns-select.ns-notelig{background:var(--grbg);color:var(--gr);}
+.ns-select:hover{opacity:.8;box-shadow:0 0 0 2px var(--ac);}
+/* Last saved indicator */
+.save-indicator{font-size:9px;color:var(--tf);margin-left:auto;display:flex;align-items:center;gap:4px;}
+.save-indicator .dot{width:6px;height:6px;border-radius:50%;display:inline-block;}
+.save-indicator .dot.ok{background:var(--g);}
+.save-indicator .dot.saving{background:var(--y);}
+.save-indicator .dot.local{background:var(--y);}
+.save-indicator .dot.err{background:var(--r);}
+
+/* Inline editable fields in Grant Tracker — click-to-edit */
+.ef{background:transparent;border:none;color:inherit;font-family:var(--font-mono);font-size:inherit;padding:0 2px;outline:none;width:100%;min-width:30px;cursor:text;}
+.ef:focus{border-bottom:1px solid var(--ac);background:var(--acbg);}
+.ef::placeholder{color:var(--tf);font-style:italic;}
+.ef-sm{font-size:10px;}
+.ef-date{width:90px;font-size:10px;color:var(--td);}
+.ef-amt{width:70px;font-size:11px;font-variant-numeric:tabular-nums;}
+.ef-note{font-size:10px;color:var(--tf);}
+/* Click-to-edit display value */
+.cte{cursor:pointer;display:inline-flex;align-items:center;gap:3px;min-height:18px;min-width:20px;padding:1px 3px;border-radius:2px;transition:background .1s;}
+.cte:hover{background:var(--acbg);}
+.cte-val{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.cte-empty{color:var(--tf);font-style:italic;font-size:10px;}
+.cte-icon{font-size:8px;color:var(--tf);opacity:0;transition:opacity .15s;flex-shrink:0;}
+.cte:hover .cte-icon{opacity:1;}
+/* Popover editor */
+.cte-pop{position:absolute;z-index:100;background:var(--s1);border:1px solid var(--ac);border-radius:3px;padding:6px;box-shadow:0 8px 24px rgba(0,0,0,.4);min-width:160px;}
+.cte-pop input,.cte-pop textarea{width:100%;background:var(--s2);border:1px solid var(--bd);color:var(--t);padding:6px 8px;border-radius:2px;font-size:12px;font-family:var(--font-mono);outline:none;}
+.cte-pop input:focus,.cte-pop textarea:focus{border-color:var(--ac);}
+.cte-pop textarea{min-height:50px;resize:vertical;}
+.cte-pop .cte-btns{display:flex;gap:4px;justify-content:flex-end;margin-top:4px;}
+.cte-pop .cte-btn{padding:3px 10px;border-radius:2px;font-size:10px;font-weight:600;cursor:pointer;border:none;font-family:var(--font-mono);}
+.cte-pop .cte-ok{background:var(--ac);color:#000;}
+.cte-pop .cte-cancel{background:var(--s2);color:var(--td);border:1px solid var(--bd);}
+@media(max-width:768px){
+  .cte-icon{opacity:.4;}
+  .cte-pop{min-width:200px;left:8px!important;right:8px!important;max-width:calc(100vw - 16px);}
 }
+
+/* ── Login overlay ── */
+#login-overlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;}
+.login-box{background:var(--s1);border:1px solid var(--bd);border-radius:3px;padding:28px 24px;width:320px;max-width:92vw;}
+.login-logo{display:flex;align-items:center;gap:10px;margin-bottom:20px;}
+.login-logo-icon{width:34px;height:34px;background:var(--ac);border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.login-logo-text{font-size:20px;font-weight:800;color:var(--t);font-family:var(--font-mono);}
+.login-logo-sub{font-size:10px;color:var(--td);font-weight:400;text-transform:uppercase;letter-spacing:.1em;}
+.login-box p{font-size:12px;color:var(--td);margin-bottom:20px;}
+.login-box input{width:100%;background:var(--s2);border:1px solid var(--bd);color:var(--t);padding:9px 11px;border-radius:2px;font-size:12px;font-family:var(--font-mono);outline:none;margin-bottom:10px;display:block;}
+.login-box input:focus{border-color:var(--ac);}
+.login-box button{width:100%;padding:10px;background:var(--ac);color:#000;border:none;border-radius:2px;font-size:12px;font-weight:700;cursor:pointer;transition:background .15s;display:flex;align-items:center;justify-content:center;gap:8px;font-family:var(--font-mono);}
+.login-box button:hover:not(:disabled){background:var(--acl);}
+.login-box button:disabled{opacity:.7;cursor:not-allowed;}
+.login-err{font-size:11px;color:var(--r);margin-top:8px;text-align:center;}
+/* Spinner */
+@keyframes spin{to{transform:rotate(360deg);}}
+.spinner{width:14px;height:14px;border:2px solid rgba(0,0,0,.25);border-top-color:#000;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;}
+/* Loading overlay after login */
+#loading-screen{position:fixed;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;z-index:9998;}
+.loading-spinner{width:28px;height:28px;border:2px solid var(--bd);border-top-color:var(--ac);border-radius:50%;animation:spin .8s linear infinite;}
+.loading-text{font-size:11px;color:var(--td);font-weight:500;text-transform:uppercase;letter-spacing:.1em;}
 </style>
 </head>
 <body>
-
 <div id="login-overlay" style="display:flex">
   <div class="login-box">
     <div class="login-logo">
-      <div class="login-logo-icon"></div>
+      <div class="login-logo-icon">🌸</div>
       <div>
-        <div class="login-logo-text">POLEN</div>
+        <div class="login-logo-text">Polen</div>
         <div class="login-logo-sub">Grant Tracker</div>
       </div>
     </div>
-    <input id="li-email" type="email" placeholder="email" autocomplete="email"/>
-    <input id="li-pass" type="password" placeholder="password" autocomplete="current-password"/>
+    <input id="li-email" type="email" placeholder="Email" autocomplete="email"/>
+    <input id="li-pass" type="password" placeholder="Password" autocomplete="current-password"/>
     <button id="li-btn" onclick="doLogin()"><span id="li-btn-text">Sign in</span></button>
     <div id="li-err" class="login-err"></div>
   </div>
 </div>
-
 <div id="loading-screen">
   <div class="loading-spinner"></div>
-  <div class="loading-text">Loading grants…</div>
+  <div class="loading-text">Loading your grants…</div>
 </div>
-
 <div id="root"></div>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <script>
+// ── Polen config — fill in your Supabase project values ──
 const SUPABASE_URL  = 'https://aqehbiyjofsxavndjfjj.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxZWhiaXlqb2ZzeGF2bmRqZmpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3NjUwMzUsImV4cCI6MjA5NDM0MTAzNX0.WgMseUQ6YbtZPjjx1i_VuRXTpSI7n9OD6QLUImmmPU0';
 const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
+// ── Auth helpers ──
 function showSpinner(){
   const btn=document.getElementById('li-btn');
   btn.disabled=true;
   document.getElementById('li-btn-text').textContent='Signing in…';
   btn.insertAdjacentHTML('afterbegin','<span class="spinner"></span>');
 }
-function hideSpinner(){
+function hideSpinner(msg){
   const btn=document.getElementById('li-btn');
   btn.disabled=false;
-  const sp=btn.querySelector('.spinner');if(sp)sp.remove();
-  document.getElementById('li-btn-text').textContent='Sign in';
+  const sp=btn.querySelector('.spinner');
+  if(sp)sp.remove();
+  document.getElementById('li-btn-text').textContent=msg||'Sign in';
 }
 function showLoading(){
   document.getElementById('login-overlay').style.display='none';
@@ -424,12 +733,13 @@ async function doLogin(){
   showSpinner();
   const {error}=await _sb.auth.signInWithPassword({email,password:pass});
   if(error){err.textContent=error.message;hideSpinner();}
-  else{boot();}
+  else{boot();}  // session is now set — boot() will find it and load the app
 }
 document.getElementById('li-email').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('li-pass').focus();});
 document.getElementById('li-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 function doSignOut(){_sb.auth.signOut().then(()=>location.reload());}
 
+// ── Data helpers ──
 async function loadFromSupabase(){
   const {data,error}=await _sb.from('grants_blob').select('data').eq('id',1).single();
   if(error&&error.code!=='PGRST116'){console.error('load',error);return[];}
@@ -448,12 +758,12 @@ function exportJSON(d){
 }
 async function loadSuggestions(){
   const {data,error}=await _sb.from('suggestions').select('*').eq('status','pending').order('submitted_at',{ascending:false});
-  if(error){console.error('suggestions',error);return[];}
+  if(error){console.error('suggestions load',error);return[];}
   return data||[];
 }
 async function acceptSuggestion(sug,addFn,setSuggestions){
-  const ng={id:Date.now(),foundation:sug.foundation,grant:sug.grant_name||'',deadline:sug.deadline||'',deadlineType:'Estimated',nextStep:'02 Check',web:sug.web||'',notes:(sug.notes||'')+(sug.notes?'\n[Suggested]':'[Suggested]'),amount:null,amountReceived:null,eligiblePeriod:'',projectDates:'',source:'calendar',reportDeadline:'',season:''};
-  addFn(ng);
+  const newGrant={id:Date.now(),foundation:sug.foundation,grant:sug.grant_name||'',deadline:sug.deadline||'',deadlineType:'Estimated',nextStep:'02 Check',web:sug.web||'',notes:(sug.notes||'')+(sug.notes?'\n[Suggested]':'[Suggested]'),amount:null,amountReceived:null,eligiblePeriod:'',projectDates:'',improvements:'',source:'suggestion',reportDeadline:'',season:''};
+  addFn(newGrant);
   await _sb.from('suggestions').update({status:'accepted'}).eq('id',sug.id);
   setSuggestions(p=>p.filter(s=>s.id!==sug.id));
 }
@@ -462,683 +772,281 @@ async function rejectSuggestion(id,setSuggestions){
   setSuggestions(p=>p.filter(s=>s.id!==id));
 }
 </script>
-
 <script type="text/babel">
 const {useState,useMemo,useCallback,useRef,useEffect}=React;
-
-// ── Status mapping ──
-const STEP_MAP={'00 Send Proposal':'drafting','01 Apply on deadline':'drafting','02 Check':'watching','03 Waiting Results':'submitted','04 Denied':'declined','05 Received':'awarded','06 Not Applied':'watching','07 Missed Deadline':'missed','08 Not Eligible':'declined'};
 const STEPS=['01 Apply on deadline','02 Check','03 Waiting Results','05 Received','04 Denied','06 Not Applied','07 Missed Deadline','08 Not Eligible'];
-const STEP_SHORT={'00 Send Proposal':'Drafting','01 Apply on deadline':'Drafting','02 Check':'Watching','03 Waiting Results':'Submitted','04 Denied':'Declined','05 Received':'Awarded','06 Not Applied':'Watching','07 Missed Deadline':'Missed','08 Not Eligible':'Declined'};
-const STATUS_LABELS={drafting:'Drafting',submitted:'Submitted',awarded:'Awarded',declined:'Declined',missed:'Missed',watching:'Watching'};
-const STATUS_ORDER=['drafting','submitted','awarded','declined','missed','watching'];
-function mapStatus(ns){return STEP_MAP[ns]||'watching';}
+const STEP_SHORT={'00 Send Proposal':'Apply','01 Apply on deadline':'Apply','02 Check':'Check','03 Waiting Results':'Waiting','04 Denied':'Denied','05 Received':'Received','06 Not Applied':'Not Applied','07 Missed Deadline':'Missed','08 Not Eligible':'Not Eligible'};
+const STEP_CSS={'00 Send Proposal':'ns-apply','01 Apply on deadline':'ns-apply','02 Check':'ns-check','03 Waiting Results':'ns-waiting','04 Denied':'ns-denied','05 Received':'ns-received','06 Not Applied':'ns-notsent','07 Missed Deadline':'ns-missed','08 Not Eligible':'ns-notelig'};
 
-// ── Date helpers ──
-const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-const MOIDX={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
-function parseDate(s){if(!s)return null;const d=new Date(s+'T00:00:00');return isNaN(d.getTime())?null:d;}
-function daysUntilDate(s){const d=parseDate(s);if(!d)return null;return Math.ceil((d-new Date())/86400000);}
-function fmtDateShort(s){const d=parseDate(s);if(!d)return'—';return`${MON[d.getMonth()]} ${d.getDate()}`;}
-function fmtDateFull(s){const d=parseDate(s);if(!d)return'—';return`${MON[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;}
-function fmtDateISO(s){const d=parseDate(s);if(!d)return'—';return`${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;}
-function fmtMoney(n){if(n==null)return null;if(n>=1000000)return(n/1000000).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(n>=10000?0:1)+'k';return n.toLocaleString();}
-function fmtMoneyFull(n){if(n==null)return'—';return n.toLocaleString('en-US');}
-function relativeDays(days){if(days==null)return'';if(days===0)return'today';if(days===1)return'1d';if(days===-1)return'1d ago';if(days>0&&days<=60)return`${days}d`;if(days<0&&days>=-60)return`${Math.abs(days)}d ago`;if(days>0)return`${Math.ceil(days/30)}mo`;return`${Math.ceil(Math.abs(days)/30)}mo ago`;}
-function urgencyClass(days){if(days==null)return'';if(days<0)return'muted';if(days<=7)return'urgent';if(days<=30)return'soon';return'';}
-
-// ── Period parser ──
-function parsePeriodDate(s){if(!s)return null;const m=s.trim().replace(/\./g,'').match(/([A-Za-z]+)\s+(\d{1,2}),?\s*(\d{2,4})/);if(!m)return null;const mo=MOIDX[m[1].toLowerCase().substring(0,3)];if(mo===undefined)return null;let y=parseInt(m[3]);if(y<100)y+=2000;return new Date(y,mo,parseInt(m[2]));}
-function parsePeriod(p){if(!p)return null;const pts=p.split(/\s*(?:–|—|to|-)\s*/);if(pts.length<2)return null;const s=parsePeriodDate(pts[0]),e=parsePeriodDate(pts[pts.length-1]);return s&&e?{start:s,end:e}:null;}
-// Legacy alias used by EditSheet
-function pDate(s){return parsePeriodDate(s);}
-function pPeriod(p){return parsePeriod(p);}
-function fmtDate(s){return fmtDateFull(s);}
-
-// ── computeProgramGroups ──
-function computeProgramGroups(data){
-  const now=new Date();now.setHours(0,0,0,0);
-  const map={};
-  data.forEach(g=>{
-    const key=(g.foundation||'').trim()+'|||'+(g.grant||'').trim();
-    if(!map[key])map[key]={key,foundation:(g.foundation||'').trim(),grant:(g.grant||'').trim(),entries:[]};
-    map[key].entries.push(g);
-  });
-  return Object.values(map).map(grp=>{
-    grp.entries.sort((a,b)=>(b.deadline||'').localeCompare(a.deadline||''));
-    const upcoming=grp.entries.filter(e=>e.deadline&&parseDate(e.deadline)>=now).sort((a,b)=>a.deadline.localeCompare(b.deadline))[0]||null;
-    const de=upcoming||grp.entries[0];
-    const status=mapStatus(de?.nextStep||'02 Check');
-    const history=grp.entries.filter(e=>e.deadline).map(e=>({year:parseInt(e.deadline.substring(0,4)),status:mapStatus(e.nextStep),amount:e.amountReceived||e.amount||null})).sort((a,b)=>a.year-b.year);
-    return{...grp,upcoming,displayEntry:de,status,history,
-      deadline:de?.deadline||null,
-      deadlineType:de?.deadlineType==='DDLNE!'?'hard':'est',
-      amount:de?.amount||null,
-      amountReceived:de?.amountReceived||null,
-      period:de?.eligiblePeriod||null,
-      reportDeadline:de?.reportDeadline||null,
-      web:de?.web||null,
-      notes:de?.notes||null,
-      project:de?.projectDates||null,
-    };
-  });
+function CopyBtn({text}){
+  const[copied,setCopied]=useState(false);
+  const copy=e=>{
+    e.stopPropagation();
+    navigator.clipboard.writeText(text).then(()=>{setCopied(true);setTimeout(()=>setCopied(false),1500);});
+  };
+  return <button className={`copy-btn${copied?' copied':''}`} onClick={copy} title={copied?'Copied!':'Copy name'}>{copied?'✓':'⧉'}</button>;
 }
 
-// ── St ──
-function St({status}){return <span className={`st ${status||'watching'}`}>{STATUS_LABELS[status]||status}</span>;}
+// Click-to-edit: shows formatted value, opens popover on click.
+function DField({value,onChange,className,type,placeholder,style,label,multiline}){
+  const[editing,setEditing]=useState(false);
+  const[local,setLocal]=useState(value||'');
+  const wrapRef=useRef(null);
+  const inputRef=useRef(null);
 
-// ── Spark ──
-function Spark({history}){
-  if(!history||!history.length)return <span className="spark"><span className="yr">new</span></span>;
-  const sorted=[...history].sort((a,b)=>a.year-b.year);
+  const open=e=>{
+    e.stopPropagation();
+    setLocal(value||'');
+    setEditing(true);
+  };
+  const save=()=>{
+    const v=type==='number'?(local?parseFloat(local):null):local;
+    if((local||'')!==(value||''))onChange(v);
+    setEditing(false);
+  };
+  const cancel=()=>setEditing(false);
+
+  useEffect(()=>{
+    if(editing&&inputRef.current){inputRef.current.focus();inputRef.current.select&&inputRef.current.select();}
+  },[editing]);
+
+  // Close on click outside
+  useEffect(()=>{
+    if(!editing)return;
+    const h=e=>{if(wrapRef.current&&!wrapRef.current.contains(e.target))save();};
+    document.addEventListener('mousedown',h);document.addEventListener('touchstart',h);
+    return()=>{document.removeEventListener('mousedown',h);document.removeEventListener('touchstart',h);};
+  });
+
+  // Format display value
+  const display=()=>{
+    if(!value&&value!==0)return null;
+    if(type==='date'&&value){try{const[y,m,dd]=value.split('-').map(Number);const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return `${months[m-1]} ${dd}, ${y}`;}catch(e){return value;}}
+    if(type==='number'&&value!=null)return typeof value==='number'?'$'+value.toLocaleString():value;
+    return String(value);
+  };
+  const disp=display();
+  const isEmpty=!disp;
+  const isAmt=className&&className.includes('ef-amt');
+  const isDate=type==='date';
+  const isNote=className&&(className.includes('ef-note')||className.includes('ef-sm'));
+
   return(
-    <span className="spark" title={sorted.map(h=>`${h.year}: ${STATUS_LABELS[h.status]}${h.amount?'·$'+fmtMoney(h.amount):''}`).join(' · ')}>
-      {sorted.map((h,i)=><span key={i} className={`blip ${h.status}`}/>)}
-      <span className="yr">·{sorted.length}y</span>
+    <span style={{position:'relative',display:'inline-block',...(style||{})}} ref={wrapRef}>
+      {!editing?(
+        <span className="cte" onClick={open} title={label||placeholder||'Click to edit'}>
+          {isEmpty?<span className="cte-empty">{placeholder||'—'}</span>:
+           <span className="cte-val" style={isAmt?{fontWeight:700,fontVariantNumeric:'tabular-nums',color:'var(--g)'}:isDate?{fontSize:10,color:'var(--td)'}:isNote?{fontSize:10,color:'var(--tf)'}:{}}>{disp}</span>}
+          <span className="cte-icon">✎</span>
+        </span>
+      ):(
+        <div className="cte-pop" onClick={e=>e.stopPropagation()} style={{top:'100%',left:0}}>
+          {label&&<div style={{fontSize:9,textTransform:'uppercase',letterSpacing:'.4px',color:'var(--tf)',marginBottom:3}}>{label}</div>}
+          {multiline?
+            <textarea ref={inputRef} value={local} onChange={e=>setLocal(e.target.value)} placeholder={placeholder} onKeyDown={e=>{if(e.key==='Escape')cancel();}}/>:
+            <input ref={inputRef} type={type||'text'} value={local} onChange={e=>setLocal(e.target.value)} placeholder={placeholder}
+              onKeyDown={e=>{if(e.key==='Enter')save();if(e.key==='Escape')cancel();}}/>
+          }
+          <div className="cte-btns">
+            <button className="cte-btn cte-cancel" onClick={cancel}>Esc</button>
+            <button className="cte-btn cte-ok" onClick={save}>OK</button>
+          </div>
+        </div>
+      )}
     </span>
   );
 }
+function fmt(n){return n?'$'+n.toLocaleString('en-US',{maximumFractionDigits:0}):'—';}
+function parseDeadline(d){if(!d)return null;const p=new Date(d+'T00:00:00');return isNaN(p.getTime())?null:p;}
+function daysUntil(d){const dt=parseDeadline(d);if(!dt)return 9999;return Math.ceil((dt-new Date())/864e5);}
+function dlClass(days){if(days<0)return'past';if(days<=7)return'soon';if(days<=30)return'upcoming';return'future';}
+function fmtDate(d){const dt=parseDeadline(d);if(!dt)return'—';return dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
+function fmtDateShort(d){const dt=parseDeadline(d);if(!dt)return'—';return dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'});}
 
-// ── GRow ──
-function GRow({g,onClick}){
-  const {status,history,foundation,grant,project,deadlineType}=g;
-  const relDate=status==='awarded'&&g.reportDeadline?g.reportDeadline:g.deadline;
-  const days=daysUntilDate(relDate);
-  const urg=(status==='drafting'||status==='submitted'||(status==='awarded'&&g.reportDeadline))?urgencyClass(days):'';
-  const showAmt=g.amountReceived??g.amount;
-  const isReceived=g.amountReceived!=null&&g.amountReceived>0;
-  const rowCls=status==='missed'?'muted':urg==='urgent'?'urgent':urg==='soon'?'soon':(status==='awarded'&&!g.reportDeadline)?'row-ok':'';
-  return(
-    <div className={`grow ${rowCls}`} onClick={()=>onClick&&onClick(g)}>
-      <div className="gr-date gd">
-        <span className="day">{fmtDateShort(relDate)}</span>
-        <span className={`rel ${urg}`}>{days!=null?relativeDays(days):'—'}</span>
-      </div>
-      <div className="gr-name gd">
-        <span className="fdn">{foundation}</span>
-        <span className="prog">{grant}</span>
-        {project&&<span className="proj">{project}</span>}
-      </div>
-      <div className="gd col-hide-sm" style={{display:'flex',alignItems:'center'}}><St status={status}/></div>
-      <div className="gd col-hide-md" style={{display:'flex',alignItems:'center'}}><Spark history={history}/></div>
-      <div className="gd col-hide-md" style={{display:'flex',alignItems:'center'}}>
-        <span className={`tg ${deadlineType==='hard'?'hard':'est'}`}>{deadlineType==='hard'?'HARD':'EST'}</span>
-      </div>
-      <div className={`gr-amt ${isReceived?'received':!showAmt?'none':''}`}>
-        {showAmt!=null?<><span className="c">$</span>{fmtMoney(showAmt)}</>:'—'}
-      </div>
-    </div>
-  );
-}
-
-// ── THead ──
-function THead(){
-  return(
-    <div className="thead">
-      <div>Deadline</div>
-      <div>Foundation · Program</div>
-      <div className="col-hide-sm">Status</div>
-      <div className="col-hide-md">History</div>
-      <div className="col-hide-md">Type</div>
-      <div className="t-end">Amount</div>
-    </div>
-  );
-}
-
-// ── Thermo ──
+// Thermometer
+const MO={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+function pDate(s){if(!s)return null;const m=s.trim().replace(/\./g,'').match(/([A-Za-z]+)\s+(\d{1,2}),?\s*(\d{2,4})/);if(m){const mo=MO[m[1].toLowerCase().substring(0,3)];if(mo!==undefined){let y=parseInt(m[3]);if(y<100)y+=2000;return new Date(y,mo,parseInt(m[2]));}}return null;}
+function pPeriod(p){if(!p)return null;const pts=p.split(/\s*(?:–|—|to|-)\s*/);if(pts.length<2)return null;const s=pDate(pts[0]),e=pDate(pts[pts.length-1]);return s&&e?{start:s,end:e}:null;}
 function Thermo({period,deadline,reportDeadline}){
-  const p=parsePeriod(period);if(!p)return null;
+  const p=pPeriod(period);if(!p)return null;
   const now=new Date(),{start:s,end:e}=p,tot=e-s;if(tot<=0)return null;
   const pct=Math.max(0,Math.min(100,(now-s)/tot*100));
-  let label,cls;
-  if(now<s){const d=Math.ceil((s-now)/86400000);label=d<=30?`STARTS IN ${d}D`:'NOT STARTED';cls='pre';}
-  else if(now>e){label='PERIOD ENDED';cls='done';}
-  else{const d=Math.ceil((e-now)/86400000);label=d<=30?`${d}D LEFT`:`${Math.round(pct)}% · ${d}D LEFT`;cls=d<=30?'urgent':'ok';}
-  const dlDate=deadline?parseDate(deadline):null;
+  let label,sc,fc;
+  if(now<s){const d=Math.ceil((s-now)/864e5);label=d<=30?`Starts ${d}d`:'Not started';sc='pre';fc='pre';}
+  else if(now>e){label='Ended';sc='done';fc='done';}
+  else{const d=Math.ceil((e-now)/864e5);label=d<=30?`${d}d left`:`${Math.round(pct)}% · ${d}d left`;sc=d<=30?'end':'prog';fc=d<=30?'end':'prog';}
+  const fd=d=>d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'});
+  // Checkpoint positions for deadline and report deadline
+  const dlDate=deadline?parseDeadline(deadline):null;
   const dlPct=dlDate&&dlDate>=s&&dlDate<=e?((dlDate-s)/tot*100):null;
-  const rdDate=reportDeadline?parseDate(reportDeadline):null;
+  const rdDate=reportDeadline?parseDeadline(reportDeadline):null;
   const rdPct=rdDate&&rdDate>=s&&rdDate<=e?((rdDate-s)/tot*100):null;
-  const fmt=d=>`${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}`;
-  return(
-    <div className="thermo">
-      <div className="thermo-head"><span>PERIOD</span><span className={`st-tag ${cls==='urgent'?'urgent':cls==='ok'?'ok':''}`}>{label}</span></div>
-      <div className="thermo-bar">
-        <div className={`thermo-fill ${cls}`} style={{width:Math.max(pct,2)+'%'}}/>
-        {now>=s&&now<=e&&<div className="thermo-now" style={{left:pct+'%'}}/>}
-        {dlPct!=null&&<div className="thermo-flag dl" style={{left:dlPct+'%'}}><span>DL</span><div className="ft"/></div>}
-        {rdPct!=null&&<div className="thermo-flag rpt" style={{left:rdPct+'%'}}><span>RPT</span><div className="ft"/></div>}
-      </div>
-      <div className="thermo-dates"><span>{fmt(s)}</span><span>{fmt(e)}</span></div>
+  return(<div className="thermo">
+    <div style={{display:'flex',alignItems:'center',gap:10,flexWrap:'wrap'}}>
+      <span className="thermo-lbl" style={{margin:0}}>Grant Period</span>
+      {deadline&&<span className="thermo-tag tg-dl">⚑ Deadline {fmtDateShort(deadline)}</span>}
+      {reportDeadline&&<span className="thermo-tag tg-rpt">⚑ Report {fmtDateShort(reportDeadline)}</span>}
     </div>
-  );
+    <div className="thermo-bar">
+      <div className={`thermo-fill ${fc}`} style={{width:Math.max(pct,2)+'%'}}/>
+      {now>=s&&now<=e&&<div className="thermo-mk" style={{left:pct+'%'}}/>}
+      {dlPct!=null&&<div className="thermo-cp cp-dl" style={{left:dlPct+'%'}} title={'Deadline: '+fmtDate(deadline)}><span className="cp-flag">⚑</span></div>}
+      {rdPct!=null&&<div className="thermo-cp cp-rpt" style={{left:rdPct+'%'}} title={'Report: '+fmtDate(reportDeadline)}><span className="cp-flag">⚑</span></div>}
+    </div>
+    <div className="thermo-dates"><span>{fd(s)}</span><span>{fd(e)}</span></div>
+    <span className={`thermo-st ${sc}`}>{label}</span>
+  </div>);
 }
 
-// ── Drawer ──
-function Drawer({g,onClose,onChangeField}){
-  if(!g)return null;
-  const de=g.displayEntry;
-  const days=daysUntilDate(g.deadline);
-  const rdays=daysUntilDate(g.reportDeadline);
-  const [editing,setEditing]=useState(false);
-  const [form,setForm]=useState({});
-  const startEdit=()=>{setForm({...de});setEditing(true);};
-  const saveEdit=()=>{if(form&&de)Object.keys(form).forEach(k=>{if(form[k]!==de[k])onChangeField(de.id,k,form[k]);});setEditing(false);};
-  const sf=(k,v)=>setForm(p=>({...p,[k]:v}));
+// ── AppEntry: timeline entry for individual applications ──
+function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
+  const yr=e.deadline?e.deadline.substring(0,4):'?';
+  const dotCls=e.nextStep==='05 Received'?'received':e.nextStep==='04 Denied'?'denied':e.nextStep==='03 Waiting Results'?'waiting':'';
+  const L=({children})=><span style={{fontSize:8,textTransform:'uppercase',letterSpacing:'.4px',color:'var(--tf)',display:'block',marginBottom:1}}>{children}</span>;
   return(
-    <>
-      <div className="dr-bg" onClick={onClose}/>
-      <div className="dr">
-        <div className="dr-head">
-          <button className="dr-close" onClick={onClose}>✕</button>
-          <div className="dr-eye">{g.foundation}</div>
-          <div className="dr-title">{g.grant||'—'}</div>
-          {g.project&&<div className="dr-fdn">{g.project}</div>}
-          <div className="dr-meta">
-            <St status={g.status}/>
-            {g.deadline&&<span><span style={{color:'var(--ink-4)'}}>DL </span><span>{fmtDateISO(g.deadline)}</span>{g.status==='drafting'&&days!=null&&<span style={{marginLeft:5,color:'var(--danger)'}}>· {relativeDays(days)}</span>}</span>}
-            {g.web&&<a href={g.web} target="_blank" rel="noreferrer" style={{color:'var(--info)'}}>↗ {g.web.replace(/^https?:\/\//,'').split('/')[0]}</a>}
+    <div className="tl-entry">
+      <div className={`tl-dot ${dotCls}`}/>
+      {!isLast&&<div className="tl-line"/>}
+      <div className="tl-card">
+        <div className="tl-header" style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:3}}>
+          <div style={{display:'flex',alignItems:'center',gap:6}}>
+            <span style={{fontSize:14,fontWeight:800,color:'var(--acl)'}}>{yr}</span>
+            <button className="tl-action" title="Duplicate" onClick={ev=>{ev.stopPropagation();onDuplicate(e.id);}}>⧉</button>
+            <button className="tl-action tl-del" title="Delete" onClick={ev=>{ev.stopPropagation();onDelete(e.id);}}>✕</button>
+          </div>
+          <div className="tl-meta" style={{display:'flex',gap:5,alignItems:'center'}}>
+            <StatusBadge entryId={e.id} currentStep={e.nextStep} onChangeStatus={onChangeStatus}/>
+            <DField className="ef ef-amt" type="number" value={e.amount||''} placeholder="Req $" label="Amount Requested" onChange={v=>onChangeField(e.id,'amount',v)}/>
+            <DField className="ef ef-amt" type="number" value={e.amountReceived||''} placeholder="Recv $" label="Amount Received" style={{fontSize:10}} onChange={v=>onChangeField(e.id,'amountReceived',v)}/>
           </div>
         </div>
-        <div className="dr-body">
-          {!editing?(
-            <>
-              <div className="dr-grid">
-                <div className="dr-f">
-                  <div className="l">{g.amountReceived?'Received':'Requested'}</div>
-                  <div className={`v amt ${g.amountReceived?'ok':''}`}>{(g.amountReceived??g.amount)!=null?'$'+fmtMoneyFull(g.amountReceived??g.amount):'—'}</div>
-                </div>
-                <div className="dr-f">
-                  <div className="l">Deadline Type</div>
-                  <div className="v">{g.deadlineType==='hard'?'HARD':'ESTIMATED'}</div>
-                </div>
-                {g.period&&<div className="dr-f full"><div className="l">Grant Period</div><div className="v">{g.period}</div></div>}
-                {g.reportDeadline&&<div className="dr-f"><div className="l">Report Due</div><div className="v">{fmtDateISO(g.reportDeadline)}{rdays!=null&&<span style={{color:'var(--ink-4)',marginLeft:6}}>· {relativeDays(rdays)}</span>}</div></div>}
-              </div>
-              {g.notes&&<div className="dr-notes"><div className="l">Notes</div>{g.notes}</div>}
-              {g.period&&<div style={{marginTop:12}}><Thermo period={g.period} deadline={g.deadline} reportDeadline={g.reportDeadline}/></div>}
-              <div style={{marginTop:14}}>
-                <button className="tb-btn primary" style={{width:'100%',padding:'9px'}} onClick={startEdit}>Edit this entry</button>
-              </div>
-              {g.entries.length>0&&(
-                <div className="dr-hist" style={{marginTop:16}}>
-                  <div style={{fontSize:9,color:'var(--ink-4)',textTransform:'uppercase',letterSpacing:'.12em',marginBottom:8}}>History ({g.entries.length})</div>
-                  {g.entries.slice().sort((a,b)=>(b.deadline||'').localeCompare(a.deadline||'')).map((e,i)=>(
-                    <div key={e.id||i} className="dr-hist-row">
-                      <span className="yr">{e.deadline?e.deadline.substring(0,4):'?'}</span>
-                      <St status={mapStatus(e.nextStep)}/>
-                      <span className="amt-h">{(e.amountReceived||e.amount)?'$'+fmtMoneyFull(e.amountReceived||e.amount):'—'}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </>
-          ):(
-            <div className="dr-edit-form">
-              <div className="mf"><label>Status</label>
-                <select value={form.nextStep||''} onChange={e=>sf('nextStep',e.target.value)}>
-                  {STEPS.map(s=><option key={s} value={s}>{STEP_SHORT[s]}</option>)}
-                </select>
-              </div>
-              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
-                <div className="mf"><label>Amount Requested</label><input type="number" value={form.amount||''} onChange={e=>sf('amount',e.target.value?parseFloat(e.target.value):null)}/></div>
-                <div className="mf"><label>Amount Received</label><input type="number" value={form.amountReceived||''} onChange={e=>sf('amountReceived',e.target.value?parseFloat(e.target.value):null)}/></div>
-              </div>
-              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:10}}>
-                <div className="mf"><label>Deadline</label><input type="date" value={form.deadline||''} onChange={e=>sf('deadline',e.target.value)}/></div>
-                <div className="mf"><label>Report Deadline</label><input type="date" value={form.reportDeadline||''} onChange={e=>sf('reportDeadline',e.target.value)}/></div>
-              </div>
-              <div className="mf"><label>Grant Period</label><input value={form.eligiblePeriod||''} onChange={e=>sf('eligiblePeriod',e.target.value)} placeholder="Jan 1, 2026 – Dec 31, 2026"/></div>
-              <div className="mf"><label>Notes</label><textarea value={form.notes||''} onChange={e=>sf('notes',e.target.value)}/></div>
-              <div style={{display:'flex',gap:8,marginTop:14}}>
-                <button className="tb-btn" style={{flex:1,padding:'8px'}} onClick={()=>setEditing(false)}>Cancel</button>
-                <button className="tb-btn primary" style={{flex:1,padding:'8px'}} onClick={saveEdit}>Save</button>
-              </div>
-            </div>
-          )}
+        <div className="tl-grid" style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'2px 14px',fontSize:11}}>
+          <div><L>Deadline</L><DField className="ef ef-date" type="date" value={e.deadline||''} label="Deadline" onChange={v=>onChangeField(e.id,'deadline',v)}/></div>
+          <div><L>Grant Period</L><DField className="ef ef-sm" value={e.eligiblePeriod||''} placeholder="Jan 1 – Dec 31, 2026" label="Grant Period" onChange={v=>onChangeField(e.id,'eligiblePeriod',v)}/></div>
+          <div><L>Project</L><DField className="ef" value={e.projectDates||''} placeholder="Project name" label="Project" onChange={v=>onChangeField(e.id,'projectDates',v)}/></div>
+          <div><L>Report Deadline</L><DField className="ef ef-date" type="date" value={e.reportDeadline||''} label="Report Deadline" onChange={v=>onChangeField(e.id,'reportDeadline',v)}/></div>
+          <div><L>Web / Link</L><DField className="ef ef-sm" value={e.web||''} placeholder="https://..." label="Link" onChange={v=>onChangeField(e.id,'web',v)}/></div>
+          <div><L>Deadline Type</L><span style={{cursor:'pointer',display:'inline-block'}} onClick={ev=>{ev.stopPropagation();onChangeField(e.id,'deadlineType',e.deadlineType==='DDLNE!'?'Estimated':'DDLNE!');}}><span className={`fd-type ${e.deadlineType==='DDLNE!'?'hard':'est'}`}>{e.deadlineType==='DDLNE!'?'Hard Deadline':'Estimated'}</span></span></div>
+          <div style={{gridColumn:'1/-1'}}><L>Notes</L><DField className="ef ef-note" value={e.notes||e.improvements||''} placeholder="Notes..." label="Notes" multiline={true} onChange={v=>onChangeField(e.id,'notes',v)}/></div>
         </div>
-      </div>
-    </>
-  );
-}
-
-// ── TODAY VIEW ──
-function TodayView({groups,onOpen}){
-  const buckets=useMemo(()=>{
-    const drafting=groups.filter(g=>g.status==='drafting').sort((a,b)=>(a.deadline||'').localeCompare(b.deadline||''));
-    const submitted=groups.filter(g=>g.status==='submitted').sort((a,b)=>(a.deadline||'').localeCompare(b.deadline||''));
-    const reportsDue=groups.filter(g=>g.status==='awarded'&&g.reportDeadline).sort((a,b)=>(a.reportDeadline||'').localeCompare(b.reportDeadline||''));
-    const watching=groups.filter(g=>g.status==='watching'&&g.deadline).sort((a,b)=>(a.deadline||'').localeCompare(b.deadline||''));
-    return{drafting,submitted,reportsDue,watching};
-  },[groups]);
-  const urgentCount=buckets.drafting.filter(g=>{const d=daysUntilDate(g.deadline);return d!=null&&d<=7;}).length;
-  const pendingAmt=buckets.submitted.reduce((s,g)=>s+(g.amount||0),0);
-  const draftingAmt=buckets.drafting.reduce((s,g)=>s+(g.amount||0),0);
-  const reportsSoon=buckets.reportsDue.filter(g=>{const d=daysUntilDate(g.reportDeadline);return d!=null&&d<=60;}).length;
-  const ytdAwarded=groups.filter(g=>g.status==='awarded'&&parseDate(g.deadline)&&parseDate(g.deadline).getFullYear()>=2025).reduce((s,g)=>s+(g.amountReceived||0),0);
-  const todayStr=new Date().toLocaleDateString('en-US',{weekday:'long'}).toUpperCase();
-  const todayISO=new Date().toISOString().substring(0,10);
-  return(
-    <>
-      <div className="ph">
-        <div className="ph-left">
-          <div>
-            <div className="ph-eye">{todayStr} · {fmtDateISO(todayISO)}</div>
-            <h1 className="ph-title">CMD <span className="a">/today</span></h1>
-          </div>
-          <div className="ph-sub">
-            {urgentCount>0&&<><span className="urgent">{urgentCount} due ≤7d</span> · </>}
-            {buckets.drafting.length} drafting · {buckets.submitted.length} pending · {reportsSoon} report{reportsSoon!==1?'s':''} ≤60d
-          </div>
-        </div>
-      </div>
-      <div className="kpi-strip">
-        <div className="kpi">
-          <div className="kpi-label">Drafting</div>
-          <div className={`kpi-val ${urgentCount>0?'urgent':''}`}>{buckets.drafting.length}</div>
-          <div className={`kpi-sub ${urgentCount>0?'urgent':''}`}>{urgentCount>0?`${urgentCount} ≤ 7 DAYS`:'ON TRACK'}</div>
-        </div>
-        <div className="kpi">
-          <div className="kpi-label">Pipeline</div>
-          <div className="kpi-val"><span className="c">$</span>{fmtMoney(pendingAmt+draftingAmt)}</div>
-          <div className="kpi-sub">IN FLIGHT</div>
-        </div>
-        <div className="kpi">
-          <div className="kpi-label">Pending Decision</div>
-          <div className="kpi-val accent">{buckets.submitted.length}</div>
-          <div className="kpi-sub">${fmtMoney(pendingAmt)} AT STAKE</div>
-        </div>
-        <div className="kpi">
-          <div className="kpi-label">Awarded YTD</div>
-          <div className="kpi-val ok"><span className="c">$</span>{fmtMoney(ytdAwarded)}</div>
-          <div className="kpi-sub ok">{groups.filter(g=>g.status==='awarded').length} ACTIVE</div>
-        </div>
-        <div className="kpi">
-          <div className="kpi-label">Reports ≤60d</div>
-          <div className={`kpi-val ${reportsSoon>0?'urgent':''}`}>{reportsSoon}</div>
-          <div className="kpi-sub">OF {buckets.reportsDue.length} ACTIVE</div>
-        </div>
-      </div>
-      {buckets.drafting.length>0&&<>
-        <div className="shead first">
-          <div className={`shead-title ${urgentCount>0?'urgent':''}`}>▸ Apply <span className="accent">now</span></div>
-          <div className="shead-meta">{buckets.drafting.length} open · ${fmtMoney(draftingAmt)} requestable</div>
-        </div>
-        <THead/>
-        {buckets.drafting.map(g=><GRow key={g.key} g={g} onClick={onOpen}/>)}
-      </>}
-      {buckets.submitted.length>0&&<>
-        <div className="shead">
-          <div className="shead-title">▸ Awaiting <span className="accent">response</span></div>
-          <div className="shead-meta">{buckets.submitted.length} submitted · ${fmtMoney(pendingAmt)} pending</div>
-        </div>
-        <THead/>
-        {buckets.submitted.map(g=><GRow key={g.key} g={g} onClick={onOpen}/>)}
-      </>}
-      {buckets.reportsDue.length>0&&<>
-        <div className="shead">
-          <div className="shead-title">▸ Reports <span className="accent">coming up</span></div>
-          <div className="shead-meta">{buckets.reportsDue.length} active grants</div>
-        </div>
-        <THead/>
-        {buckets.reportsDue.map(g=><GRow key={g.key} g={g} onClick={onOpen}/>)}
-      </>}
-      {buckets.watching.length>0&&<>
-        <div className="shead">
-          <div className="shead-title">▸ On the <span className="accent">radar</span></div>
-          <div className="shead-meta">{buckets.watching.length} watching</div>
-        </div>
-        <THead/>
-        {buckets.watching.map(g=><GRow key={g.key} g={g} onClick={onOpen}/>)}
-      </>}
-      {buckets.drafting.length===0&&buckets.submitted.length===0&&buckets.reportsDue.length===0&&buckets.watching.length===0&&(
-        <div className="empty"><div className="ico">[ ∅ ]</div>NOTHING URGENT RIGHT NOW</div>
-      )}
-    </>
-  );
-}
-
-// ── LIBRARY VIEW ──
-function ListView({groups,onOpen,search,setSearch,statusFilter,setStatusFilter}){
-  const filtered=useMemo(()=>{
-    let r=[...groups];
-    if(statusFilter!=='all')r=r.filter(g=>g.status===statusFilter);
-    if(search){const q=search.toLowerCase();r=r.filter(g=>(g.foundation||'').toLowerCase().includes(q)||(g.grant||'').toLowerCase().includes(q)||(g.notes||'').toLowerCase().includes(q));}
-    return r;
-  },[groups,search,statusFilter]);
-  const fdnGroups=useMemo(()=>{
-    const m={};
-    filtered.forEach(g=>{const k=g.foundation;if(!m[k])m[k]={name:k,entries:[],awarded:0};m[k].entries.push(g);if(g.status==='awarded')m[k].awarded+=(g.amountReceived||0);});
-    Object.values(m).forEach(grp=>grp.entries.sort((a,b)=>(b.deadline||'').localeCompare(a.deadline||'')));
-    return Object.values(m).sort((a,b)=>a.name.localeCompare(b.name));
-  },[filtered]);
-  const statuses=['all',...STATUS_ORDER];
-  return(
-    <>
-      <div className="ph">
-        <div className="ph-left">
-          <div>
-            <div className="ph-eye">{groups.length} programs · {filtered.length} shown</div>
-            <h1 className="ph-title">CMD <span className="a">/library</span></h1>
-          </div>
-          <div className="ph-sub">All grants grouped by funder.</div>
-        </div>
-        <div className="chips">
-          {statuses.map(s=>(
-            <button key={s} className={`chip ${statusFilter===s?'on':''}`} onClick={()=>setStatusFilter(s)}>
-              {s==='all'?'All':STATUS_LABELS[s]}
-              {s!=='all'&&<span className="n">{groups.filter(g=>g.status===s).length}</span>}
-            </button>
-          ))}
-        </div>
-      </div>
-      <THead/>
-      {fdnGroups.length===0&&<div className="empty"><div className="ico">[ ∅ ]</div>NO MATCHES</div>}
-      {fdnGroups.map(fgrp=>(
-        <div key={fgrp.name}>
-          <div className="lsec">
-            <span className="name">{fgrp.name}</span>
-            <span className="meta">
-              <strong>{fgrp.entries.length}</strong> program{fgrp.entries.length>1?'s':''}
-              {fgrp.awarded>0&&<> · <strong style={{color:'var(--ok)'}}>{'$'+fmtMoney(fgrp.awarded)}</strong> won</>}
-            </span>
-          </div>
-          {fgrp.entries.map(g=><GRow key={g.key} g={g} onClick={onOpen}/>)}
-        </div>
-      ))}
-    </>
-  );
-}
-
-// ── ACTIVE VIEW ──
-function ActiveView({data,groups,onOpen}){
-  const now=new Date();
-  const active=useMemo(()=>data.filter(g=>{
-    if(g.nextStep!=='05 Received')return false;
-    const p=parsePeriod(g.eligiblePeriod);
-    return p&&now>=p.start&&now<=p.end;
-  }).sort((a,b)=>{
-    const pa=parsePeriod(a.eligiblePeriod),pb=parsePeriod(b.eligiblePeriod);
-    return(pa?pa.end:new Date('9999'))-(pb?pb.end:new Date('9999'));
-  }),[data]);
-  const totalAmt=active.reduce((s,g)=>s+(g.amountReceived||g.amount||0),0);
-  const findGroup=useCallback((entry)=>groups.find(g=>g.entries.some(e=>e.id===entry.id)),[groups]);
-  return(
-    <>
-      <div className="ph">
-        <div className="ph-left">
-          <div>
-            <div className="ph-eye">{active.length} active · ${fmtMoney(totalAmt)} deployed</div>
-            <h1 className="ph-title">CMD <span className="a">/active</span></h1>
-          </div>
-          <div className="ph-sub">Awarded grants within their active period.</div>
-        </div>
-      </div>
-      {active.length===0?<div className="empty"><div className="ico">[ ∅ ]</div>NO ACTIVE PERIODS</div>:
-        active.map(g=>{
-          const p=parsePeriod(g.eligiblePeriod);
-          const daysLeft=p?Math.ceil((p.end-now)/86400000):null;
-          const rddays=daysUntilDate(g.reportDeadline);
-          const grp=findGroup(g);
-          return(
-            <div key={g.id} className="active-card" onClick={()=>grp&&onOpen(grp)}>
-              <div className="active-card-head">
-                <div className="ac-fdn">{g.foundation}</div>
-                <div className="ac-grant">{g.grant||'—'}</div>
-                {g.projectDates&&<div className="ac-proj">{g.projectDates}</div>}
-                <div className="ac-meta">
-                  <div className="ac-amt">${fmtMoney(g.amountReceived||g.amount)}</div>
-                  {daysLeft!=null&&<div className="ac-days" style={{color:daysLeft<=30?'var(--danger)':daysLeft<=90?'var(--warn)':'var(--ok)'}}>{daysLeft}d left</div>}
-                  {g.reportDeadline&&<div className="ac-rpt">RPT {fmtDateShort(g.reportDeadline)}{rddays!=null&&<> · {relativeDays(rddays)}</>}</div>}
-                </div>
-              </div>
-              <Thermo period={g.eligiblePeriod} deadline={g.deadline} reportDeadline={g.reportDeadline}/>
-              {g.notes&&<div style={{padding:'8px 12px',fontSize:11,color:'var(--ink-3)',borderTop:'1px solid var(--rule)'}}>{g.notes}</div>}
-            </div>
-          );
-        })
-      }
-    </>
-  );
-}
-
-// ── CALENDAR VIEW ──
-function CalendarView({groups,onOpen}){
-  const now=new Date();now.setHours(0,0,0,0);
-  const months=useMemo(()=>{
-    const upcoming=groups.filter(g=>g.deadline&&parseDate(g.deadline)>=now).sort((a,b)=>a.deadline.localeCompare(b.deadline));
-    const byMonth={};
-    upcoming.forEach(g=>{
-      const d=parseDate(g.deadline);
-      const key=d.getFullYear()+'-'+String(d.getMonth()).padStart(2,'0');
-      if(!byMonth[key])byMonth[key]={key,short:d.toLocaleDateString('en-US',{month:'long'}).toUpperCase(),year:d.getFullYear(),month:d.getMonth(),entries:[]};
-      byMonth[key].entries.push(g);
-    });
-    return Object.values(byMonth);
-  },[groups]);
-  const total=months.reduce((s,m)=>s+m.entries.length,0);
-  return(
-    <>
-      <div className="ph">
-        <div className="ph-left">
-          <div>
-            <div className="ph-eye">{total} upcoming deadlines</div>
-            <h1 className="ph-title">CMD <span className="a">/calendar</span></h1>
-          </div>
-          <div className="ph-sub">Open deadlines ordered by month.</div>
-        </div>
-      </div>
-      {months.length===0?<div className="empty"><div className="ico">[ ∅ ]</div>NO UPCOMING DEADLINES</div>:
-        months.map((m,idx)=>{
-          const isCurrent=m.year===now.getFullYear()&&m.month===now.getMonth();
-          const totalAmt=m.entries.reduce((s,g)=>s+(g.amount||0),0);
-          return(
-            <div key={m.key}>
-              <div className={`shead ${idx===0?'first':''}`}>
-                <div className="shead-title">▸ {m.short} <span style={{color:'var(--ink-4)'}}>{m.year}</span>{isCurrent&&<span className="accent" style={{marginLeft:8}}>· NOW</span>}</div>
-                <div className="shead-meta">{m.entries.length} deadline{m.entries.length>1?'s':''} · ${fmtMoney(totalAmt)}</div>
-              </div>
-              {idx===0&&<THead/>}
-              {m.entries.map(g=><GRow key={g.key} g={g} onClick={onOpen}/>)}
-            </div>
-          );
-        })
-      }
-    </>
-  );
-}
-
-// ── INSIGHTS VIEW ──
-function InsightsView({groups}){
-  const stats=useMemo(()=>{
-    const decided=groups.filter(g=>g.status==='awarded'||g.status==='declined');
-    const won=groups.filter(g=>g.status==='awarded');
-    const winRate=decided.length>0?Math.round(won.length/decided.length*100):0;
-    const totalReq=groups.reduce((s,g)=>s+(g.amount||0),0);
-    const totalAwd=won.reduce((s,g)=>s+(g.amountReceived||0),0);
-    const avgAward=won.length>0?Math.round(totalAwd/won.length):0;
-    const byStatus={};STATUS_ORDER.forEach(s=>byStatus[s]=groups.filter(g=>g.status===s).length);
-    const byFdn={};won.forEach(g=>{const k=g.foundation;if(!byFdn[k])byFdn[k]={name:k,amount:0};byFdn[k].amount+=(g.amountReceived||0);});
-    const topFdn=Object.values(byFdn).sort((a,b)=>b.amount-a.amount).slice(0,6);
-    const pendingAmt=groups.filter(g=>g.status==='submitted').reduce((s,g)=>s+(g.amount||0),0);
-    const draftingAmt=groups.filter(g=>g.status==='drafting').reduce((s,g)=>s+(g.amount||0),0);
-    return{winRate,won:won.length,decided:decided.length,totalReq,totalAwd,avgAward,byStatus,topFdn,pendingAmt,draftingAmt};
-  },[groups]);
-  const maxSt=Math.max(...Object.values(stats.byStatus),1);
-  const maxFdn=stats.topFdn[0]?.amount||1;
-  return(
-    <>
-      <div className="ph">
-        <div className="ph-left">
-          <div>
-            <div className="ph-eye">all-time stats</div>
-            <h1 className="ph-title">CMD <span className="a">/insights</span></h1>
-          </div>
-          <div className="ph-sub">Pipeline performance across all cycles.</div>
-        </div>
-      </div>
-      <div className="ig">
-        <div className="ig-cell"><h3>Total Awarded</h3><div className="big"><span className="c">$</span>{fmtMoney(stats.totalAwd)}</div><div className="sub">{stats.won} grants · avg ${fmtMoney(stats.avgAward)}</div></div>
-        <div className="ig-cell"><h3>Win Rate</h3><div className="big" style={{color:'var(--accent)'}}>{stats.winRate}<span style={{fontSize:17}}>%</span></div><div className="sub">{stats.won}/{stats.decided} decided</div></div>
-        <div className="ig-cell"><h3>Pipeline</h3><div className="big"><span className="c">$</span>{fmtMoney(stats.pendingAmt+stats.draftingAmt)}</div><div className="sub">{groups.filter(g=>g.status==='submitted'||g.status==='drafting').length} in flight</div></div>
-        <div className="ig-cell"><h3>Capture Rate</h3><div className="big">{stats.totalReq>0?Math.round(stats.totalAwd/stats.totalReq*100):0}<span style={{fontSize:17}}>%</span></div><div className="sub">${fmtMoney(stats.totalAwd)} of ${fmtMoney(stats.totalReq)}</div></div>
-      </div>
-      <div className="ig-row">
-        <div className="ig-cell">
-          <h3>By Status</h3>
-          <div className="bars">
-            {STATUS_ORDER.map(s=>{
-              const cc=s==='awarded'?'ok':s==='declined'?'danger':s==='submitted'?'info':s==='drafting'?'warn':'mute';
-              return(<div key={s} className="bar-row"><div className="bl"><span className="bl-name">{STATUS_LABELS[s]}</span><div className="bl-track"><div className={`bl-fill ${cc}`} style={{width:(stats.byStatus[s]/maxSt*100||1)+'%'}}/></div></div><span className="num">{stats.byStatus[s]}</span></div>);
-            })}
-          </div>
-        </div>
-        <div className="ig-cell">
-          <h3>Top Funders · by $ Awarded</h3>
-          <div className="bars">
-            {stats.topFdn.map(f=>(
-              <div key={f.name} className="bar-row">
-                <div className="bl">
-                  <span className="bl-name" style={{width:120,fontFamily:'var(--font-display)',fontSize:11,textTransform:'none',letterSpacing:0}}>{f.name.length>22?f.name.substring(0,20)+'…':f.name}</span>
-                  <div className="bl-track"><div className="bl-fill ok" style={{width:(f.amount/maxFdn*100)+'%'}}/></div>
-                </div>
-                <span className="num">${fmtMoney(f.amount)}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </>
-  );
-}
-
-// ── ADD MODAL ──
-function AddModal({onClose,onAdd,prefill}){
-  const pf=prefill||{};
-  const [f,sF]=useState({id:Date.now(),deadline:'',deadlineType:'Estimated',foundation:pf.foundation||'',grant:pf.grant||'',nextStep:'02 Check',web:pf.web||'',notes:'',amount:null,amountReceived:null,eligiblePeriod:'',projectDates:'',source:'calendar',reportDeadline:'',season:pf.season||''});
-  const s=(k,v)=>sF(p=>({...p,[k]:v}));
-  return(
-    <>
-      <h3>+ New Grant Entry</h3>
-      <div className="mf"><label>Foundation *</label><input value={f.foundation} onChange={e=>s('foundation',e.target.value)} placeholder="Foundation name"/></div>
-      <div className="mf"><label>Grant Program</label><input value={f.grant} onChange={e=>s('grant',e.target.value)} placeholder="Program name"/></div>
-      <div className="mf-row">
-        <div className="mf"><label>Deadline</label><input type="date" value={f.deadline} onChange={e=>s('deadline',e.target.value)}/></div>
-        <div className="mf"><label>Type</label><select value={f.deadlineType} onChange={e=>s('deadlineType',e.target.value)}><option value="DDLNE!">Hard Deadline</option><option value="Estimated">Estimated</option></select></div>
-      </div>
-      <div className="mf-row">
-        <div className="mf"><label>Status</label><select value={f.nextStep} onChange={e=>s('nextStep',e.target.value)}>{STEPS.map(st=><option key={st} value={st}>{STEP_SHORT[st]}</option>)}</select></div>
-        <div className="mf"><label>Amount Requested</label><input type="number" value={f.amount||''} onChange={e=>s('amount',e.target.value?parseFloat(e.target.value):null)}/></div>
-      </div>
-      <div className="mf-row">
-        <div className="mf"><label>Amount Received</label><input type="number" value={f.amountReceived||''} onChange={e=>s('amountReceived',e.target.value?parseFloat(e.target.value):null)}/></div>
-        <div className="mf"><label>Report Deadline</label><input type="date" value={f.reportDeadline} onChange={e=>s('reportDeadline',e.target.value)}/></div>
-      </div>
-      <div className="mf"><label>Grant Period</label><input value={f.eligiblePeriod||''} onChange={e=>s('eligiblePeriod',e.target.value)} placeholder="Jan 1, 2026 – Dec 31, 2026"/></div>
-      <div className="mf"><label>Project</label><input value={f.projectDates||''} onChange={e=>s('projectDates',e.target.value)} placeholder="Project name"/></div>
-      <div className="mf"><label>Web / Link</label><input value={f.web} onChange={e=>s('web',e.target.value)} placeholder="https://..."/></div>
-      <div className="mf"><label>Notes</label><textarea value={f.notes} onChange={e=>s('notes',e.target.value)}/></div>
-      <div className="ma">
-        <button className="tb-btn" onClick={onClose}>Cancel</button>
-        <button className="tb-btn primary" onClick={()=>{if(f.foundation.trim()){onAdd(f);onClose();}}}>Add Grant</button>
-      </div>
-    </>
-  );
-}
-
-// ── SUGGESTIONS MODAL ──
-function SuggestionsModal({suggestions,onClose,onAccept,onReject}){
-  return(
-    <div className="mo" onClick={onClose}>
-      <div className="modal" onClick={e=>e.stopPropagation()}>
-        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16}}>
-          <h3 style={{margin:0}}>Suggestions {suggestions.length>0&&<span style={{background:'var(--danger-bg)',color:'var(--danger)',padding:'2px 7px',fontSize:10,marginLeft:8}}>{suggestions.length}</span>}</h3>
-          <button className="tb-iconbtn" onClick={onClose}>✕</button>
-        </div>
-        {suggestions.length===0?(
-          <div style={{textAlign:'center',padding:'28px 0',color:'var(--ink-4)',fontSize:11,textTransform:'uppercase',letterSpacing:'.1em'}}>
-            <div style={{fontSize:26,marginBottom:8,color:'var(--ink-5)'}}>[ ∅ ]</div>
-            No pending suggestions
-          </div>
-        ):suggestions.map(s=>(
-          <div key={s.id} style={{background:'var(--panel-2)',border:'1px solid var(--rule)',padding:'12px 14px',marginBottom:10}}>
-            <div style={{fontFamily:'var(--font-display)',fontWeight:700,fontSize:14,marginBottom:2}}>{s.foundation}</div>
-            {s.grant_name&&<div style={{fontSize:12,color:'var(--ink-3)',marginBottom:4}}>{s.grant_name}</div>}
-            <div style={{display:'flex',gap:12,flexWrap:'wrap',fontSize:10,color:'var(--ink-4)',marginBottom:8,textTransform:'uppercase',letterSpacing:'.08em'}}>
-              {s.deadline&&<span>DL {s.deadline}</span>}
-              {s.web&&<a href={s.web} target="_blank" rel="noreferrer" style={{color:'var(--info)'}}>{s.web.replace(/^https?:\/\//,'').substring(0,30)}</a>}
-              <span style={{marginLeft:'auto'}}>{new Date(s.submitted_at).toLocaleDateString()}</span>
-            </div>
-            {s.notes&&<div style={{fontSize:11,color:'var(--ink-2)',marginBottom:10,lineHeight:1.5,background:'var(--bg)',padding:'6px 8px'}}>{s.notes}</div>}
-            <div style={{display:'flex',gap:8}}>
-              <button className="tb-btn primary" style={{flex:1}} onClick={()=>onAccept(s)}>✓ Accept → Tracker</button>
-              <button className="tb-btn" onClick={()=>onReject(s.id)}>✕ Discard</button>
-            </div>
-          </div>
-        ))}
+        {e.web&&<a href={e.web} target="_blank" rel="noreferrer" className="btn-conv" onClick={ev=>ev.stopPropagation()} style={{marginTop:6}}>Ver Convocatoria <span className="conv-arrow">→</span></a>}
+        {e.eligiblePeriod&&<Thermo period={e.eligiblePeriod} deadline={e.deadline} reportDeadline={e.reportDeadline}/>}
       </div>
     </div>
   );
 }
 
-// ── EDIT SHEET ──
+// ── COMPONENTS ──
+
+// Clickable status badge — works everywhere
+function StatusBadge({entryId,currentStep,onChangeStatus}){
+  return(
+    <select className={`ns-select ${STEP_CSS[currentStep]||'ns-check'}`}
+      value={currentStep}
+      onClick={e=>e.stopPropagation()}
+      onChange={e=>{e.stopPropagation();onChangeStatus(entryId,e.target.value);}}>
+      {STEPS.map(st=><option key={st} value={st}>{STEP_SHORT[st]}</option>)}
+    </select>
+  );
+}
+
+// ── Spreadsheet Editor with resizable columns ──
 function EditSheet({data,setData,search}){
-  const [sortCol,setSortCol]=useState('foundation');
-  const [sortDir,setSortDir]=useState('asc');
-  const [colWidths,setColWidths]=useState({id:32,foundation:170,grant:150,projectDates:120,deadline:95,deadlineType:65,nextStep:75,amount:82,amountReceived:82,eligiblePeriod:130,reportDeadline:92,web:120,notes:140,del:26});
+  const[sortCol,setSortCol]=useState('foundation');
+  const[sortDir,setSortDir]=useState('asc');
+  const[colWidths,setColWidths]=useState({
+    id:35,foundation:170,grant:150,projectDates:120,deadline:100,deadlineType:70,season:70,nextStep:78,amount:85,amountReceived:85,eligiblePeriodStart:90,eligiblePeriodEnd:90,reportDeadline:95,source:55,web:120,notes:140,del:28
+  });
   const resizing=useRef(null);
+
   useEffect(()=>{
-    const onMove=e=>{if(!resizing.current)return;const{col,startX,startW}=resizing.current;setColWidths(prev=>({...prev,[col]:Math.max(40,startW+(e.clientX-startX))}));};
+    const onMove=e=>{
+      if(!resizing.current)return;
+      const{col,startX,startW}=resizing.current;
+      const diff=e.clientX-startX;
+      setColWidths(prev=>({...prev,[col]:Math.max(40,startW+diff)}));
+    };
     const onUp=()=>{resizing.current=null;document.body.style.cursor='';};
-    document.addEventListener('mousemove',onMove);document.addEventListener('mouseup',onUp);
+    document.addEventListener('mousemove',onMove);
+    document.addEventListener('mouseup',onUp);
     return()=>{document.removeEventListener('mousemove',onMove);document.removeEventListener('mouseup',onUp);};
   },[]);
-  const startResize=(col,e)=>{e.stopPropagation();e.preventDefault();resizing.current={col,startX:e.clientX,startW:colWidths[col]};document.body.style.cursor='col-resize';};
+
+  const startResize=(col,e)=>{
+    e.stopPropagation();
+    e.preventDefault();
+    resizing.current={col,startX:e.clientX,startW:colWidths[col]};
+    document.body.style.cursor='col-resize';
+  };
+
   const rows=useMemo(()=>{
     let r=[...data];
-    if(search){const q=search.toLowerCase();r=r.filter(g=>(g.foundation||'').toLowerCase().includes(q)||(g.grant||'').toLowerCase().includes(q)||(g.notes||'').toLowerCase().includes(q));}
+    if(search){const q=search.toLowerCase();r=r.filter(g=>g.foundation.toLowerCase().includes(q)||(g.grant||'').toLowerCase().includes(q)||(g.notes||'').toLowerCase().includes(q)||(g.projectDates||'').toLowerCase().includes(q));}
     r.sort((a,b)=>{
-      let va=a[sortCol]??'',vb=b[sortCol]??'';
-      if(typeof va==='string')va=va.toLowerCase();if(typeof vb==='string')vb=vb.toLowerCase();
-      if(va<vb)return sortDir==='asc'?-1:1;if(va>vb)return sortDir==='asc'?1:-1;return 0;
+      let va,vb;
+      if(sortCol==='deadline'||sortCol==='eligiblePeriodStart'||sortCol==='eligiblePeriodEnd'||sortCol==='reportDeadline'){va=a[sortCol]||'';vb=b[sortCol]||'';}
+      else if(sortCol==='amount'||sortCol==='amountReceived'){va=a[sortCol]||0;vb=b[sortCol]||0;}
+      else{va=(a[sortCol]||'').toLowerCase?.()??a[sortCol]??'';vb=(b[sortCol]||'').toLowerCase?.()??b[sortCol]??'';}
+      if(va<vb)return sortDir==='asc'?-1:1;
+      if(va>vb)return sortDir==='asc'?1:-1;
+      return 0;
     });
     return r;
   },[data,search,sortCol,sortDir]);
-  const upd=(id,key,val)=>setData(prev=>prev.map(g=>g.id===id?{...g,[key]:val}:g));
+
+  const upd=(id,key,val)=>{
+    setData(prev=>prev.map(g=>g.id===id?{...g,[key]:val}:g));
+  };
+  // Helper: update eligiblePeriod from start/end dates
+  const updPeriod=(id,which,val)=>{
+    setData(prev=>prev.map(g=>{
+      if(g.id!==id)return g;
+      // Parse existing period to get start/end
+      const parts=(g.eligiblePeriod||'').split(/\s*(?:–|—|to|-)\s*/);
+      let startStr=parts[0]||'';
+      let endStr=parts.length>1?parts[parts.length-1]:'';
+      if(which==='start'){
+        // Convert date input value to readable string
+        if(val){const d=new Date(val+'T00:00:00');startStr=d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}else startStr='';
+      }else{
+        if(val){const d=new Date(val+'T00:00:00');endStr=d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}else endStr='';
+      }
+      const newPeriod=startStr&&endStr?`${startStr} – ${endStr}`:startStr||endStr;
+      return {...g,eligiblePeriod:newPeriod};
+    }));
+  };
+  // Parse eligiblePeriod to get start/end dates for input
   const parsePeriodDates=(period)=>{
     if(!period)return{start:'',end:''};
     const pts=period.split(/\s*(?:–|—|to|-)\s*/);
     const toISO=(s)=>{const d=pDate(s);return d?d.toISOString().substring(0,10):''};
-    return{start:toISO(pts[0]||''),end:pts.length>1?toISO(pts[pts.length-1]):''};
+    return{start:toISO(pts[0]||''),end:pts.length>1?toISO(pts[pts.length-1]):''}
   };
-  const updPeriod=(id,which,val)=>{
-    setData(prev=>prev.map(g=>{
-      if(g.id!==id)return g;
-      const parts=(g.eligiblePeriod||'').split(/\s*(?:–|—|to|-)\s*/);
-      let startStr=parts[0]||'',endStr=parts.length>1?parts[parts.length-1]:'';
-      if(which==='start'){if(val){const d=new Date(val+'T00:00:00');startStr=d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}else startStr='';}
-      else{if(val){const d=new Date(val+'T00:00:00');endStr=d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}else endStr='';}
-      return{...g,eligiblePeriod:startStr&&endStr?`${startStr} – ${endStr}`:startStr||endStr};
-    }));
+  const del=(id)=>{
+    if(confirm('Delete this entry?'))setData(prev=>prev.filter(g=>g.id!==id));
   };
-  const del=(id)=>{if(confirm('Delete this entry?'))setData(prev=>prev.filter(g=>g.id!==id));};
   const doSort=c=>{if(sortCol===c)setSortDir(d=>d==='asc'?'desc':'asc');else{setSortCol(c);setSortDir('asc');}};
   const AR=({c})=><span style={{marginLeft:2,opacity:sortCol===c?1:.3,fontSize:7}}>{sortCol===c?(sortDir==='asc'?'▲':'▼'):'↕'}</span>;
   const RH=({col})=><div className="col-resize" onMouseDown={e=>startResize(col,e)}/>;
+
   return(
     <div className="sheet-wrap">
       <table className="sheet">
         <thead><tr>
           <th style={{width:colWidths.id}}>#</th>
-          <th onClick={()=>doSort('foundation')} className={sortCol==='foundation'?'so':''} style={{width:colWidths.foundation}}>Foundation<AR c="foundation"/><RH col="foundation"/></th>
-          <th onClick={()=>doSort('grant')} className={sortCol==='grant'?'so':''} style={{width:colWidths.grant}}>Grant Program<AR c="grant"/><RH col="grant"/></th>
-          <th style={{width:colWidths.projectDates}}>Project<RH col="projectDates"/></th>
-          <th onClick={()=>doSort('deadline')} className={sortCol==='deadline'?'so':''} style={{width:colWidths.deadline}}>Deadline<AR c="deadline"/><RH col="deadline"/></th>
+          <th onClick={()=>doSort('foundation')} className={sortCol==='foundation'?'so':''} style={{width:colWidths.foundation}}>Foundation <AR c="foundation"/><RH col="foundation"/></th>
+          <th onClick={()=>doSort('grant')} className={sortCol==='grant'?'so':''} style={{width:colWidths.grant}}>Grant Program <AR c="grant"/><RH col="grant"/></th>
+          <th onClick={()=>doSort('projectDates')} className={sortCol==='projectDates'?'so':''} style={{width:colWidths.projectDates}}>Project <AR c="projectDates"/><RH col="projectDates"/></th>
+          <th onClick={()=>doSort('deadline')} className={sortCol==='deadline'?'so':''} style={{width:colWidths.deadline}}>Deadline <AR c="deadline"/><RH col="deadline"/></th>
           <th style={{width:colWidths.deadlineType}}>Type<RH col="deadlineType"/></th>
-          <th onClick={()=>doSort('nextStep')} className={sortCol==='nextStep'?'so':''} style={{width:colWidths.nextStep}}>Status<AR c="nextStep"/><RH col="nextStep"/></th>
-          <th onClick={()=>doSort('amount')} className={sortCol==='amount'?'so':''} style={{width:colWidths.amount}}>Requested<AR c="amount"/><RH col="amount"/></th>
-          <th onClick={()=>doSort('amountReceived')} className={sortCol==='amountReceived'?'so':''} style={{width:colWidths.amountReceived}}>Received<AR c="amountReceived"/><RH col="amountReceived"/></th>
-          <th style={{width:colWidths.eligiblePeriod}}>Period<RH col="eligiblePeriod"/></th>
-          <th onClick={()=>doSort('reportDeadline')} className={sortCol==='reportDeadline'?'so':''} style={{width:colWidths.reportDeadline}}>Report DL<AR c="reportDeadline"/><RH col="reportDeadline"/></th>
+          <th onClick={()=>doSort('season')} className={sortCol==='season'?'so':''} style={{width:colWidths.season}}>Season <AR c="season"/><RH col="season"/></th>
+          <th onClick={()=>doSort('nextStep')} className={sortCol==='nextStep'?'so':''} style={{width:colWidths.nextStep}}>Status <AR c="nextStep"/><RH col="nextStep"/></th>
+          <th onClick={()=>doSort('amount')} className={sortCol==='amount'?'so':''} style={{width:colWidths.amount}}>Requested <AR c="amount"/><RH col="amount"/></th>
+          <th onClick={()=>doSort('amountReceived')} className={sortCol==='amountReceived'?'so':''} style={{width:colWidths.amountReceived}}>Received <AR c="amountReceived"/><RH col="amountReceived"/></th>
+          <th style={{width:colWidths.eligiblePeriodStart}}>Period Start<RH col="eligiblePeriodStart"/></th>
+          <th style={{width:colWidths.eligiblePeriodEnd}}>Period End<RH col="eligiblePeriodEnd"/></th>
+          <th onClick={()=>doSort('reportDeadline')} className={sortCol==='reportDeadline'?'so':''} style={{width:colWidths.reportDeadline}}>Report DL <AR c="reportDeadline"/><RH col="reportDeadline"/></th>
+          <th style={{width:colWidths.source}} title="Upcoming = tracked. Past = historical.">Track<RH col="source"/></th>
           <th style={{width:colWidths.web}}>Link<RH col="web"/></th>
           <th style={{width:colWidths.notes}}>Notes<RH col="notes"/></th>
           <th style={{width:colWidths.del}}></th>
@@ -1147,196 +1055,39 @@ function EditSheet({data,setData,search}){
           {rows.map((g,i)=>{
             const pd=parsePeriodDates(g.eligiblePeriod);
             return(
-              <tr key={g.id}>
-                <td className="cell-id">{i+1}</td>
-                <td className="cell-found"><textarea value={g.foundation||''} onChange={e=>upd(g.id,'foundation',e.target.value)} rows={1} onInput={e=>{e.target.style.height='auto';e.target.style.height=e.target.scrollHeight+'px';}}/></td>
-                <td><textarea value={g.grant||''} onChange={e=>upd(g.id,'grant',e.target.value)} placeholder="—" rows={1} onInput={e=>{e.target.style.height='auto';e.target.style.height=e.target.scrollHeight+'px';}}/></td>
-                <td><textarea value={g.projectDates||''} onChange={e=>upd(g.id,'projectDates',e.target.value)} placeholder="—" rows={1} onInput={e=>{e.target.style.height='auto';e.target.style.height=e.target.scrollHeight+'px';}}/></td>
-                <td className="cell-date" onClick={ev=>{const inp=ev.currentTarget.querySelector('input');if(inp)inp.showPicker?.();}}><span className="date-disp">{g.deadline?fmtDateFull(g.deadline):'—'}</span><input type="date" value={g.deadline||''} onChange={e=>upd(g.id,'deadline',e.target.value)} className="date-hidden"/></td>
-                <td><select value={g.deadlineType||'Estimated'} onChange={e=>upd(g.id,'deadlineType',e.target.value)}><option value="DDLNE!">Hard</option><option value="Estimated">Est.</option></select></td>
-                <td><select value={g.nextStep||'02 Check'} onChange={e=>upd(g.id,'nextStep',e.target.value)} style={{fontSize:10}}>{STEPS.map(st=><option key={st} value={st}>{STEP_SHORT[st]}</option>)}</select></td>
-                <td className="cell-amt"><input type="number" value={g.amount||''} onChange={e=>upd(g.id,'amount',e.target.value?parseFloat(e.target.value):null)} placeholder="—"/></td>
-                <td className="cell-amt"><input type="number" value={g.amountReceived||''} onChange={e=>upd(g.id,'amountReceived',e.target.value?parseFloat(e.target.value):null)} placeholder="—"/></td>
-                <td>
-                  <div style={{display:'flex',gap:3}}>
-                    <input type="date" value={pd.start} onChange={e=>updPeriod(g.id,'start',e.target.value)} style={{width:90}} title="Period start"/>
-                    <input type="date" value={pd.end} onChange={e=>updPeriod(g.id,'end',e.target.value)} style={{width:90}} title="Period end"/>
-                  </div>
-                </td>
-                <td className="cell-date" onClick={ev=>{const inp=ev.currentTarget.querySelector('input');if(inp)inp.showPicker?.();}}><span className="date-disp">{g.reportDeadline?fmtDateFull(g.reportDeadline):'—'}</span><input type="date" value={g.reportDeadline||''} onChange={e=>upd(g.id,'reportDeadline',e.target.value)} className="date-hidden"/></td>
-                <td><textarea value={g.web||''} onChange={e=>upd(g.id,'web',e.target.value)} placeholder="https://..." rows={1} style={{fontSize:10}} onInput={e=>{e.target.style.height='auto';e.target.style.height=e.target.scrollHeight+'px';}}/></td>
-                <td><textarea value={g.notes||''} onChange={e=>upd(g.id,'notes',e.target.value)} placeholder="—" rows={1} onInput={e=>{e.target.style.height='auto';e.target.style.height=e.target.scrollHeight+'px';}}/></td>
-                <td className="cell-del"><button onClick={()=>del(g.id)} title="Delete">✕</button></td>
-              </tr>
-            );
-          })}
+            <tr key={g.id}>
+              <td className="cell-id">{i+1}</td>
+              <td className="cell-found"><textarea value={g.foundation} onChange={e=>upd(g.id,'foundation',e.target.value)} rows={1} onInput={e=>{e.target.style.height='auto';e.target.style.height=e.target.scrollHeight+'px';}}/></td>
+              <td><textarea value={g.grant||''} onChange={e=>upd(g.id,'grant',e.target.value)} placeholder="—" rows={1} onInput={e=>{e.target.style.height='auto';e.target.style.height=e.target.scrollHeight+'px';}}/></td>
+              <td><textarea value={g.projectDates||''} onChange={e=>upd(g.id,'projectDates',e.target.value)} placeholder="Project name" rows={1} onInput={e=>{e.target.style.height='auto';e.target.style.height=e.target.scrollHeight+'px';}}/></td>
+              <td className="cell-date" onClick={ev=>{const inp=ev.currentTarget.querySelector('input');if(inp)inp.showPicker?.();}}><span className="date-disp">{g.deadline?fmtDate(g.deadline):'—'}</span><input type="date" value={g.deadline||''} onChange={e=>upd(g.id,'deadline',e.target.value)} className="date-hidden"/></td>
+              <td><select value={g.deadlineType||'Estimated'} onChange={e=>upd(g.id,'deadlineType',e.target.value)}><option value="DDLNE!">Hard</option><option value="Estimated">Est.</option></select></td>
+              <td><select value={g.season||''} onChange={e=>upd(g.id,'season',e.target.value)} style={{fontSize:9}}><option value="">—</option><option value="Spring">🌱 Spr</option><option value="Summer">☀️ Sum</option><option value="Fall">🍂 Fall</option><option value="Winter">❄️ Win</option><option value="Closed">🚫 Closed</option></select></td>
+              <td><select value={g.nextStep} onChange={e=>upd(g.id,'nextStep',e.target.value)} style={{fontSize:9}}>{STEPS.map(st=><option key={st} value={st}>{STEP_SHORT[st]}</option>)}</select></td>
+              <td className="cell-amt"><input type="number" value={g.amount||''} onChange={e=>upd(g.id,'amount',e.target.value?parseFloat(e.target.value):null)} placeholder="—"/></td>
+              <td className="cell-amt"><input type="number" value={g.amountReceived||''} onChange={e=>upd(g.id,'amountReceived',e.target.value?parseFloat(e.target.value):null)} placeholder="—"/></td>
+              <td className="cell-date" onClick={ev=>{const inp=ev.currentTarget.querySelector('input');if(inp)inp.showPicker?.();}}><span className="date-disp">{pd.start?fmtDate(pd.start):'—'}</span><input type="date" value={pd.start} onChange={e=>updPeriod(g.id,'start',e.target.value)} className="date-hidden"/></td>
+              <td className="cell-date" onClick={ev=>{const inp=ev.currentTarget.querySelector('input');if(inp)inp.showPicker?.();}}><span className="date-disp">{pd.end?fmtDate(pd.end):'—'}</span><input type="date" value={pd.end} onChange={e=>updPeriod(g.id,'end',e.target.value)} className="date-hidden"/></td>
+              <td className="cell-date" onClick={ev=>{const inp=ev.currentTarget.querySelector('input');if(inp)inp.showPicker?.();}}><span className="date-disp">{g.reportDeadline?fmtDate(g.reportDeadline):'—'}</span><input type="date" value={g.reportDeadline||''} onChange={e=>upd(g.id,'reportDeadline',e.target.value)} className="date-hidden"/></td>
+              <td><select value={g.source||'historical'} onChange={e=>upd(g.id,'source',e.target.value)} style={{fontSize:9}}><option value="calendar">Up</option><option value="historical">Past</option></select></td>
+              <td><textarea value={g.web||''} onChange={e=>upd(g.id,'web',e.target.value)} placeholder="https://..." rows={1} style={{fontSize:10}} onInput={e=>{e.target.style.height='auto';e.target.style.height=e.target.scrollHeight+'px';}}/></td>
+              <td><textarea value={g.notes||''} onChange={e=>upd(g.id,'notes',e.target.value)} placeholder="—" rows={1} onInput={e=>{e.target.style.height='auto';e.target.style.height=e.target.scrollHeight+'px';}}/></td>
+              <td className="cell-del"><button onClick={()=>del(g.id)} title="Delete">✕</button></td>
+            </tr>
+          );})}
         </tbody>
       </table>
     </div>
   );
 }
 
-// ── APP ──
-function App({initialGrants}){
-  const [data,setData]=useState(()=>initialGrants.map(g=>({...g})));
-  const [view,setView]=useState('today');
-  const [openGroup,setOpenGroup]=useState(null);
-  const [search,setSearch]=useState('');
-  const [statusFilter,setStatusFilter]=useState('all');
-  const [showAdd,setShowAdd]=useState(false);
-  const [showSuggestions,setShowSuggestions]=useState(false);
-  const [showEditSheet,setShowEditSheet]=useState(false);
-  const [isDark,setIsDark]=useState(true);
-  const [suggestions,setSuggestions]=useState([]);
-  const [saveStatus,setSaveStatus]=useState('ok');
-  const [lastSaved,setLastSaved]=useState(null);
-
-  useEffect(()=>{document.documentElement.classList.toggle('light',!isDark);},[isDark]);
-  useEffect(()=>{loadSuggestions().then(setSuggestions);},[]);
-
-  const saveTimer=useRef(null);
-  const firstRender=useRef(true);
-  useEffect(()=>{
-    if(firstRender.current){firstRender.current=false;return;}
-    setSaveStatus('saving');
-    if(saveTimer.current)clearTimeout(saveTimer.current);
-    saveTimer.current=setTimeout(async()=>{
-      const r=await saveToServer(data);
-      if(r.ok){setSaveStatus('ok');setLastSaved(new Date());}
-      else setSaveStatus('err');
-    },2000);
-    return()=>{if(saveTimer.current)clearTimeout(saveTimer.current);};
-  },[data]);
-
-  const groups=useMemo(()=>computeProgramGroups(data),[data]);
-
-  const urgentCount=groups.filter(g=>{if(g.status!=='drafting')return false;const d=daysUntilDate(g.deadline);return d!=null&&d<=7;}).length;
-  const pendingAmt=groups.filter(g=>g.status==='submitted').reduce((s,g)=>s+(g.amount||0),0);
-  const ytdAwarded=groups.filter(g=>g.status==='awarded').reduce((s,g)=>s+(g.amountReceived||0),0);
-  const now=new Date();
-  const activeCount=data.filter(g=>{if(g.nextStep!=='05 Received')return false;const p=parsePeriod(g.eligiblePeriod);return p&&now>=p.start&&now<=p.end;}).length;
-  const reportsSoon=groups.filter(g=>g.status==='awarded'&&g.reportDeadline&&(daysUntilDate(g.reportDeadline)||999)<=60&&(daysUntilDate(g.reportDeadline)||999)>=0).length;
-
-  const tabs=[
-    {id:'today',label:'Today',count:groups.filter(g=>g.status==='drafting'||g.status==='submitted').length,urgent:urgentCount>0},
-    {id:'library',label:'Library',count:groups.length},
-    {id:'active',label:'Active',count:activeCount},
-    {id:'calendar',label:'Calendar',count:groups.filter(g=>g.deadline&&parseDate(g.deadline)>=now).length},
-    {id:'insights',label:'Insights'},
-  ];
-
-  const changeField=useCallback((id,field,val)=>setData(p=>p.map(g=>g.id===id?{...g,[field]:val}:g)),[]);
-  const add=useCallback(g=>setData(p=>[g,...p]),[]);
-  const handleAccept=useCallback(async(sug)=>acceptSuggestion(sug,add,setSuggestions),[add]);
-  const handleReject=useCallback(async(id)=>rejectSuggestion(id,setSuggestions),[]);
-
-  return(
-    <div className="app">
-      <div className="tbar">
-        <div className="tb-brand">
-          <div className="tb-logo"/>
-          <div className="tb-name">POLEN</div>
-          <div className="tb-tag">v3</div>
-        </div>
-        <div className="tb-stats">
-          <div className="tb-stat"><div className="tb-stat-label">DUE ≤7D</div><div className={`tb-stat-val ${urgentCount>0?'urgent':''}`}>{urgentCount}</div></div>
-          <div className="tb-stat"><div className="tb-stat-label">PENDING</div><div className="tb-stat-val accent">${fmtMoney(pendingAmt)}</div></div>
-          <div className="tb-stat"><div className="tb-stat-label">AWARDED YTD</div><div className="tb-stat-val ok">${fmtMoney(ytdAwarded)}</div></div>
-          <div className="tb-stat"><div className="tb-stat-label">ACTIVE</div><div className="tb-stat-val">{activeCount} <span className="x">/ grants</span></div></div>
-          <div className="tb-stat"><div className="tb-stat-label">RPT ≤60D</div><div className={`tb-stat-val ${reportsSoon>0?'warn':''}`}>{reportsSoon}</div></div>
-        </div>
-        <div className="tb-actions">
-          <button className="tb-btn primary" onClick={()=>setShowAdd(true)}>+ NEW</button>
-          <button className="tb-iconbtn" onClick={()=>setShowEditSheet(true)} title="Edit all data" style={{fontSize:15}}>⊟</button>
-          <div style={{position:'relative'}}>
-            <button className="tb-iconbtn" onClick={()=>setShowSuggestions(true)} title="Suggestions">✉</button>
-            {suggestions.length>0&&<span className="tb-badge">{suggestions.length}</span>}
-          </div>
-          <button className="tb-iconbtn" onClick={()=>setIsDark(d=>!d)} title="Theme">{isDark?'☼':'☾'}</button>
-          <button className="tb-iconbtn" onClick={doSignOut} title="Sign out" style={{fontSize:15}}>⎋</button>
-        </div>
-      </div>
-
-      <div className="tabs">
-        {tabs.map(tab=>(
-          <button key={tab.id} className={`tab ${view===tab.id?'active':''}`} onClick={()=>setView(tab.id)}>
-            {tab.urgent&&view!==tab.id&&<span className="pulse"/>}
-            {tab.label.toUpperCase()}
-            {tab.count!=null&&<span className="num">[{tab.count}]</span>}
-          </button>
-        ))}
-        <div className="tab-spacer"/>
-        {view==='library'&&(
-          <div className="tab-right">
-            <span style={{color:'var(--ink-4)'}}>/</span>
-            <input className="tab-search" placeholder="search..." value={search} onChange={e=>setSearch(e.target.value)}/>
-          </div>
-        )}
-        <div className="tab-right">
-          <span style={{color:'var(--ink-4)'}}>USER</span>
-          <span style={{color:'var(--ink-2)'}}>creartbox</span>
-        </div>
-      </div>
-
-      <div className="main">
-        {view==='today'&&<TodayView groups={groups} onOpen={setOpenGroup}/>}
-        {view==='library'&&<ListView groups={groups} onOpen={setOpenGroup} search={search} setSearch={setSearch} statusFilter={statusFilter} setStatusFilter={setStatusFilter}/>}
-        {view==='active'&&<ActiveView data={data} groups={groups} onOpen={setOpenGroup}/>}
-        {view==='calendar'&&<CalendarView groups={groups} onOpen={setOpenGroup}/>}
-        {view==='insights'&&<InsightsView groups={groups}/>}
-      </div>
-
-      <div className="fbar">
-        <span><span className="dot" style={{background:saveStatus==='err'?'var(--danger)':saveStatus==='saving'?'var(--warn)':'var(--ok)'}}/> {saveStatus==='ok'?'ONLINE':saveStatus==='saving'?'SAVING…':'ERROR'}</span>
-        <span>POLEN v3</span>
-        <span>{new Date().toLocaleDateString('en-US',{weekday:'short',year:'numeric',month:'short',day:'numeric'}).toUpperCase()}</span>
-        <div className="right">
-          <span>{data.length} ENTRIES</span>
-          <span>·</span>
-          <span>{view.toUpperCase()}</span>
-          {lastSaved&&<span>· SAVED {lastSaved.toLocaleTimeString()}</span>}
-        </div>
-      </div>
-
-      {openGroup&&<Drawer g={openGroup} onClose={()=>setOpenGroup(null)} onChangeField={changeField}/>}
-
-      {showAdd&&(
-        <div className="mo" onClick={()=>setShowAdd(false)}>
-          <div className="modal" onClick={e=>e.stopPropagation()}>
-            <AddModal onClose={()=>setShowAdd(false)} onAdd={add}/>
-          </div>
-        </div>
-      )}
-
-      {showSuggestions&&<SuggestionsModal suggestions={suggestions} onClose={()=>setShowSuggestions(false)} onAccept={handleAccept} onReject={handleReject}/>}
-
-      {showEditSheet&&(
-        <div className="sheet-mo">
-          <div className="sheet-mo-head">
-            <span className="title">DATA EDITOR</span>
-            <span style={{fontSize:10,color:'var(--ink-4)'}}>{data.length} entries</span>
-            <div style={{marginLeft:'auto',display:'flex',gap:8}}>
-              <button className="tb-btn" onClick={async()=>{const r=await saveToServer(data);if(r.ok){setSaveStatus('ok');setLastSaved(new Date());}}} style={{borderColor:'var(--ok)',color:'var(--ok)'}}>💾 Save</button>
-              <button className="tb-btn" onClick={()=>exportJSON(data)} style={{color:'var(--info)'}}>⬇ Export</button>
-              <label className="tb-btn" style={{cursor:'pointer',color:'var(--warn)'}}>⬆ Import<input type="file" accept=".json" style={{display:'none'}} onChange={e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(Array.isArray(d)){setData(d);}}catch(err){alert('Invalid JSON');}};rd.readAsText(f);e.target.value='';}}/>
-              </label>
-              <button className="tb-btn primary" onClick={()=>setShowEditSheet(false)}>Close</button>
-            </div>
-          </div>
-          <div className="sheet-mo-body">
-            <EditSheet data={data} setData={setData} search=""/>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
+// ── DATA LOADING ──
 function startApp(data){
   const root=ReactDOM.createRoot(document.getElementById('root'));
   root.render(<App initialGrants={data}/>);
 }
 
+// Boot: runs on page load AND after doLogin() — always inside Babel so startApp is defined
 async function boot(){
   if(window._appStarted)return;
   const {data:{session}}=await _sb.auth.getSession();
@@ -1351,6 +1102,504 @@ async function boot(){
   }
 }
 boot();
+
+
+
+
+// ── APP ──
+function App({initialGrants}){
+  const[data,setData]=useState(()=>initialGrants.map(g=>({...g})));
+  const[saveMsg,setSaveMsg]=useState(null);
+  const[lastSaved,setLastSaved]=useState(null);
+  const[saveStatus,setSaveStatus]=useState('ok'); // ok, local, err
+  const[search,setSearch]=useState('');
+  const[statusFilter,setStatusFilter]=useState('all');
+  const[showAdd,setShowAdd]=useState(false);
+  const[addPrefill,setAddPrefill]=useState(null);
+  const[editMode,setEditMode]=useState(false);
+  const[activeView,setActiveView]=useState(false); // "Active Grants" view
+  const[calendarView,setCalendarView]=useState(false); // "Upcoming/Calendar" view
+  const[isDark,setIsDark]=useState(true);
+  const[suggestions,setSuggestions]=useState([]);
+  const[showSuggestions,setShowSuggestions]=useState(false);
+  useEffect(()=>{document.documentElement.classList.toggle('light',!isDark);},[isDark]);
+  useEffect(()=>{loadSuggestions().then(setSuggestions);},[]);
+
+  // Auto-save: localStorage instantly + server after 2s debounce
+  const saveTimer=useRef(null);
+  const firstRender=useRef(true);
+  useEffect(()=>{
+    if(firstRender.current){firstRender.current=false;return;}
+    setLastSaved(new Date());
+    setSaveStatus('saving');
+    if(saveTimer.current)clearTimeout(saveTimer.current);
+    saveTimer.current=setTimeout(async()=>{
+      const r=await saveToServer(data);
+      if(r.ok){setSaveStatus('ok');setLastSaved(new Date());setSaveMsg(null);}
+      else{setSaveStatus('local');setSaveMsg(r.msg);}
+    },2000);
+    return()=>{if(saveTimer.current)clearTimeout(saveTimer.current);};
+  },[data]);
+
+  // Group entries by grant program (foundation + grant combo)
+  const programGroups=useMemo(()=>{
+    let r=[...data];
+    if(statusFilter==='apply')r=r.filter(g=>g.nextStep==='01 Apply on deadline'||g.nextStep==='00 Send Proposal');
+    else if(statusFilter!=='all')r=r.filter(g=>g.nextStep===statusFilter);
+    if(search){
+      const q=search.toLowerCase();
+      r=r.filter(g=>(g.foundation||'').toLowerCase().includes(q)||(g.grant||'').toLowerCase().includes(q)||(g.notes||'').toLowerCase().includes(q)||(g.projectDates||'').toLowerCase().includes(q));
+    }
+    // Group by foundation + grant
+    const groups={};
+    r.forEach(g=>{
+      const key=(g.foundation||'').trim()+'|||'+(g.grant||'').trim();
+      if(!groups[key])groups[key]={key,foundation:(g.foundation||'').trim(),grant:(g.grant||'').trim(),entries:[]};
+      groups[key].entries.push(g);
+    });
+    const now=new Date();now.setHours(0,0,0,0);
+    // For each group, compute stats and find next deadline
+    return Object.values(groups).map(grp=>{
+      grp.entries.sort((a,b)=>(b.deadline||'').localeCompare(a.deadline||'')); // newest first
+      const futureEntries=grp.entries.filter(e=>e.deadline&&new Date(e.deadline+'T00:00:00')>=now).sort((a,b)=>a.deadline.localeCompare(b.deadline));
+      grp.nextDeadline=futureEntries[0]||null;
+      grp.primary=grp.entries[0];
+      grp.received=grp.entries.filter(e=>e.nextStep==='05 Received').length;
+      grp.denied=grp.entries.filter(e=>e.nextStep==='04 Denied').length;
+      grp.waiting=grp.entries.filter(e=>e.nextStep==='03 Waiting Results').length;
+      grp.totalAmt=grp.entries.filter(e=>e.nextStep==='05 Received').reduce((s,e)=>s+(e.amountReceived||e.amount||0),0);
+      return grp;
+    }).sort((a,b)=>{
+      // Groups with future deadlines first (soonest), then past (most recent)
+      const aD=a.nextDeadline?a.nextDeadline.deadline:'9999';
+      const bD=b.nextDeadline?b.nextDeadline.deadline:'9999';
+      const aFut=a.nextDeadline&&new Date(aD+'T00:00:00')>=now;
+      const bFut=b.nextDeadline&&new Date(bD+'T00:00:00')>=now;
+      if(aFut&&!bFut)return -1;
+      if(!aFut&&bFut)return 1;
+      if(aFut&&bFut)return aD.localeCompare(bD);
+      // Both past: most recent first
+      const aR=a.primary.deadline||'';
+      const bR=b.primary.deadline||'';
+      return bR.localeCompare(aR);
+    });
+  },[data,statusFilter,search]);
+
+  // Active Grants: awarded + currently within grant period
+  const activeGrants=useMemo(()=>{
+    const now=new Date();
+    return data.filter(g=>{
+      if(g.nextStep!=='05 Received')return false;
+      const p=pPeriod(g.eligiblePeriod);
+      if(!p)return false; // no period = can't determine if active
+      return now>=p.start&&now<=p.end;
+    }).sort((a,b)=>{
+      // Sort by period end date (soonest ending first)
+      const pa=pPeriod(a.eligiblePeriod), pb=pPeriod(b.eligiblePeriod);
+      return(pa?pa.end:new Date('9999'))-(pb?pb.end:new Date('9999'));
+    });
+  },[data]);
+
+  // Calendar view: only shows grant programs that have an explicit season field
+  const calendarData=useMemo(()=>{
+    const SEASONS=[
+      {key:'Spring',name:'Spring',emoji:'🌱'},
+      {key:'Summer',name:'Summer',emoji:'☀️'},
+      {key:'Fall',name:'Fall',emoji:'🍂'},
+      {key:'Winter',name:'Winter',emoji:'❄️'},
+      {key:'Closed',name:'Closed',emoji:'🚫'}
+    ];
+    const seasonKeyToIdx={Spring:0,Summer:1,Fall:2,Winter:3,Closed:4};
+    const monthToSeason=m=>m>=2&&m<=4?0:m>=5&&m<=7?1:m>=8&&m<=10?2:3;
+    const curYear=new Date().getFullYear();
+    // Build program map — only include entries that have a season field
+    const progMap={};
+    data.forEach(g=>{
+      const hasSeason=g.season&&seasonKeyToIdx[g.season]!==undefined;
+      const key=(g.foundation||'').trim()+'|||'+(g.grant||'').trim();
+      // Initialize program if any entry of it has a season
+      if(hasSeason&&!progMap[key])progMap[key]={foundation:(g.foundation||'').trim(),grant:(g.grant||'').trim(),entries:[],web:g.web||'',season:g.season};
+      // If program already exists (season was set on another entry), also collect this entry for history
+      if(progMap[key]){
+        if(g.deadline){
+          const d=new Date(g.deadline+'T00:00:00');
+          progMap[key].entries.push({month:d.getMonth(),day:d.getDate(),year:d.getFullYear(),status:g.nextStep,amount:g.amountReceived||g.amount||0,deadline:g.deadline,deadlineType:g.deadlineType||''});
+        }
+        if(g.web&&!progMap[key].web)progMap[key].web=g.web;
+        if(hasSeason)progMap[key].season=g.season;
+      }
+    });
+    const bySeason=[[],[],[],[],[]];
+    Object.values(progMap).forEach(prog=>{
+      if(!prog.season||seasonKeyToIdx[prog.season]===undefined)return;
+      const si=seasonKeyToIdx[prog.season];
+      const received=prog.entries.filter(e=>e.status==='05 Received').length;
+      const totalApps=prog.entries.length;
+      const rate=totalApps>0?Math.round(received/totalApps*100):0;
+      const totalAmt=prog.entries.filter(e=>e.status==='05 Received').reduce((s,e)=>s+e.amount,0);
+      const history=prog.entries.slice().sort((a,b)=>a.year-b.year||a.month-b.month);
+      const thisYearEntries=prog.entries.filter(e=>e.year===curYear);
+      const trackedStatuses=['01 Apply on deadline','00 Send Proposal','03 Waiting Results','05 Received','04 Denied','08 Not Eligible'];
+      const isTracked=thisYearEntries.some(e=>trackedStatuses.includes(e.status));
+      // Skip if already tracked this year (apply/waiting/received/denied)
+      if(isTracked)return;
+      // Compute last known deadline for reference
+      const lastEntry=history.length>0?history[history.length-1]:null;
+      const lastDeadline=lastEntry?lastEntry.deadline:null;
+      const lastDLType=lastEntry?lastEntry.deadlineType:'';
+      const lastMonth=lastEntry?lastEntry.month:null;
+      const lastDay=lastEntry?lastEntry.day:null;
+      const lastYear=lastEntry?lastEntry.year:null;
+      // Estimated next deadline based on historical avg
+      const avgMonth=lastMonth;
+      const avgDay=lastDay;
+      bySeason[si].push({
+        foundation:prog.foundation,grant:prog.grant,web:prog.web,
+        totalApps,received,rate,totalAmt,history,
+        lastDeadline,lastDLType,lastMonth,lastDay,lastYear,avgMonth,avgDay
+      });
+    });
+    bySeason.forEach(arr=>arr.sort((a,b)=>(a.foundation||'').localeCompare(b.foundation||'')));
+    const now=new Date();
+    const curSeason=monthToSeason(now.getMonth());
+    const result=[];
+    for(let i=0;i<4;i++){
+      const si=(curSeason+i)%4;
+      const s=SEASONS[si];
+      if(bySeason[si].length>0){
+        result.push({...s,isCurrent:si===curSeason,isNext:si===(curSeason+1)%4,grants:bySeason[si]});
+      }
+    }
+    // Closed always at the end
+    if(bySeason[4].length>0){
+      result.push({...SEASONS[4],isCurrent:false,isNext:false,grants:bySeason[4]});
+    }
+    return result;
+  },[data]);
+
+  const stats=useMemo(()=>({
+    total:data.length,
+    apply:data.filter(g=>g.nextStep==='01 Apply on deadline'||g.nextStep==='00 Send Proposal').length,
+    waiting:data.filter(g=>g.nextStep==='03 Waiting Results').length,
+    received:data.filter(g=>g.nextStep==='05 Received').length,
+    denied:data.filter(g=>g.nextStep==='04 Denied').length,
+    active:activeGrants.length,
+    totalAmt:data.filter(g=>g.nextStep==='05 Received').reduce((s,g)=>s+(g.amountReceived||g.amount||0),0),
+    activeAmt:activeGrants.reduce((s,g)=>s+(g.amountReceived||g.amount||0),0),
+  }),[data,activeGrants]);
+
+  const changeStatus=useCallback((id,newStep)=>setData(p=>p.map(g=>g.id===id?{...g,nextStep:newStep}:g)),[]);
+  const changeField=useCallback((id,field,val)=>setData(p=>p.map(g=>g.id===id?{...g,[field]:val}:g)),[]);
+  const changeProgramSeason=useCallback((foundation,grant,newSeason)=>{
+    const f=(foundation||'').trim(), gr=(grant||'').trim();
+    setData(p=>p.map(g=>(g.foundation||'').trim()===f&&(g.grant||'').trim()===gr?{...g,season:newSeason}:g));
+  },[]);
+  const add=useCallback(g=>setData(p=>[g,...p]),[]);
+  const delEntry=useCallback(id=>{if(confirm('Delete this grant entry?'))setData(p=>p.filter(g=>g.id!==id));},[]);
+  const dupEntry=useCallback(id=>{setData(p=>{const src=p.find(g=>g.id===id);if(!src)return p;const copy={...src,id:Date.now(),notes:(src.notes||'')+' (copy)'};return[copy,...p];});},[]);
+  const[expRow,setExpRow]=useState(null);
+
+  return(
+    <div className="app">
+      <div className="topbar">
+        <img src="logo.png" alt="" style={{height:36}}/>
+        <div className="topbar-actions">
+          <button className="theme-btn" onClick={()=>window.location.reload()} title="Reload from server">🔄</button>
+          <button className="theme-btn" onClick={doSignOut} title="Sign out">⎋</button>
+          <button className="theme-btn" onClick={()=>setShowSuggestions(true)} title="Suggestions inbox" style={{position:'relative'}}>
+            💡{suggestions.length>0&&<span style={{position:'absolute',top:0,right:0,background:'var(--r)',color:'#fff',borderRadius:'50%',fontSize:9,fontWeight:800,width:14,height:14,display:'flex',alignItems:'center',justifyContent:'center',lineHeight:1}}>{suggestions.length}</span>}
+          </button>
+          <button className="theme-btn" onClick={()=>setIsDark(d=>!d)} title="Toggle light/dark">{isDark?'☀️':'🌙'}</button>
+          <button className="btn btn-pri" onClick={()=>setShowAdd(true)}>+ Add Grant</button>
+        </div>
+      </div>
+
+      <div className="filters">
+        <input className="search" placeholder="Search foundation, grant program, notes..." value={search} onChange={e=>setSearch(e.target.value)}/>
+        <div style={{display:'flex',gap:4,flexWrap:'wrap'}}>
+          {[['all','All',stats.total],['apply','Apply',stats.apply],['03 Waiting Results','Waiting',stats.waiting],['05 Received','Awarded',stats.received],['04 Denied','Denied',stats.denied]].map(([k,l,c])=>
+            <button key={k} className={`chip ${statusFilter===k&&!editMode&&!activeView&&!calendarView?'on':''}`} onClick={()=>{setStatusFilter(k);setEditMode(false);setActiveView(false);setCalendarView(false);setExpRow(null);}}>{l}{k!=='all'&&c>0&&<span style={{opacity:.6,marginLeft:3,fontSize:10}}>{c}</span>}</button>
+          )}
+          <button className={`chip ${activeView&&!editMode&&!calendarView?'on':''}`} onClick={()=>{setActiveView(!activeView);setEditMode(false);setCalendarView(false);setExpRow(null);}} style={activeView?{borderColor:'var(--g)',background:'var(--gbg)',color:'var(--g)'}:{}}>✦ Active ({stats.active})</button>
+          <button className={`chip ${calendarView&&!editMode?'on':''}`} onClick={()=>{setCalendarView(!calendarView);setEditMode(false);setActiveView(false);setExpRow(null);}} style={calendarView?{borderColor:'var(--o)',background:'var(--obg)',color:'var(--o)'}:{}}>📅 Upcoming {calendarData.reduce((s,m)=>s+m.grants.length,0)>0&&<span style={{background:'var(--obg)',color:'var(--o)',padding:'0 5px',borderRadius:6,fontSize:10,fontWeight:700,marginLeft:2}}>{calendarData.reduce((s,m)=>s+m.grants.length,0)}</span>}</button>
+          <span style={{width:1,height:16,background:'var(--bd)',margin:'0 4px'}}/>
+          <button className={`chip ${editMode?'on':''}`} onClick={()=>{setEditMode(!editMode);setActiveView(false);setCalendarView(false);}} style={editMode?{borderColor:'var(--y)',background:'var(--ybg)',color:'var(--y)'}:{}}>✏ Edit All</button>
+          {editMode&&<>
+            <button className="chip" onClick={async()=>{const r=await saveToServer(data);setSaveMsg(r.msg);setTimeout(()=>setSaveMsg(null),2500);}} style={{borderColor:'var(--g)',background:'var(--gbg)',color:'var(--g)',fontWeight:700}}>💾 Save</button>
+            <button className="chip" onClick={()=>exportJSON(data)} style={{borderColor:'var(--b)',color:'var(--b)'}}>⬇ JSON</button>
+            <label className="chip" style={{borderColor:'var(--y)',color:'var(--y)',cursor:'pointer'}}>⬆ Import<input type="file" accept=".json" style={{display:'none'}} onChange={e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(Array.isArray(d)){setData(d);setSaveMsg('Imported '+d.length);setTimeout(()=>setSaveMsg(null),2000);}}catch(err){alert('Invalid JSON');}};rd.readAsText(f);e.target.value='';}}/></label>
+            {saveMsg&&<span style={{fontSize:10,color:'var(--g)',fontWeight:600}}>{saveMsg}</span>}
+          </>}
+        </div>
+        <span style={{fontSize:11,color:'var(--tf)',marginLeft:'auto'}}>
+          {editMode?`${data.length} entries`:calendarView?`${calendarData.reduce((s,m)=>s+m.grants.length,0)} programs · ${calendarData.length} seasons`:activeView?`${activeGrants.length} active · ${fmt(stats.activeAmt)}`:`${programGroups.length} programs · ${programGroups.reduce((s,g)=>s+g.entries.length,0)} grants`}
+          {lastSaved&&<span className="save-indicator"><span className={`dot ${saveStatus}`}/>{saveStatus==='ok'?'Saved':saveStatus==='saving'?'Saving...':'Error'} · {lastSaved.toLocaleTimeString()}</span>}
+        </span>
+      </div>
+
+      <div className="main-area">
+        {editMode?(
+          <EditSheet data={data} setData={setData} search={search}/>
+        ):calendarView?(
+          <div className="cal-view">
+            {calendarData.length===0?(
+              <div className="cal-empty">
+                <div className="cal-empty-icon">✓</div>
+                All grant programs are tracked for {new Date().getFullYear()}. Nothing to check.
+              </div>
+            ):calendarData.map(se=>(
+              <div key={se.name} className={`cal-season${se.key==='Closed'?' closed':''}`}>
+                <div className="cal-season-hdr">
+                  <span className={`cal-season-name ${se.isCurrent?'current':se.isNext?'next':''}`}>{se.emoji} {se.name}</span>
+                  <span className="cal-season-count">{se.grants.length}</span>
+                  {se.isCurrent&&<span className="cal-season-tag">Now</span>}
+                  {se.isNext&&<span className="cal-season-tag" style={{background:'var(--ybg)',color:'var(--y)'}}>Next</span>}
+                </div>
+                {se.grants.map((g,gi)=>{
+                  const goToTimeline=()=>{const k=(g.foundation||'').trim()+'|||'+(g.grant||'').trim();setCalendarView(false);setStatusFilter('all');setSearch('');setExpRow(k);};
+                  const MSHORT=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                  return(
+                  <div key={gi} className="cal-grant" onClick={goToTimeline}>
+                    <div className="cg-top">
+                      <div>
+                        <div className="cg-foundation">{g.foundation}</div>
+                        <div className="cg-program">{g.grant||'—'}</div>
+                      </div>
+                      <div className="cg-top-right">
+                        <select className="cg-season-sel" value={se.key} onClick={e=>e.stopPropagation()} onChange={e=>{e.stopPropagation();changeProgramSeason(g.foundation,g.grant,e.target.value);}}>
+                          <option value="Spring">🌱</option><option value="Summer">☀️</option><option value="Fall">🍂</option><option value="Winter">❄️</option><option value="Closed">🚫</option>
+                        </select>
+                        <span className="cg-chevron">›</span>
+                      </div>
+                    </div>
+                    {g.lastDeadline&&(
+                      <div className="cg-meta">
+                        <div className="cg-meta-item"><span className="label">Last deadline</span> <span className="val">{MSHORT[g.lastMonth]} {g.lastDay}, {g.lastYear}</span></div>
+                        <span className={`cg-dl-type ${g.lastDLType==='DDLNE!'?'hard':'est'}`}>{g.lastDLType==='DDLNE!'?'HARD':'EST'}</span>
+                        {g.totalAmt>0&&<div className="cg-meta-item"><span className="label">Won</span> <span className="val" style={{color:'var(--g)'}}>{fmt(g.totalAmt)}</span></div>}
+                      </div>
+                    )}
+                    <div className="cg-bottom">
+                      <div className="cg-history">
+                        {g.history.map((h,hi)=>{
+                          const cls=h.status==='05 Received'?'received':h.status==='04 Denied'?'denied':h.status==='03 Waiting Results'?'waiting':h.status==='07 Missed Deadline'?'missed':h.status==='08 Not Eligible'?'notelig':'check';
+                          return <span key={hi} className="cg-yr"><span className={`sem-dot ${cls}`}/>{String(h.year).slice(-2)}</span>;
+                        })}
+                        <span className="cg-rate">{g.received}/{g.totalApps}</span>
+                      </div>
+                      <div style={{display:'flex',gap:6,alignItems:'center'}}>
+                        <a className="cg-search-btn" href={'https://www.google.com/search?q='+encodeURIComponent((g.foundation||'')+' '+(g.grant||'')+' grant '+new Date().getFullYear())} target="_blank" rel="noreferrer" onClick={e=>e.stopPropagation()} title="Search on Google">🔍</a>
+                        {g.web&&<a className="cg-web-btn" href={g.web} target="_blank" rel="noreferrer" onClick={e=>e.stopPropagation()} title="Open website">🔗</a>}
+                        <button className="cg-add-btn" onClick={e=>{e.stopPropagation();setAddPrefill({foundation:g.foundation,grant:g.grant,web:g.web||'',season:se.key});setShowAdd(true);}}>
+                          + Add {new Date().getFullYear()}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );})}
+              </div>
+            ))}
+          </div>
+        ):activeView?(
+          <div className="active-grid">
+            {activeGrants.length===0?(
+              <div style={{textAlign:'center',padding:40,color:'var(--tf)'}}>No active grants with a defined grant period right now.</div>
+            ):activeGrants.map(g=>{
+              const p=pPeriod(g.eligiblePeriod);
+              const daysLeft=p?Math.ceil((p.end-new Date())/864e5):null;
+              return(
+                <div key={g.id} className="active-card">
+                  <div className="ac-top">
+                    <div className="ac-info">
+                      <div className="ac-foundation">{g.foundation}<CopyBtn text={g.foundation}/></div>
+                      <div className="ac-grant">{g.grant||'—'}{g.grant&&<CopyBtn text={g.grant}/>}</div>
+                      {g.projectDates&&<div className="ac-project">{g.projectDates}</div>}
+                    </div>
+                    <div className="ac-amounts">
+                      <div className="ac-amt">{fmt(g.amountReceived||g.amount)}</div>
+                      {daysLeft!=null&&<div className="ac-days" style={{color:daysLeft<=30?'var(--r)':daysLeft<=90?'var(--y)':'var(--g)'}}>{daysLeft}d left</div>}
+                      {g.reportDeadline&&<div className="ac-report">Report: {fmtDateShort(g.reportDeadline)}</div>}
+                    </div>
+                  </div>
+                  <Thermo period={g.eligiblePeriod} deadline={g.deadline} reportDeadline={g.reportDeadline}/>
+                  {g.notes&&<div className="ac-notes">{g.notes}</div>}
+                </div>
+              );
+            })}
+          </div>
+        ):(
+          <div style={{overflowX:'auto',WebkitOverflowScrolling:'touch'}}>
+          <table className="flat-table">
+            <thead><tr>
+              <th style={{width:110}}>Deadline</th>
+              <th>Foundation</th>
+              <th>Grant Program</th>
+              <th style={{width:75}}>Status</th>
+              <th style={{width:60}}>Apps</th>
+              <th style={{width:80}}>Results</th>
+              <th style={{width:80}}>Amount</th>
+              <th style={{width:120}}></th>
+            </tr></thead>
+            <tbody>
+              {programGroups.map(grp=>{
+                const nd=grp.nextDeadline||grp.primary;
+                const days=nd&&nd.deadline?daysUntil(nd.deadline):9999;
+                const dc=dlClass(days);
+                const isExp=expRow===grp.key;
+                const relStr=days<0?`${Math.abs(days)}d ago`:days===0?'Today':days<=60?`${days}d`:`${Math.round(days/30)}mo`;
+                const latestStep=grp.primary.nextStep;
+                const dType=nd?nd.deadlineType:'';
+                // Semáforo: year history dots
+                const semEntries=grp.entries.slice().sort((a,b)=>(a.deadline||'').localeCompare(b.deadline||''));
+                return(
+                  <React.Fragment key={grp.key}>
+                  <tr className={isExp?'g-sel':''} onClick={()=>setExpRow(isExp?null:grp.key)} style={{cursor:'pointer'}}>
+                    {/* Line 1: deadline + status + amount (on mobile: all in one flex row) */}
+                    <td className="mob-line1">
+                      <span style={{fontSize:10,color:'var(--tf)',transition:'transform .2s',display:'inline-block',transform:isExp?'rotate(90deg)':'rotate(0deg)'}}>▶</span>
+                      {nd&&nd.deadline?(
+                        <span className={`g-deadline ${dc}`}>{fmtDateShort(nd.deadline)}</span>
+                      ):(
+                        <span className="g-deadline" style={{color:'var(--tf)'}}>—</span>
+                      )}
+                      {nd&&nd.deadline&&<span className={`fd-rel ${dc}`} style={{fontSize:8,fontWeight:600,whiteSpace:'nowrap'}}>{relStr}</span>}
+                      {dType&&<span className={`fd-type ${dType==='DDLNE!'?'hard':'est'}`}>{dType==='DDLNE!'?'Hard':'Est.'}</span>}
+                    </td>
+                    {/* Line 2: Foundation */}
+                    <td className="flat-fname" style={{fontWeight:600,maxWidth:220,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>
+                      {grp.foundation}<CopyBtn text={grp.foundation}/>
+                    </td>
+                    {/* Line 3: Grant program + semáforo */}
+                    <td className="flat-gname">
+                      <span className="g-name" style={{display:'inline'}}>{grp.grant||'—'}{grp.grant&&<CopyBtn text={grp.grant}/>}</span>
+                      <span className="prog-sem" style={{marginLeft:6}}>
+                        {semEntries.map(e=>{
+                          const yr=e.deadline?e.deadline.substring(2,4):'?';
+                          const cls=e.nextStep==='05 Received'?'received':e.nextStep==='04 Denied'?'denied':e.nextStep==='03 Waiting Results'?'waiting':e.nextStep==='07 Missed Deadline'?'missed':e.nextStep==='08 Not Eligible'?'notelig':e.nextStep==='02 Check'?'check':'apply';
+                          return <span key={e.id} className="sem-yr"><span className={`sem-dot ${cls}`}/><span className="sem-lbl">{yr}</span></span>;
+                        })}
+                      </span>
+                    </td>
+                    {/* Desktop-only separate cells */}
+                    <td className="desk-only"><span className={`ns ${STEP_CSS[latestStep]||'ns-check'}`}>{STEP_SHORT[latestStep]||latestStep}</span></td>
+                    <td className="desk-only" style={{fontSize:10,color:'var(--td)'}}>{grp.entries.length} app{grp.entries.length>1?'s':''}</td>
+                    <td className="desk-only">
+                      <div style={{display:'flex',gap:3}}>
+                        {grp.received>0&&<span className="ms ms-g">✓{grp.received}</span>}
+                        {grp.waiting>0&&<span className="ms ms-b">⏳{grp.waiting}</span>}
+                        {grp.denied>0&&<span className="ms ms-r">✗{grp.denied}</span>}
+                      </div>
+                    </td>
+                    <td className="desk-only" style={{fontVariantNumeric:'tabular-nums',fontWeight:700,color:'var(--g)',fontSize:11}}>{grp.totalAmt>0?fmt(grp.totalAmt):''}</td>
+                    <td className="desk-only" style={{textAlign:'center'}}>
+                      {grp.primary.web&&<a href={grp.primary.web} target="_blank" rel="noreferrer" className="btn-conv" onClick={e=>e.stopPropagation()}>Ver Convocatoria <span className="conv-arrow">→</span></a>}
+                    </td>
+                    {/* Mobile-only: combined right-side stats */}
+                    <td className="mob-right">
+                      <span className={`ns ${STEP_CSS[latestStep]||'ns-check'}`}>{STEP_SHORT[latestStep]||latestStep}</span>
+                      <span style={{fontSize:9,color:'var(--td)'}}>{grp.entries.length}</span>
+                      {grp.received>0&&<span className="ms ms-g" style={{fontSize:8}}>✓{grp.received}</span>}
+                      {grp.waiting>0&&<span className="ms ms-b" style={{fontSize:8}}>⏳{grp.waiting}</span>}
+                      {grp.denied>0&&<span className="ms ms-r" style={{fontSize:8}}>✗{grp.denied}</span>}
+                      {grp.totalAmt>0&&<span style={{fontVariantNumeric:'tabular-nums',fontWeight:700,color:'var(--g)',fontSize:9}}>{fmt(grp.totalAmt)}</span>}
+                    </td>
+                  </tr>
+                  {isExp&&(
+                    <tr><td colSpan={9} style={{padding:0}}>
+                      <div className="hist-panel" onClick={e=>e.stopPropagation()}>
+                        {/* Application Timeline */}
+                        <div>
+                          <div style={{fontSize:10,fontWeight:700,textTransform:'uppercase',letterSpacing:'.4px',color:'var(--tf)',marginBottom:8}}>
+                            Application Timeline ({grp.entries.length})
+                          </div>
+                          {grp.entries.map((e,i)=><AppEntry key={e.id} e={e} isLast={i===grp.entries.length-1} onChangeStatus={changeStatus} onChangeField={changeField} onDelete={delEntry} onDuplicate={dupEntry}/>)}
+                        </div>
+                      </div>
+                    </td></tr>
+                  )}
+                  </React.Fragment>
+                );
+              })}
+            </tbody>
+          </table>
+          </div>
+        )}
+      </div>
+
+      {showSuggestions&&(
+        <div className="modal-ov" onClick={()=>setShowSuggestions(false)}>
+          <div className="modal" style={{maxWidth:600}} onClick={e=>e.stopPropagation()}>
+            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16}}>
+              <h3 style={{margin:0}}>💡 Suggestions inbox {suggestions.length>0&&<span style={{background:'var(--rbg)',color:'var(--r)',borderRadius:8,padding:'2px 8px',fontSize:12,marginLeft:6}}>{suggestions.length}</span>}</h3>
+              <button className="btn btn-sec" onClick={()=>setShowSuggestions(false)}>✕</button>
+            </div>
+            {suggestions.length===0?(
+              <div style={{textAlign:'center',padding:'32px 0',color:'var(--tf)'}}>
+                <div style={{fontSize:32,marginBottom:8}}>✓</div>
+                No pending suggestions
+                <div style={{marginTop:12,fontSize:12}}>Share <strong>gaawi.github.io/Polen/suggest.html</strong> so others can suggest grants</div>
+              </div>
+            ):suggestions.map(s=>(
+              <div key={s.id} style={{background:'var(--s2)',border:'1px solid var(--bd)',borderRadius:10,padding:'12px 14px',marginBottom:10}}>
+                <div style={{fontWeight:700,fontSize:14,marginBottom:2}}>{s.foundation}</div>
+                {s.grant_name&&<div style={{fontSize:12,color:'var(--td)',marginBottom:4}}>{s.grant_name}</div>}
+                <div style={{display:'flex',gap:12,flexWrap:'wrap',fontSize:11,color:'var(--tf)',marginBottom:8}}>
+                  {s.deadline&&<span>📅 {s.deadline}</span>}
+                  {s.web&&<a href={s.web} target="_blank" rel="noreferrer" style={{color:'var(--b)'}}>{s.web}</a>}
+                  <span style={{marginLeft:'auto'}}>{new Date(s.submitted_at).toLocaleDateString()}</span>
+                </div>
+                {s.notes&&<div style={{fontSize:11,color:'var(--td)',marginBottom:10,lineHeight:1.5,background:'var(--s3)',borderRadius:6,padding:'6px 8px'}}>{s.notes}</div>}
+                <div style={{display:'flex',gap:8}}>
+                  <button className="btn btn-pri" style={{flex:1,fontSize:12}} onClick={()=>acceptSuggestion(s,add,setSuggestions)}>✓ Aceptar → Tracker</button>
+                  <button className="btn btn-sec" style={{fontSize:12}} onClick={()=>rejectSuggestion(s.id,setSuggestions)}>✕ Descartar</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {showAdd&&(
+        <div className="modal-ov" onClick={()=>setShowAdd(false)}>
+          <div className="modal" onClick={e=>e.stopPropagation()}>
+            <AddModal onClose={()=>{setShowAdd(false);setAddPrefill(null);}} onAdd={add} prefill={addPrefill}/>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AddModal({onClose,onAdd,prefill}){
+  const pf=prefill||{};
+  const[f,sF]=useState({id:Date.now(),deadline:'',deadlineType:'Estimated',foundation:pf.foundation||'',grant:pf.grant||'',nextStep:'02 Check',web:pf.web||'',notes:'',amount:null,amountReceived:null,eligiblePeriod:'',projectDates:'',improvements:'',source:'calendar',reportDeadline:'',season:pf.season||''});
+  const s=(k,v)=>sF(p=>({...p,[k]:v}));
+  return(
+    <>
+      <h3>Add Grant</h3>
+      <div className="mf"><label>Foundation *</label><input value={f.foundation} onChange={e=>s('foundation',e.target.value)} placeholder="Foundation name"/></div>
+      <div className="mf"><label>Grant program</label><input value={f.grant} onChange={e=>s('grant',e.target.value)} placeholder="Specific grant name"/></div>
+      <div className="mf"><label>Deadline *</label><input type="date" value={f.deadline} onChange={e=>s('deadline',e.target.value)}/></div>
+      <div style={{display:'flex',gap:8}}>
+        <div className="mf" style={{flex:1}}><label>Type</label><select value={f.deadlineType} onChange={e=>s('deadlineType',e.target.value)}><option value="DDLNE!">Hard Deadline</option><option value="Estimated">Estimated Deadline</option></select></div>
+        <div className="mf" style={{flex:1}}><label>Status</label><select value={f.nextStep} onChange={e=>s('nextStep',e.target.value)}>{STEPS.map(st=><option key={st} value={st}>{STEP_SHORT[st]}</option>)}</select></div>
+        <div className="mf" style={{flex:1}}><label>Season</label><select value={f.season||''} onChange={e=>s('season',e.target.value)}><option value="">—</option><option value="Spring">🌱 Spring</option><option value="Summer">☀️ Summer</option><option value="Fall">🍂 Fall</option><option value="Winter">❄️ Winter</option><option value="Closed">🚫 Closed</option></select></div>
+      </div>
+      <div style={{display:'flex',gap:8}}>
+        <div className="mf" style={{flex:1}}><label>Amount Requested ($)</label><input type="number" value={f.amount||''} onChange={e=>s('amount',e.target.value?parseFloat(e.target.value):null)}/></div>
+        <div className="mf" style={{flex:1}}><label>Amount Received ($)</label><input type="number" value={f.amountReceived||''} onChange={e=>s('amountReceived',e.target.value?parseFloat(e.target.value):null)}/></div>
+      </div>
+      <div className="mf"><label>Web / Link</label><input value={f.web} onChange={e=>s('web',e.target.value)} placeholder="https://..."/></div>
+      <div className="mf"><label>Report Deadline</label><input type="date" value={f.reportDeadline} onChange={e=>s('reportDeadline',e.target.value)}/></div>
+      <div className="mf"><label>Notes</label><textarea value={f.notes} onChange={e=>s('notes',e.target.value)}/></div>
+      <div className="ma">
+        <button className="btn btn-sec" onClick={onClose}>Cancel</button>
+        <button className="btn btn-pri" onClick={()=>{if(f.foundation.trim()){onAdd(f);onClose();}}}>Add</button>
+      </div>
+    </>
+  );
+}
+
+// App is started by the data loader above
 </script>
 </body>
 </html>
