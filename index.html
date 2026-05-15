@@ -731,7 +731,7 @@ async function doLogin(){
   showSpinner();
   const {error}=await _sb.auth.signInWithPassword({email,password:pass});
   if(error){err.textContent=error.message;hideSpinner();}
-  // on success, boot() inside Babel fires via onAuthStateChange
+  else{boot();}  // session is now set — boot() will find it and load the app
 }
 document.getElementById('li-email').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('li-pass').focus();});
 document.getElementById('li-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
@@ -1084,24 +1084,18 @@ function startApp(data){
   root.render(<App initialGrants={data}/>);
 }
 
-// Boot runs here — inside Babel — so startApp is always defined when called
+// Boot: runs on page load AND after doLogin() — always inside Babel so startApp is defined
 async function boot(){
+  if(window._appStarted)return;
   const {data:{session}}=await _sb.auth.getSession();
   if(session){
+    window._appStarted=true;
     showLoading();
     const grants=await loadFromSupabase();
     hideLoading();
     startApp(grants);
   } else {
     document.getElementById('login-overlay').style.display='flex';
-    _sb.auth.onAuthStateChange(async(event,session)=>{
-      if(session&&event==='SIGNED_IN'){
-        showLoading();
-        const grants=await loadFromSupabase();
-        hideLoading();
-        startApp(grants);
-      }
-    });
   }
 }
 boot();
