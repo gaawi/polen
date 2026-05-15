@@ -663,7 +663,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 </style>
 </head>
 <body>
-<div id="login-overlay" style="display:none">
+<div id="login-overlay" style="display:flex">
   <div class="login-box">
     <h2>Polen</h2>
     <p>Grant Tracker — sign in to continue</p>
@@ -734,14 +734,20 @@ async function rejectSuggestion(id,setSuggestions){
 // ── Boot: wait for session, then render ──
 // _pendingGrants holds grants loaded before Babel finishes compiling
 window._pendingGrants=null;
+// Fallback: if auth doesn't fire in 1s, show login
+const _authFallback=setTimeout(()=>{
+  if(!window._appStarted){
+    document.getElementById('login-overlay').style.display='flex';
+  }
+},1000);
 _sb.auth.onAuthStateChange(async(event,session)=>{
+  clearTimeout(_authFallback);
   const overlay=document.getElementById('login-overlay');
   if(session){
     overlay.style.display='none';
     if(!window._appStarted){
       window._appStarted=true;
       const grants=await loadFromSupabase();
-      // If Babel already finished, startApp is defined; otherwise store for later
       if(typeof startApp==='function'){startApp(grants);}
       else{window._pendingGrants=grants;}
     }
