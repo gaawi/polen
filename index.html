@@ -652,44 +652,47 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 /* ── Login overlay ── */
 #login-overlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;}
 .login-box{background:var(--s1);border:1px solid var(--bd);border-radius:16px;padding:32px 28px;width:340px;max-width:92vw;}
-.login-box h2{font-size:22px;font-weight:800;margin-bottom:4px;color:var(--t);}
+.login-logo{display:flex;align-items:center;gap:10px;margin-bottom:20px;}
+.login-logo-icon{width:38px;height:38px;background:var(--ac);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.login-logo-text{font-size:22px;font-weight:800;color:var(--t);}
+.login-logo-sub{font-size:11px;color:var(--td);font-weight:400;}
 .login-box p{font-size:12px;color:var(--td);margin-bottom:20px;}
 .login-box input{width:100%;background:var(--s2);border:1px solid var(--bd);color:var(--t);padding:10px 12px;border-radius:8px;font-size:13px;font-family:inherit;outline:none;margin-bottom:10px;display:block;}
 .login-box input:focus{border-color:var(--ac);}
-.login-box button{width:100%;padding:11px;background:var(--ac);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;transition:background .15s;}
-.login-box button:hover{background:var(--acl);}
-.login-box button:disabled{opacity:.5;cursor:not-allowed;}
+.login-box button{width:100%;padding:11px;background:var(--ac);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;transition:background .15s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.login-box button:hover:not(:disabled){background:var(--acl);}
+.login-box button:disabled{opacity:.7;cursor:not-allowed;}
 .login-err{font-size:11px;color:var(--r);margin-top:8px;text-align:center;}
+/* Spinner */
+@keyframes spin{to{transform:rotate(360deg);}}
+.spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;}
+/* Loading overlay after login */
+#loading-screen{position:fixed;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;z-index:9998;}
+.loading-spinner{width:32px;height:32px;border:3px solid var(--bd);border-top-color:var(--ac);border-radius:50%;animation:spin .8s linear infinite;}
+.loading-text{font-size:13px;color:var(--td);font-weight:500;}
 </style>
 </head>
 <body>
 <div id="login-overlay" style="display:flex">
   <div class="login-box">
-    <h2>Polen</h2>
-    <p>Grant Tracker — sign in to continue</p>
+    <div class="login-logo">
+      <div class="login-logo-icon">🌸</div>
+      <div>
+        <div class="login-logo-text">Polen</div>
+        <div class="login-logo-sub">Grant Tracker</div>
+      </div>
+    </div>
     <input id="li-email" type="email" placeholder="Email" autocomplete="email"/>
     <input id="li-pass" type="password" placeholder="Password" autocomplete="current-password"/>
-    <button id="li-btn" onclick="doLogin()">Sign in</button>
+    <button id="li-btn" onclick="doLogin()"><span id="li-btn-text">Sign in</span></button>
     <div id="li-err" class="login-err"></div>
   </div>
 </div>
+<div id="loading-screen">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">Loading your grants…</div>
+</div>
 <div id="root"></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script>
-// Global error catcher — shows any JS error on screen
-window.onerror=function(msg,src,line,col,err){
-  const d=document.createElement('div');
-  d.style.cssText='position:fixed;bottom:0;left:0;right:0;background:#f87171;color:#000;padding:12px;font:12px monospace;z-index:99999;white-space:pre-wrap;';
-  d.textContent='JS ERROR: '+msg+'\n'+src+':'+line;
-  document.body.appendChild(d);
-};
-window.onunhandledrejection=function(e){
-  const d=document.createElement('div');
-  d.style.cssText='position:fixed;bottom:0;left:0;right:0;background:#fb923c;color:#000;padding:12px;font:12px monospace;z-index:99999;white-space:pre-wrap;';
-  d.textContent='PROMISE ERROR: '+(e.reason&&e.reason.message||e.reason||'unknown');
-  document.body.appendChild(d);
-};
-</script>
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -700,15 +703,35 @@ const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
 // ── Auth helpers ──
-async function doLogin(){
+function showSpinner(){
   const btn=document.getElementById('li-btn');
+  btn.disabled=true;
+  document.getElementById('li-btn-text').textContent='Signing in…';
+  btn.insertAdjacentHTML('afterbegin','<span class="spinner"></span>');
+}
+function hideSpinner(msg){
+  const btn=document.getElementById('li-btn');
+  btn.disabled=false;
+  const sp=btn.querySelector('.spinner');
+  if(sp)sp.remove();
+  document.getElementById('li-btn-text').textContent=msg||'Sign in';
+}
+function showLoading(){
+  document.getElementById('login-overlay').style.display='none';
+  document.getElementById('loading-screen').style.display='flex';
+}
+function hideLoading(){
+  document.getElementById('loading-screen').style.display='none';
+}
+async function doLogin(){
   const err=document.getElementById('li-err');
   const email=document.getElementById('li-email').value.trim();
   const pass=document.getElementById('li-pass').value;
-  btn.disabled=true; err.textContent=''; btn.textContent='Signing in...';
+  err.textContent='';
+  showSpinner();
   const {error}=await _sb.auth.signInWithPassword({email,password:pass});
-  if(error){err.textContent=error.message;btn.disabled=false;btn.textContent='Sign in';}
-  // on success, the boot() call inside Babel handles the rest
+  if(error){err.textContent=error.message;hideSpinner();}
+  // on success, boot() inside Babel fires via onAuthStateChange
 }
 document.getElementById('li-email').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('li-pass').focus();});
 document.getElementById('li-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
@@ -1063,19 +1086,19 @@ function startApp(data){
 
 // Boot runs here — inside Babel — so startApp is always defined when called
 async function boot(){
-  const overlay=document.getElementById('login-overlay');
   const {data:{session}}=await _sb.auth.getSession();
   if(session){
-    overlay.style.display='none';
+    showLoading();
     const grants=await loadFromSupabase();
+    hideLoading();
     startApp(grants);
   } else {
-    overlay.style.display='flex';
-    // Poll for login: re-run boot when auth state changes
+    document.getElementById('login-overlay').style.display='flex';
     _sb.auth.onAuthStateChange(async(event,session)=>{
       if(session&&event==='SIGNED_IN'){
-        overlay.style.display='none';
+        showLoading();
         const grants=await loadFromSupabase();
+        hideLoading();
         startApp(grants);
       }
     });
