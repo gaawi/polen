@@ -693,6 +693,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
   <div class="loading-text">Loading your grants…</div>
 </div>
 <div id="root"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -735,6 +736,7 @@ async function doLogin(){
 }
 document.getElementById('li-email').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('li-pass').focus();});
 document.getElementById('li-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+function doSignOut(){_sb.auth.signOut().then(()=>location.reload());}
 
 // ── Data helpers ──
 async function loadFromSupabase(){
@@ -1302,7 +1304,7 @@ function App({initialGrants}){
         <img src="logo.png" alt="" style={{height:36}}/>
         <div className="topbar-actions">
           <button className="theme-btn" onClick={()=>window.location.reload()} title="Reload from server">🔄</button>
-          <button className="theme-btn" onClick={()=>{_sb.auth.signOut();}} title="Sign out">⎋</button>
+          <button className="theme-btn" onClick={doSignOut} title="Sign out">⎋</button>
           <button className="theme-btn" onClick={()=>setShowSuggestions(true)} title="Suggestions inbox" style={{position:'relative'}}>
             💡{suggestions.length>0&&<span style={{position:'absolute',top:0,right:0,background:'var(--r)',color:'#fff',borderRadius:'50%',fontSize:9,fontWeight:800,width:14,height:14,display:'flex',alignItems:'center',justifyContent:'center',lineHeight:1}}>{suggestions.length}</span>}
           </button>
