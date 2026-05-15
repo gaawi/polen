@@ -707,32 +707,8 @@ async function doLogin(){
   const pass=document.getElementById('li-pass').value;
   btn.disabled=true; err.textContent=''; btn.textContent='Signing in...';
   const {error}=await _sb.auth.signInWithPassword({email,password:pass});
-  if(error){
-    err.textContent=error.message;
-    btn.disabled=false;
-    btn.textContent='Sign in';
-  } else {
-    // Hide overlay and load app directly — don't wait for onAuthStateChange
-    document.getElementById('login-overlay').style.display='none';
-    if(!window._appStarted){
-      window._appStarted=true;
-      btn.textContent='Loading...';
-      try{
-        const grants=await loadFromSupabase();
-        if(typeof startApp==='function'){
-          startApp(grants);
-        } else {
-          throw new Error('startApp not defined — Babel may not have compiled yet');
-        }
-      }catch(e){
-        document.getElementById('login-overlay').style.display='flex';
-        document.getElementById('li-err').textContent='Error: '+e.message;
-        btn.disabled=false; btn.textContent='Sign in';
-        window._appStarted=false;
-        console.error('startApp failed:',e);
-      }
-    }
-  }
+  if(error){err.textContent=error.message;btn.disabled=false;btn.textContent='Sign in';}
+  // on success, the boot() call inside Babel handles the rest
 }
 document.getElementById('li-email').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('li-pass').focus();});
 document.getElementById('li-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
@@ -769,31 +745,6 @@ async function rejectSuggestion(id,setSuggestions){
   await _sb.from('suggestions').update({status:'rejected'}).eq('id',id);
   setSuggestions(p=>p.filter(s=>s.id!==id));
 }
-
-// ── Boot: wait for session, then render ──
-// _pendingGrants holds grants loaded before Babel finishes compiling
-window._pendingGrants=null;
-// Fallback: if auth doesn't fire in 1s, show login
-const _authFallback=setTimeout(()=>{
-  if(!window._appStarted){
-    document.getElementById('login-overlay').style.display='flex';
-  }
-},1000);
-_sb.auth.onAuthStateChange(async(event,session)=>{
-  clearTimeout(_authFallback);
-  const overlay=document.getElementById('login-overlay');
-  if(session){
-    overlay.style.display='none';
-    if(!window._appStarted){
-      window._appStarted=true;
-      const grants=await loadFromSupabase();
-      if(typeof startApp==='function'){startApp(grants);}
-      else{window._pendingGrants=grants;}
-    }
-  } else {
-    overlay.style.display='flex';
-  }
-});
 </script>
 <script type="text/babel">
 const {useState,useMemo,useCallback,useRef,useEffect}=React;
@@ -1109,8 +1060,28 @@ function startApp(data){
   const root=ReactDOM.createRoot(document.getElementById('root'));
   root.render(<App initialGrants={data}/>);
 }
-// If auth fired before Babel finished, grants are waiting in _pendingGrants
-if(window._pendingGrants!==null){startApp(window._pendingGrants);}
+
+// Boot runs here — inside Babel — so startApp is always defined when called
+async function boot(){
+  const overlay=document.getElementById('login-overlay');
+  const {data:{session}}=await _sb.auth.getSession();
+  if(session){
+    overlay.style.display='none';
+    const grants=await loadFromSupabase();
+    startApp(grants);
+  } else {
+    overlay.style.display='flex';
+    // Poll for login: re-run boot when auth state changes
+    _sb.auth.onAuthStateChange(async(event,session)=>{
+      if(session&&event==='SIGNED_IN'){
+        overlay.style.display='none';
+        const grants=await loadFromSupabase();
+        startApp(grants);
+      }
+    });
+  }
+}
+boot();
 
 
 
