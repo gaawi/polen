@@ -41,8 +41,12 @@ body{transition:background .2s,color .2s;}
 body{font-family:var(--font-mono);background:var(--bg);color:var(--t);min-height:100vh;-webkit-font-smoothing:antialiased;font-size:12px;line-height:1.45;letter-spacing:-.005em;}
 .app{height:100vh;display:flex;flex-direction:column;overflow:hidden;}
 
-/* Top bar */
-.topbar{display:flex;align-items:center;gap:8px;padding:8px 16px;background:var(--s1);border-bottom:1px solid var(--bd);flex-shrink:0;flex-wrap:wrap;}
+/* ── Shared nav ── */
+.topbar{display:flex;align-items:center;gap:2px;padding:0 12px;background:var(--s1);border-bottom:1px solid var(--bd);flex-shrink:0;height:40px;}
+.nav-brand{font-size:13px;font-weight:800;color:var(--ac);letter-spacing:.06em;padding:0 10px 0 2px;margin-right:4px;border-right:1px solid var(--bd);flex-shrink:0;}
+.nav-link{background:none;border:none;color:var(--td);font-size:11px;font-weight:600;padding:5px 10px;border-radius:3px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;transition:all .15s;font-family:var(--font-mono);white-space:nowrap;}
+.nav-link:hover{color:var(--t);background:var(--s3);}
+.nav-link.active{color:var(--ac);}
 .stat{display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:3px;background:var(--s2);font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;border:1px solid transparent;}
 .stat:hover{border-color:var(--bd2);}
 .stat.active{border-color:var(--ac);background:var(--acbg);}
@@ -1207,7 +1211,7 @@ function App({initialGrants}){
   const[editMode,setEditMode]=useState(false);
   const[activeView,setActiveView]=useState(false); // "Active Grants" view
   const[calendarView,setCalendarView]=useState(false); // "Upcoming/Calendar" view
-  const[isDark,setIsDark]=useState(true);
+  const[isDark,setIsDark]=useState(()=>localStorage.getItem('polen-theme')==='dark');
   const[suggestions,setSuggestions]=useState([]);
   const[showSuggestions,setShowSuggestions]=useState(false);
   const[suggView,setSuggView]=useState(false);
@@ -1392,13 +1396,15 @@ function App({initialGrants}){
     <div className="app">
       <div className="topbar">
         <img src="logo.png" alt="" style={{height:36}}/>
+        <span className="nav-brand">POLEN</span>
+        <span className="nav-link active">App</span>
+        <a href="grants-cc14d57ccd.html" target="_blank" className="nav-link">Feed</a>
+        <a href="suggest-a51084f11a.html" target="_blank" className="nav-link">+ Suggest</a>
         <div className="topbar-actions">
-          <button className="theme-btn" onClick={()=>window.location.reload()} title="Reload from server">🔄</button>
+          <button className="theme-btn" onClick={()=>window.location.reload()} title="Reload">🔄</button>
           <button className="theme-btn" onClick={doSignOut} title="Sign out">⎋</button>
-          <button className="theme-btn" onClick={()=>window.open(window.location.href.replace(/[^/]*$/,'grants-cc14d57ccd.html'),'_blank')} title="Feed público de grants (ChatGPT lee esto)" style={{fontSize:12,letterSpacing:'-.02em'}}>FEED</button>
-          <button className="theme-btn" onClick={()=>window.open(window.location.href.replace(/[^/]*$/,'suggest-a51084f11a.html'),'_blank')} title="Formulario para que ChatGPT sugiera grants" style={{fontSize:12,letterSpacing:'-.02em'}}>+IA</button>
-          <button className="theme-btn" onClick={()=>setIsDark(d=>!d)} title="Toggle light/dark">{isDark?'☀️':'🌙'}</button>
-          <button className="btn btn-pri" onClick={()=>setShowAdd(true)}>+ Add Grant</button>
+          <button className="theme-btn" title="Toggle theme" onClick={()=>{setIsDark(d=>{const n=!d;localStorage.setItem('polen-theme',n?'dark':'light');return n;})}}>{isDark?'☀️':'🌙'}</button>
+          <button className="btn btn-pri" onClick={()=>setShowAdd(true)}>+ Add</button>
         </div>
       </div>
 
