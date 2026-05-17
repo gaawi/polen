@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+<meta name="googlebot" content="noindex, nofollow">
+<title>Polen · Suggest Grants</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Courier New',Courier,monospace;background:#0e0d0a;color:#f4ede0;padding:24px 20px;font-size:13px;line-height:1.5;}
+h1{color:#ffd233;font-size:15px;font-weight:700;margin-bottom:4px;letter-spacing:.05em;}
+.sub{color:#5c5749;font-size:11px;margin-bottom:24px;}
+.section{font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:#5c5749;margin-bottom:8px;margin-top:24px;}
+pre.schema{background:#15130f;border:1px solid #2a2620;padding:14px 16px;font-size:11px;color:#8a8475;line-height:1.55;overflow-x:auto;white-space:pre;margin-bottom:0;}
+pre.schema .key{color:#7dafff;}
+pre.schema .str{color:#6ee08e;}
+pre.schema .num{color:#ffa848;}
+pre.schema .cmt{color:#3a3528;}
+textarea{width:100%;min-height:220px;background:#15130f;border:1px solid #2a2620;color:#f4ede0;padding:12px 14px;font-size:12px;font-family:'Courier New',Courier,monospace;outline:none;resize:vertical;line-height:1.5;transition:border-color .15s;}
+textarea:focus{border-color:#ffd233;}
+textarea::placeholder{color:#3a3528;}
+.err{color:#ff6b6b;font-size:11px;margin-top:6px;min-height:16px;}
+.ok{color:#6ee08e;font-size:11px;margin-top:6px;min-height:16px;}
+table{width:100%;border-collapse:collapse;margin-top:12px;}
+th{text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:#5c5749;padding:5px 10px;border-bottom:1px solid #2a2620;font-weight:700;}
+td{padding:5px 10px;border-bottom:1px solid #1c1a14;font-size:12px;vertical-align:top;word-break:break-word;}
+.f{font-weight:700;}.g{color:#c8c1b3;}.d{color:#8a8475;white-space:nowrap;}.amt{color:#6ee08e;font-weight:700;}
+.badge{display:inline-block;padding:1px 7px;border-radius:2px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
+.b-apply{background:rgba(255,107,107,.12);color:#ff6b6b;}
+.b-waiting{background:rgba(125,175,255,.12);color:#7dafff;}
+.b-received{background:rgba(110,224,142,.12);color:#6ee08e;}
+.b-denied{background:rgba(255,107,107,.12);color:#ff6b6b;}
+.b-check{background:rgba(255,168,72,.12);color:#ffa848;}
+.b-missed{background:rgba(255,168,72,.08);color:#8a8475;}
+.b-other{background:rgba(122,117,104,.08);color:#7a7568;}
+.btn{padding:9px 20px;border-radius:3px;font-size:12px;font-weight:700;cursor:pointer;border:none;font-family:'Courier New',Courier,monospace;transition:all .1s;}
+.btn-pri{background:#ffd233;color:#000;}.btn-pri:hover{background:#ffe680;}
+.btn-pri:disabled{background:#3a3528;color:#5c5749;cursor:not-allowed;}
+.done{background:#15130f;border:1px solid #6ee08e;padding:20px;color:#6ee08e;font-size:13px;font-weight:700;margin-top:16px;border-radius:3px;display:none;}
+.field-note{font-size:10px;color:#5c5749;font-style:italic;}
+#preview-wrap{display:none;}
+</style>
+</head>
+<body>
+
+<h1>POLEN · SUGGEST GRANTS</h1>
+<div class="sub">Batch grant suggestions → reviewed in Polen app · one-click accept</div>
+
+<div class="section">JSON schema — paste an array following this format</div>
+<pre class="schema"><span class="cmt">// Paste a JSON array. All fields except foundation and grant are optional.</span>
+[
+  {
+    <span class="key">"foundation"</span>:     <span class="str">"Foundation name"</span>,              <span class="cmt">// required</span>
+    <span class="key">"grant"</span>:           <span class="str">"Grant program name"</span>,           <span class="cmt">// required</span>
+    <span class="key">"deadline"</span>:        <span class="str">"YYYY-MM-DD"</span>,                    <span class="cmt">// optional</span>
+    <span class="key">"deadlineType"</span>:    <span class="str">"DDLNE!"</span> <span class="cmt">or</span> <span class="str">"Estimated"</span>,       <span class="cmt">// DDLNE! = hard deadline</span>
+    <span class="key">"nextStep"</span>:        <span class="str">"02 Check"</span>,                     <span class="cmt">// see options below</span>
+    <span class="key">"amount"</span>:          <span class="num">50000</span>,                           <span class="cmt">// number, no $ sign</span>
+    <span class="key">"web"</span>:             <span class="str">"https://foundation.org/grants"</span>, <span class="cmt">// grant page URL</span>
+    <span class="key">"eligiblePeriod"</span>:  <span class="str">"Jan 1, 2027 – Dec 31, 2027"</span>,  <span class="cmt">// grant period</span>
+    <span class="key">"reportDeadline"</span>:  <span class="str">"YYYY-MM-DD"</span>,                    <span class="cmt">// optional</span>
+    <span class="key">"projectDates"</span>:    <span class="str">"Project name or dates"</span>,        <span class="cmt">// optional</span>
+    <span class="key">"notes"</span>:           <span class="str">"Why this grant is relevant"</span>,   <span class="cmt">// optional but useful</span>
+    <span class="key">"season"</span>:          <span class="str">"Fall"</span>                          <span class="cmt">// Spring/Summer/Fall/Winter/Closed</span>
+  }
+]
+
+<span class="cmt">// nextStep options:
+//   "01 Apply on deadline"   → ready to apply
+//   "02 Check"               → needs research (default)
+//   "03 Waiting Results"     → submitted, awaiting decision
+//   "05 Received"            → awarded
+//   "04 Denied"              → declined
+//   "07 Missed Deadline"     → missed
+//   "08 Not Eligible"        → not eligible</span></pre>
+
+<div class="section" style="margin-top:20px">Paste your grant list here</div>
+<textarea id="input" placeholder='[
+  {
+    "foundation": "Ford Foundation",
+    "grant": "Creativity and Free Expression",
+    "deadline": "2026-09-15",
+    "amount": 75000,
+    "notes": "Strong match for current programs"
+  }
+]'></textarea>
+<div id="parse-err" class="err"></div>
+
+<div id="preview-wrap">
+  <div class="section">Preview — <span id="preview-count">0</span> grants to submit</div>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th style="width:160px">Foundation</th>
+        <th>Grant Program</th>
+        <th style="width:90px">Deadline</th>
+        <th style="width:90px">Status</th>
+        <th style="width:80px">Amount</th>
+        <th>Notes</th>
+      </tr>
+    </thead>
+    <tbody id="preview-body"></tbody>
+  </table>
+  <div style="margin-top:16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+    <button class="btn btn-pri" id="submit-btn" disabled>Submit 0 suggestions</button>
+    <span id="submit-err" class="err" style="margin-top:0"></span>
+  </div>
+</div>
+
+<div class="done" id="done">
+  ✓ <span id="done-count">0</span> suggestions submitted · they'll appear in Polen for review
+</div>
+
+<script>
+const SB_URL = 'https://aqehbiyjofsxavndjfjj.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxZWhiaXlqb2ZzeGF2bmRqZmpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3NjUwMzUsImV4cCI6MjA5NDM0MTAzNX0.WgMseUQ6YbtZPjjx1i_VuRXTpSI7n9OD6QLUImmmPU0';
+
+const LABEL = {'00 Send Proposal':'Apply','01 Apply on deadline':'Apply','02 Check':'Check','03 Waiting Results':'Waiting','04 Denied':'Denied','05 Received':'Received','06 Not Applied':'Not Applied','07 Missed Deadline':'Missed','08 Not Eligible':'Not Eligible'};
+const CSS_MAP = {'00 Send Proposal':'apply','01 Apply on deadline':'apply','02 Check':'check','03 Waiting Results':'waiting','04 Denied':'denied','05 Received':'received','06 Not Applied':'other','07 Missed Deadline':'missed','08 Not Eligible':'other'};
+
+function fmt(n){if(!n)return'—';if(n>=1e6)return'$'+(n/1e6).toFixed(1)+'M';if(n>=1000)return'$'+(n/1000).toFixed(n>=10000?0:1)+'k';return'$'+n.toLocaleString();}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+let parsed = [];
+
+function validate(raw) {
+  if (!raw.trim()) { parsed=[]; return null; }
+  try {
+    const arr = JSON.parse(raw);
+    if (!Array.isArray(arr)) return 'Must be a JSON array: [ { ... }, { ... } ]';
+    if (arr.length === 0) return 'Array is empty';
+    for (let i = 0; i < arr.length; i++) {
+      const g = arr[i];
+      if (typeof g !== 'object' || !g) return `Item ${i+1} is not an object`;
+      if (!g.foundation) return `Item ${i+1} missing "foundation"`;
+      if (!g.grant) return `Item ${i+1} missing "grant"`;
+    }
+    parsed = arr;
+    return null;
+  } catch(e) {
+    return 'JSON parse error: ' + e.message;
+  }
+}
+
+function renderPreview() {
+  const tbody = document.getElementById('preview-body');
+  tbody.innerHTML = '';
+  parsed.forEach((g, i) => {
+    const css = CSS_MAP[g.nextStep] || 'check';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="color:#5c5749">${i+1}</td>
+      <td class="f">${esc(g.foundation)}</td>
+      <td class="g">${esc(g.grant)}</td>
+      <td class="d">${esc(g.deadline||'—')}</td>
+      <td><span class="badge b-${css}">${esc(LABEL[g.nextStep]||g.nextStep||'Check')}</span></td>
+      <td class="amt">${fmt(g.amount)}</td>
+      <td style="color:#8a8475;font-size:11px;max-width:240px">${esc(g.notes||'—')}</td>`;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('preview-count').textContent = parsed.length;
+  const btn = document.getElementById('submit-btn');
+  btn.textContent = `Submit ${parsed.length} suggestion${parsed.length===1?'':'s'}`;
+  btn.disabled = parsed.length === 0;
+}
+
+const input = document.getElementById('input');
+input.addEventListener('input', () => {
+  const errEl = document.getElementById('parse-err');
+  const wrap = document.getElementById('preview-wrap');
+  const err = validate(input.value);
+  if (err) {
+    errEl.textContent = err;
+    wrap.style.display = 'none';
+  } else if (parsed.length > 0) {
+    errEl.textContent = '';
+    wrap.style.display = 'block';
+    renderPreview();
+  } else {
+    errEl.textContent = '';
+    wrap.style.display = 'none';
+  }
+});
+
+document.getElementById('submit-btn').addEventListener('click', async () => {
+  if (!parsed.length) return;
+  const btn = document.getElementById('submit-btn');
+  const errEl = document.getElementById('submit-err');
+  btn.disabled = true;
+  btn.textContent = 'Submitting…';
+  errEl.textContent = '';
+
+  try {
+    const rows = parsed.map(g => ({
+      foundation: g.foundation || '',
+      grant_name: g.grant || '',
+      deadline: g.deadline || null,
+      web: g.web || null,
+      notes: g.notes || null,
+      status: 'pending',
+      grant_data: g
+    }));
+
+    const r = await fetch(`${SB_URL}/rest/v1/suggestions`, {
+      method: 'POST',
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + SB_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify(rows)
+    });
+
+    if (!r.ok) {
+      const body = await r.text();
+      throw new Error(`HTTP ${r.status}: ${body}`);
+    }
+
+    const done = document.getElementById('done');
+    document.getElementById('done-count').textContent = parsed.length;
+    done.style.display = 'block';
+    document.getElementById('preview-wrap').style.display = 'none';
+    input.value = '';
+    input.style.display = 'none';
+    document.getElementById('parse-err').textContent = '';
+    btn.style.display = 'none';
+
+  } catch(e) {
+    errEl.textContent = 'Error: ' + e.message;
+    btn.disabled = false;
+    btn.textContent = `Submit ${parsed.length} suggestion${parsed.length===1?'':'s'}`;
+  }
+});
+</script>
+</body>
+</html>

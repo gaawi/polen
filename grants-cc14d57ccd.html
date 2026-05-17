@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, nositelinkssearchbox">
+<meta name="googlebot" content="noindex, nofollow">
+<title>Polen · Grants Feed</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Courier New',Courier,monospace;background:#0e0d0a;color:#f4ede0;padding:24px 20px;font-size:13px;line-height:1.5;}
+h1{color:#ffd233;font-size:15px;font-weight:700;margin-bottom:4px;letter-spacing:.05em;}
+.sub{color:#5c5749;font-size:11px;margin-bottom:28px;}
+.section{font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:#5c5749;margin-bottom:8px;margin-top:28px;}
+table{width:100%;border-collapse:collapse;margin-bottom:16px;}
+th{text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:#5c5749;padding:5px 10px;border-bottom:1px solid #2a2620;font-weight:700;}
+td{padding:5px 10px;border-bottom:1px solid #1c1a14;font-size:12px;vertical-align:top;word-break:break-word;}
+tr:hover td{background:rgba(255,210,51,.03);}
+.f{font-weight:700;color:#f4ede0;}
+.g{color:#c8c1b3;}
+.d{white-space:nowrap;color:#8a8475;}
+.badge{display:inline-block;padding:1px 7px;border-radius:2px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;}
+.b-apply{background:rgba(255,107,107,.12);color:#ff6b6b;}
+.b-waiting{background:rgba(125,175,255,.12);color:#7dafff;}
+.b-received{background:rgba(110,224,142,.12);color:#6ee08e;}
+.b-denied{background:rgba(255,107,107,.12);color:#ff6b6b;}
+.b-check{background:rgba(255,168,72,.12);color:#ffa848;}
+.b-missed{background:rgba(255,168,72,.08);color:#8a8475;}
+.b-other{background:rgba(122,117,104,.08);color:#7a7568;}
+.amt{color:#6ee08e;font-weight:700;}
+.note{color:#5c5749;font-size:11px;max-width:280px;}
+pre{background:#15130f;border:1px solid #2a2620;padding:16px;overflow-x:auto;font-size:11px;color:#8a8475;line-height:1.4;white-space:pre-wrap;word-break:break-word;}
+#msg{color:#8a8475;padding:20px 0;}
+#err{color:#ff6b6b;padding:20px 0;display:none;}
+.stats{display:flex;gap:24px;margin-bottom:24px;}
+.stat{font-size:11px;color:#8a8475;}.stat strong{color:#ffd233;font-size:14px;display:block;margin-bottom:2px;}
+</style>
+</head>
+<body>
+<h1>POLEN · GRANTS FEED</h1>
+<div class="sub" id="sub">Loading…</div>
+
+<div id="msg">Fetching grants from database…</div>
+<div id="err"></div>
+
+<div id="main" style="display:none">
+  <div class="stats">
+    <div class="stat"><strong id="cnt-total">—</strong>Total entries</div>
+    <div class="stat"><strong id="cnt-apply">—</strong>To apply</div>
+    <div class="stat"><strong id="cnt-waiting">—</strong>Waiting</div>
+    <div class="stat"><strong id="cnt-received">—</strong>Awarded</div>
+  </div>
+
+  <div class="section">All grants (deduplicated by program · sorted by deadline)</div>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:170px">Foundation</th>
+        <th>Grant Program</th>
+        <th style="width:90px">Deadline</th>
+        <th style="width:90px">Status</th>
+        <th style="width:80px">Amount</th>
+        <th>Notes</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+
+  <div class="section" style="margin-top:32px">Full grant history · raw JSON (all entries including historical)</div>
+  <pre id="json-out"></pre>
+</div>
+
+<script>
+const URL_ = 'https://aqehbiyjofsxavndjfjj.supabase.co';
+const KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxZWhiaXlqb2ZzeGF2bmRqZmpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3NjUwMzUsImV4cCI6MjA5NDM0MTAzNX0.WgMseUQ6YbtZPjjx1i_VuRXTpSI7n9OD6QLUImmmPU0';
+
+const LABEL = {'00 Send Proposal':'Apply','01 Apply on deadline':'Apply','02 Check':'Check','03 Waiting Results':'Waiting','04 Denied':'Denied','05 Received':'Received','06 Not Applied':'Not Applied','07 Missed Deadline':'Missed','08 Not Eligible':'Not Eligible'};
+const CSS   = {'00 Send Proposal':'apply','01 Apply on deadline':'apply','02 Check':'check','03 Waiting Results':'waiting','04 Denied':'denied','05 Received':'received','06 Not Applied':'other','07 Missed Deadline':'missed','08 Not Eligible':'other'};
+
+function fmt(n){if(!n)return'—';if(n>=1e6)return'$'+(n/1e6).toFixed(1)+'M';if(n>=1000)return'$'+(n/1000).toFixed(n>=10000?0:1)+'k';return'$'+n.toLocaleString();}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+async function load(){
+  try{
+    const r=await fetch(`${URL_}/rest/v1/grants_blob?select=data&id=eq.1`,{
+      headers:{'apikey':KEY,'Authorization':'Bearer '+KEY}
+    });
+    if(!r.ok)throw new Error('HTTP '+r.status+' — run the SQL in README to enable public read');
+    const rows=await r.json();
+    if(!rows.length)throw new Error('No grant data found (id=1)');
+    const grants=rows[0].data||[];
+
+    document.getElementById('msg').style.display='none';
+    document.getElementById('main').style.display='block';
+
+    // Stats
+    document.getElementById('cnt-total').textContent=grants.length;
+    document.getElementById('cnt-apply').textContent=grants.filter(g=>g.nextStep==='01 Apply on deadline'||g.nextStep==='00 Send Proposal').length;
+    document.getElementById('cnt-waiting').textContent=grants.filter(g=>g.nextStep==='03 Waiting Results').length;
+    document.getElementById('cnt-received').textContent=grants.filter(g=>g.nextStep==='05 Received').length;
+
+    // Dedup + sort for table (most recent entry per program)
+    const sorted=[...grants].sort((a,b)=>(b.deadline||'').localeCompare(a.deadline||''));
+    const seen=new Set();
+    const deduped=sorted.filter(g=>{
+      const k=(g.foundation||'').trim()+'|||'+(g.grant||'').trim();
+      if(seen.has(k))return false; seen.add(k); return true;
+    });
+    // Sort: future deadlines first, then past
+    const now=new Date().toISOString().slice(0,10);
+    deduped.sort((a,b)=>{
+      const af=a.deadline&&a.deadline>=now, bf=b.deadline&&b.deadline>=now;
+      if(af&&!bf)return -1; if(!af&&bf)return 1;
+      if(af&&bf)return(a.deadline||'').localeCompare(b.deadline||'');
+      return(b.deadline||'').localeCompare(a.deadline||'');
+    });
+
+    const tbody=document.getElementById('tbody');
+    deduped.forEach(g=>{
+      const amt=g.amountReceived||g.amount;
+      const css=CSS[g.nextStep]||'other';
+      const tr=document.createElement('tr');
+      tr.innerHTML=`
+        <td class="f">${esc(g.foundation||'—')}</td>
+        <td class="g">${esc(g.grant||'—')}${g.projectDates?'<br><span style="color:#5c5749;font-size:10px">'+esc(g.projectDates)+'</span>':''}</td>
+        <td class="d">${esc(g.deadline||'—')}${g.deadlineType==='DDLNE!'?'<br><span style="color:#ff6b6b;font-size:9px">HARD</span>':'<br><span style="color:#5c5749;font-size:9px">est.</span>'}</td>
+        <td><span class="badge b-${css}">${esc(LABEL[g.nextStep]||g.nextStep||'—')}</span></td>
+        <td class="amt">${fmt(amt)}</td>
+        <td class="note">${esc(g.notes||'—')}</td>`;
+      tbody.appendChild(tr);
+    });
+
+    // JSON — full history, clean fields
+    const jsonData=grants.map(g=>({
+      foundation:g.foundation,grant:g.grant,deadline:g.deadline,
+      deadlineType:g.deadlineType,nextStep:g.nextStep,
+      amount:g.amount,amountReceived:g.amountReceived,
+      eligiblePeriod:g.eligiblePeriod,reportDeadline:g.reportDeadline,
+      projectDates:g.projectDates,web:g.web,notes:g.notes,season:g.season
+    }));
+    document.getElementById('json-out').textContent=JSON.stringify(jsonData,null,2);
+
+    document.getElementById('sub').textContent=
+      `${deduped.length} programs · ${grants.length} total entries · fetched ${new Date().toLocaleString()}`;
+  }catch(e){
+    document.getElementById('msg').style.display='none';
+    const el=document.getElementById('err');
+    el.style.display='block';
+    el.textContent='Error: '+e.message;
+  }
+}
+load();
+</script>
+</body>
+</html>

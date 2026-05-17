@@ -762,7 +762,25 @@ async function loadSuggestions(){
   return data||[];
 }
 async function acceptSuggestion(sug,addFn,setSuggestions){
-  const newGrant={id:Date.now(),foundation:sug.foundation,grant:sug.grant_name||'',deadline:sug.deadline||'',deadlineType:'Estimated',nextStep:'02 Check',web:sug.web||'',notes:(sug.notes||'')+(sug.notes?'\n[Suggested]':'[Suggested]'),amount:null,amountReceived:null,eligiblePeriod:'',projectDates:'',improvements:'',source:'suggestion',reportDeadline:'',season:''};
+  const gd=sug.grant_data||{};
+  const newGrant={
+    id:Date.now(),
+    foundation:gd.foundation||sug.foundation||'',
+    grant:gd.grant||sug.grant_name||'',
+    deadline:gd.deadline||sug.deadline||'',
+    deadlineType:gd.deadlineType||'Estimated',
+    nextStep:gd.nextStep||'02 Check',
+    web:gd.web||sug.web||'',
+    notes:(gd.notes||sug.notes||'')+'\n[Suggested by AI]',
+    amount:gd.amount||null,
+    amountReceived:gd.amountReceived||null,
+    eligiblePeriod:gd.eligiblePeriod||'',
+    projectDates:gd.projectDates||'',
+    improvements:'',
+    source:'suggestion',
+    reportDeadline:gd.reportDeadline||'',
+    season:gd.season||''
+  };
   addFn(newGrant);
   await _sb.from('suggestions').update({status:'accepted'}).eq('id',sug.id);
   setSuggestions(p=>p.filter(s=>s.id!==sug.id));
@@ -1528,33 +1546,51 @@ function App({initialGrants}){
 
       {showSuggestions&&(
         <div className="modal-ov" onClick={()=>setShowSuggestions(false)}>
-          <div className="modal" style={{maxWidth:600}} onClick={e=>e.stopPropagation()}>
+          <div className="modal" style={{maxWidth:640}} onClick={e=>e.stopPropagation()}>
             <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16}}>
-              <h3 style={{margin:0}}>💡 Suggestions inbox {suggestions.length>0&&<span style={{background:'var(--rbg)',color:'var(--r)',borderRadius:8,padding:'2px 8px',fontSize:12,marginLeft:6}}>{suggestions.length}</span>}</h3>
+              <h3 style={{margin:0}}>💡 Suggestions inbox {suggestions.length>0&&<span style={{background:'var(--rbg)',color:'var(--r)',borderRadius:3,padding:'2px 8px',fontSize:11,marginLeft:6,fontWeight:700}}>{suggestions.length}</span>}</h3>
               <button className="btn btn-sec" onClick={()=>setShowSuggestions(false)}>✕</button>
             </div>
             {suggestions.length===0?(
               <div style={{textAlign:'center',padding:'32px 0',color:'var(--tf)'}}>
-                <div style={{fontSize:32,marginBottom:8}}>✓</div>
+                <div style={{fontSize:28,marginBottom:8}}>✓</div>
                 No pending suggestions
-                <div style={{marginTop:12,fontSize:12}}>Share <strong>gaawi.github.io/Polen/suggest.html</strong> so others can suggest grants</div>
               </div>
-            ):suggestions.map(s=>(
-              <div key={s.id} style={{background:'var(--s2)',border:'1px solid var(--bd)',borderRadius:10,padding:'12px 14px',marginBottom:10}}>
-                <div style={{fontWeight:700,fontSize:14,marginBottom:2}}>{s.foundation}</div>
-                {s.grant_name&&<div style={{fontSize:12,color:'var(--td)',marginBottom:4}}>{s.grant_name}</div>}
-                <div style={{display:'flex',gap:12,flexWrap:'wrap',fontSize:11,color:'var(--tf)',marginBottom:8}}>
-                  {s.deadline&&<span>📅 {s.deadline}</span>}
-                  {s.web&&<a href={s.web} target="_blank" rel="noreferrer" style={{color:'var(--b)'}}>{s.web}</a>}
-                  <span style={{marginLeft:'auto'}}>{new Date(s.submitted_at).toLocaleDateString()}</span>
+            ):suggestions.map(s=>{
+              const gd=s.grant_data||{};
+              const hasFullData=Object.keys(gd).length>0;
+              return(
+              <div key={s.id} style={{background:'var(--s2)',border:'1px solid var(--bd)',borderRadius:3,padding:'12px 14px',marginBottom:10}}>
+                <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:8,marginBottom:6}}>
+                  <div>
+                    <div style={{fontWeight:700,fontSize:13,marginBottom:1}}>{s.foundation}</div>
+                    {s.grant_name&&<div style={{fontSize:11,color:'var(--td)'}}>{s.grant_name}</div>}
+                  </div>
+                  <div style={{fontSize:9,color:'var(--tf)',whiteSpace:'nowrap',flexShrink:0}}>{new Date(s.submitted_at).toLocaleDateString()}</div>
                 </div>
-                {s.notes&&<div style={{fontSize:11,color:'var(--td)',marginBottom:10,lineHeight:1.5,background:'var(--s3)',borderRadius:6,padding:'6px 8px'}}>{s.notes}</div>}
+                {/* Full data grid if submitted via AI batch form */}
+                {hasFullData?(
+                  <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'3px 16px',fontSize:11,marginBottom:8}}>
+                    {gd.deadline&&<div><span style={{color:'var(--tf)',fontSize:9,textTransform:'uppercase',letterSpacing:'.06em'}}>Deadline </span><span style={{color:'var(--t)'}}>{gd.deadline}</span>{gd.deadlineType==='DDLNE!'&&<span style={{color:'var(--r)',fontSize:9,marginLeft:4}}>HARD</span>}</div>}
+                    {gd.amount&&<div><span style={{color:'var(--tf)',fontSize:9,textTransform:'uppercase',letterSpacing:'.06em'}}>Amount </span><span style={{color:'var(--g)',fontWeight:700}}>${Number(gd.amount).toLocaleString()}</span></div>}
+                    {gd.nextStep&&<div><span style={{color:'var(--tf)',fontSize:9,textTransform:'uppercase',letterSpacing:'.06em'}}>Status </span><span style={{color:'var(--t)'}}>{gd.nextStep}</span></div>}
+                    {gd.season&&<div><span style={{color:'var(--tf)',fontSize:9,textTransform:'uppercase',letterSpacing:'.06em'}}>Season </span><span style={{color:'var(--t)'}}>{gd.season}</span></div>}
+                    {gd.eligiblePeriod&&<div style={{gridColumn:'1/-1'}}><span style={{color:'var(--tf)',fontSize:9,textTransform:'uppercase',letterSpacing:'.06em'}}>Period </span><span style={{color:'var(--t)'}}>{gd.eligiblePeriod}</span></div>}
+                    {gd.web&&<div style={{gridColumn:'1/-1'}}><span style={{color:'var(--tf)',fontSize:9,textTransform:'uppercase',letterSpacing:'.06em'}}>Web </span><a href={gd.web} target="_blank" rel="noreferrer" style={{color:'var(--b)'}}>{gd.web}</a></div>}
+                  </div>
+                ):(
+                  <div style={{display:'flex',gap:12,flexWrap:'wrap',fontSize:11,color:'var(--tf)',marginBottom:6}}>
+                    {s.deadline&&<span>📅 {s.deadline}</span>}
+                    {s.web&&<a href={s.web} target="_blank" rel="noreferrer" style={{color:'var(--b)'}}>{s.web}</a>}
+                  </div>
+                )}
+                {(gd.notes||s.notes)&&<div style={{fontSize:11,color:'var(--td)',marginBottom:10,lineHeight:1.5,background:'var(--s3)',borderRadius:2,padding:'5px 8px'}}>{gd.notes||s.notes}</div>}
                 <div style={{display:'flex',gap:8}}>
-                  <button className="btn btn-pri" style={{flex:1,fontSize:12}} onClick={()=>acceptSuggestion(s,add,setSuggestions)}>✓ Aceptar → Tracker</button>
-                  <button className="btn btn-sec" style={{fontSize:12}} onClick={()=>rejectSuggestion(s.id,setSuggestions)}>✕ Descartar</button>
+                  <button className="btn btn-pri" style={{flex:1,fontSize:11}} onClick={()=>acceptSuggestion(s,add,setSuggestions)}>✓ Añadir al Tracker</button>
+                  <button className="btn btn-sec" style={{fontSize:11}} onClick={()=>rejectSuggestion(s.id,setSuggestions)}>✕</button>
                 </div>
               </div>
-            ))}
+            );})}
           </div>
         </div>
       )}
