@@ -1129,14 +1129,64 @@ boot();
 
 
 // ── AI Suggestions View ──
-function SuggestionsView({suggestions,onAccept,onReject}){
+function SuggestionRow({s,i,onAccept,onReject}){
+  const gd=s.grant_data||{};
+  const foundation=gd.foundation||s.foundation||'—';
+  const grant=gd.grant||s.grant_name||'—';
+  const deadline=gd.deadline||s.deadline||null;
+  const isHard=gd.deadlineType==='DDLNE!';
+  const step=gd.nextStep||'02 Check';
+  const web=gd.web||s.web||null;
+  const[notes,setNotes]=useState(gd.notes||s.notes||'');
+  const[editing,setEditing]=useState(false);
   function fmtAmt(n){if(!n)return'—';if(n>=1e6)return'$'+(n/1e6).toFixed(1)+'M';if(n>=1000)return'$'+(n/1000).toFixed(n>=10000?0:1)+'k';return'$'+n.toLocaleString();}
+  const enriched={...s,grant_data:{...gd,notes}};
+  return(
+    <tr key={s.id}>
+      <td style={{color:'var(--tf)',fontSize:10,textAlign:'center'}}>{i+1}</td>
+      <td style={{fontWeight:700,fontSize:12}}>{foundation}</td>
+      <td>
+        <div style={{fontSize:12,fontWeight:600}}>{grant}</div>
+        {gd.eligiblePeriod&&<div style={{fontSize:10,color:'var(--tf)',marginTop:1}}>{gd.eligiblePeriod}</div>}
+        {gd.projectDates&&<div style={{fontSize:10,color:'var(--tf)',marginTop:1}}>{gd.projectDates}</div>}
+      </td>
+      <td>
+        {deadline?<><span style={{fontSize:11,fontWeight:600,color:isHard?'var(--r)':'var(--t)'}}>{deadline}</span><br/><span style={{fontSize:9,color:isHard?'var(--r)':'var(--tf)'}}>{isHard?'HARD':'est.'}</span></>:<span style={{color:'var(--tf)'}}>—</span>}
+      </td>
+      <td><span className={`ns ${STEP_CSS[step]||'ns-check'}`}>{STEP_SHORT[step]||step}</span></td>
+      <td style={{fontWeight:700,color:'var(--g)',fontVariantNumeric:'tabular-nums',fontSize:11}}>{fmtAmt(gd.amount)}</td>
+      <td style={{fontSize:10,color:'var(--td)'}}>{gd.season||'—'}</td>
+      <td style={{fontSize:11,color:'var(--tf)',maxWidth:240}}>
+        {editing
+          ? <textarea
+              autoFocus
+              value={notes}
+              onChange={e=>setNotes(e.target.value)}
+              onBlur={()=>setEditing(false)}
+              style={{width:'100%',minHeight:60,background:'var(--s2)',border:'1px solid var(--ac)',color:'var(--t)',padding:'4px 6px',fontSize:11,fontFamily:'inherit',resize:'vertical',lineHeight:1.4}}
+            />
+          : <div style={{lineHeight:1.4,cursor:'text',minHeight:24,color:notes?'var(--tf)':'var(--bd2)'}} onClick={()=>setEditing(true)} title="Click to edit notes">
+              {notes||<span style={{fontStyle:'italic',fontSize:10}}>click to add notes…</span>}
+            </div>
+        }
+        {web&&<a href={web} target="_blank" rel="noreferrer" className="btn-conv" onClick={e=>e.stopPropagation()} style={{marginTop:4,display:'inline-block'}}>↗ link</a>}
+      </td>
+      <td>
+        <div style={{display:'flex',gap:5,alignItems:'center'}}>
+          <button className="btn btn-pri" style={{fontSize:10,padding:'4px 12px',whiteSpace:'nowrap'}} onClick={()=>onAccept(enriched)}>✓ Accept</button>
+          <button className="btn btn-sec" style={{fontSize:10,padding:'4px 8px'}} onClick={()=>onReject(s.id)}>✕</button>
+        </div>
+      </td>
+    </tr>
+  );
+}
+function SuggestionsView({suggestions,onAccept,onReject}){
   if(suggestions.length===0)return(
     <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:'60px 20px',gap:12,color:'var(--tf)'}}>
       <div style={{fontSize:32}}>🤖</div>
-      <div style={{fontSize:13,fontWeight:600}}>No hay sugerencias pendientes</div>
+      <div style={{fontSize:13,fontWeight:600}}>No pending suggestions</div>
       <div style={{fontSize:11,color:'var(--tf)',textAlign:'center',maxWidth:340,lineHeight:1.6}}>
-        Cuando ChatGPT añada grants desde el formulario <strong style={{color:'var(--td)'}}>+IA</strong>, aparecerán aquí para que los apruebes.
+        When ChatGPT adds grants via the Action, they'll appear here for review.
       </div>
     </div>
   );
@@ -1151,47 +1201,11 @@ function SuggestionsView({suggestions,onAccept,onReject}){
           <th style={{width:80}}>Status</th>
           <th style={{width:85}}>Amount</th>
           <th style={{width:55}}>Season</th>
-          <th>Notes</th>
+          <th>Notes <span style={{fontWeight:400,textTransform:'none',fontSize:9,letterSpacing:0,color:'var(--tf)'}}>· click to edit</span></th>
           <th style={{width:140}}></th>
         </tr></thead>
         <tbody>
-          {suggestions.map((s,i)=>{
-            const gd=s.grant_data||{};
-            const foundation=gd.foundation||s.foundation||'—';
-            const grant=gd.grant||s.grant_name||'—';
-            const deadline=gd.deadline||s.deadline||null;
-            const isHard=gd.deadlineType==='DDLNE!';
-            const step=gd.nextStep||'02 Check';
-            const web=gd.web||s.web||null;
-            const notes=gd.notes||s.notes||null;
-            return(
-              <tr key={s.id}>
-                <td style={{color:'var(--tf)',fontSize:10,textAlign:'center'}}>{i+1}</td>
-                <td style={{fontWeight:700,fontSize:12}}>{foundation}</td>
-                <td>
-                  <div style={{fontSize:12,fontWeight:600}}>{grant}</div>
-                  {gd.eligiblePeriod&&<div style={{fontSize:10,color:'var(--tf)',marginTop:1}}>{gd.eligiblePeriod}</div>}
-                  {gd.projectDates&&<div style={{fontSize:10,color:'var(--tf)',marginTop:1}}>{gd.projectDates}</div>}
-                </td>
-                <td>
-                  {deadline?<><span style={{fontSize:11,fontWeight:600,color:isHard?'var(--r)':'var(--t)'}}>{deadline}</span><br/><span style={{fontSize:9,color:isHard?'var(--r)':'var(--tf)'}}>{isHard?'HARD':'est.'}</span></>:<span style={{color:'var(--tf)'}}>—</span>}
-                </td>
-                <td><span className={`ns ${STEP_CSS[step]||'ns-check'}`}>{STEP_SHORT[step]||step}</span></td>
-                <td style={{fontWeight:700,color:'var(--g)',fontVariantNumeric:'tabular-nums',fontSize:11}}>{fmtAmt(gd.amount)}</td>
-                <td style={{fontSize:10,color:'var(--td)'}}>{gd.season||'—'}</td>
-                <td style={{fontSize:11,color:'var(--tf)',maxWidth:220}}>
-                  {notes&&<div style={{marginBottom:web?3:0,lineHeight:1.4}}>{notes}</div>}
-                  {web&&<a href={web} target="_blank" rel="noreferrer" className="btn-conv" onClick={e=>e.stopPropagation()} style={{marginTop:2}}>↗ link</a>}
-                </td>
-                <td>
-                  <div style={{display:'flex',gap:5,alignItems:'center'}}>
-                    <button className="btn btn-pri" style={{fontSize:10,padding:'4px 12px',whiteSpace:'nowrap'}} onClick={()=>onAccept(s)}>✓ Añadir</button>
-                    <button className="btn btn-sec" style={{fontSize:10,padding:'4px 8px'}} onClick={()=>onReject(s.id)}>✕</button>
-                  </div>
-                </td>
-              </tr>
-            );
-          })}
+          {suggestions.map((s,i)=><SuggestionRow key={s.id} s={s} i={i} onAccept={onAccept} onReject={onReject}/>)}
         </tbody>
       </table>
     </div>
