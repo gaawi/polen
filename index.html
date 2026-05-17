@@ -42,8 +42,8 @@ body{font-family:var(--font-mono);background:var(--bg);color:var(--t);min-height
 .app{height:100vh;display:flex;flex-direction:column;overflow:hidden;}
 
 /* ── Shared nav ── */
-.topbar{display:flex;align-items:center;gap:2px;padding:0 12px;background:var(--s1);border-bottom:1px solid var(--bd);flex-shrink:0;height:40px;}
-.nav-brand{font-size:13px;font-weight:800;color:var(--ac);letter-spacing:.06em;padding:0 10px 0 2px;margin-right:4px;border-right:1px solid var(--bd);flex-shrink:0;}
+.topbar{display:flex;align-items:center;gap:4px;padding:0 12px;background:var(--s1);border-bottom:1px solid var(--bd);flex-shrink:0;height:44px;position:sticky;top:0;z-index:20;}
+.nav-brand{font-size:13px;font-weight:800;color:var(--ac);letter-spacing:.06em;padding:0 10px 0 0;margin-right:4px;border-right:1px solid var(--bd);flex-shrink:0;white-space:nowrap;}
 .nav-link{background:none;border:none;color:var(--td);font-size:11px;font-weight:600;padding:5px 10px;border-radius:3px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;transition:all .15s;font-family:var(--font-mono);white-space:nowrap;}
 .nav-link:hover{color:var(--t);background:var(--s3);}
 .nav-link.active{color:var(--ac);}
@@ -57,7 +57,7 @@ body{font-family:var(--font-mono);background:var(--bg);color:var(--t);min-height
 .stat.sr .sv{color:var(--r);}
 .stat.sb .sv{color:var(--b);}
 .stat.sp .sv{color:var(--acl);}
-.topbar-actions{margin-left:auto;display:flex;gap:6px;align-items:center;}
+.topbar-actions{display:flex;gap:6px;align-items:center;flex-shrink:0;}
 .btn{padding:5px 12px;border-radius:3px;font-size:11px;font-weight:700;cursor:pointer;border:none;transition:all .1s;font-family:var(--font-mono);}
 .btn-pri{background:var(--ac);color:#000;}.btn-pri:hover{background:var(--acl);}
 .btn-sec{background:var(--s2);color:var(--td);border:1px solid var(--bd);}.btn-sec:hover{color:var(--t);border-color:var(--ac);}
@@ -355,23 +355,13 @@ body{font-family:var(--font-mono);background:var(--bg);color:var(--t);min-height
   /* ── Safe area & system feel ── */
   .app{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);}
 
-  /* ── Top bar: Large title style ── */
-  .topbar{
-    padding:14px 16px 8px;gap:0;flex-wrap:wrap;
-    background:var(--bg);border-bottom:none;
-  }
-  .topbar h1{font-size:28px;font-weight:800;letter-spacing:-.5px;width:100%;margin-bottom:6px;}
-  .topbar h1 span{color:var(--acl);display:inline;}
-  /* Stats as horizontal pill row below title */
-  .stat{
-    padding:3px 10px;font-size:10px;border-radius:20px;
-    background:var(--s2);gap:4px;
-  }
-  .stat .sv{font-size:13px;}
-  .stat span:not(.sv){display:inline;font-size:9px;}
-  .topbar-actions{margin-left:auto;gap:6px;}
-  .btn{padding:7px 14px;font-size:12px;border-radius:20px;font-weight:700;}
-  .theme-btn{padding:6px 10px;border-radius:20px;font-size:16px;}
+  /* ── Top bar: compact single row on mobile ── */
+  .topbar{padding:0 10px;height:44px;background:var(--s1);border-bottom:1px solid var(--bd);}
+  .nav-brand{font-size:12px;padding:0 8px 0 0;margin-right:2px;}
+  .topbar-actions{gap:4px;}
+  .btn-reload,.btn-signout{display:none;}
+  .btn{padding:6px 12px;font-size:11px;border-radius:3px;font-weight:700;}
+  .theme-btn{padding:4px 8px;font-size:13px;}
 
   /* ── Filters: segmented control + search ── */
   .filters{
@@ -584,7 +574,7 @@ body{font-family:var(--font-mono);background:var(--bg);color:var(--t);min-height
 
 /* Small phones */
 @media(max-width:400px){
-  .topbar h1{font-size:24px;}
+  .nav-brand{font-size:11px;}
   .stat{padding:3px 8px;font-size:9px;}
   .stat .sv{font-size:12px;}
   .flat-table td.flat-fname{font-size:14px;}
@@ -1409,11 +1399,11 @@ function App({initialGrants}){
   return(
     <div className="app">
       <div className="topbar">
-        <img src="logo.png" alt="" style={{height:36}}/>
-        <span className="nav-brand">POLEN</span>
+        <span className="nav-brand">🌸 POLEN</span>
+        <div style={{flex:1}}/>
         <div className="topbar-actions">
-          <button className="theme-btn" onClick={()=>window.location.reload()} title="Reload">🔄</button>
-          <button className="theme-btn" onClick={doSignOut} title="Sign out">⎋</button>
+          <button className="theme-btn btn-reload" onClick={()=>window.location.reload()} title="Reload">🔄</button>
+          <button className="theme-btn btn-signout" onClick={doSignOut} title="Sign out">⎋</button>
           <button className="theme-btn" title="Toggle theme" onClick={()=>{setIsDark(d=>{const n=!d;localStorage.setItem('polen-theme',n?'dark':'light');return n;})}}>{isDark?'☀️':'🌙'}</button>
           <button className="btn btn-pri" onClick={()=>setShowAdd(true)}>+ Add</button>
         </div>
