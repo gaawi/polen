@@ -99,6 +99,7 @@ body{font-family:var(--font-mono);background:var(--bg);color:var(--t);min-height
 .sugg-actions{display:flex;gap:8px;margin-top:12px;align-items:stretch;}
 .sugg-actions .btn{flex:1;text-align:center;justify-content:center;padding:10px 16px;font-size:12px;border-radius:6px;font-weight:700;letter-spacing:.02em;}
 .sugg-actions .btn-rej{flex:0 0 44px;padding:10px 0;border-radius:6px;font-size:16px;}
+.sugg-status-sel{width:100%;padding:7px 28px 7px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font-mono);appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='currentColor' opacity='.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;}
 .sugg-link-btn{display:inline-flex;align-items:center;gap:5px;padding:10px 14px;border-radius:6px;font-size:11px;font-weight:700;color:var(--b);background:var(--bbg);border:1px solid color-mix(in srgb,var(--b) 20%,transparent);cursor:pointer;text-decoration:none;white-space:nowrap;transition:all .15s;font-family:var(--font-mono);flex-shrink:0;}
 .sugg-link-btn:hover{background:var(--b);color:#fff;border-color:var(--b);}
 
@@ -426,7 +427,7 @@ body{font-family:var(--font-mono);background:var(--bg);color:var(--t);min-height
   .sugg-actions .btn{min-height:44px;font-size:14px;border-radius:10px;}
   .sugg-actions .btn-rej{min-height:44px;border-radius:10px;}
   .sugg-link-btn{min-height:44px;border-radius:10px;font-size:12px;}
-  .sugg-notes-input{font-size:16px;}
+  .sugg-notes-input{font-size:14px;}
 
   /* ── Save indicator ── */
   .save-indicator{font-size:9px;}
@@ -526,8 +527,10 @@ body{font-family:var(--font-mono);background:var(--bg);color:var(--t);min-height
   .tl-card .tl-header>span:first-child{font-size:18px!important;}
   .tl-card .tl-meta{flex-wrap:wrap;gap:4px!important;}
   .tl-card .tl-meta .ns-select{font-size:11px;padding:4px 12px;}
-  .tl-card .tl-grid{grid-template-columns:1fr!important;gap:4px!important;font-size:13px!important;}
-  .tl-card .tl-grid span[style]{font-size:10px!important;}
+  .tl-card .tl-grid{grid-template-columns:1fr 1fr!important;gap:10px 14px!important;font-size:12px!important;}
+  .tl-card .tl-grid span[style]{font-size:9px!important;}
+  .period-inputs{gap:6px!important;}
+  .period-date{font-size:13px!important;padding:6px 8px!important;}
 
   /* Thermo — slightly bigger for touch */
   .thermo-bar{height:8px;border-radius:5px;}
@@ -663,19 +666,20 @@ body{font-family:var(--font-mono);background:var(--bg);color:var(--t);min-height
 @media(max-width:768px){.cte-icon{opacity:.4;}}
 /* Inline editor — replaces floating popup */
 .dfield-wrap{display:block;width:100%;}
-.dfield-input{display:block;width:100%;background:var(--s2);border:1px solid var(--ac);color:var(--t);padding:6px 8px;border-radius:2px;font-size:12px;font-family:var(--font-mono);outline:none;color-scheme:light dark;-webkit-appearance:none;}
+.dfield-input{display:block;width:100%;background:var(--s2);border:1px solid var(--ac);color:var(--t);padding:6px 8px;border-radius:4px;font-size:12px;font-family:var(--font-mono);outline:none;color-scheme:light dark;-webkit-appearance:none;}
 html.light .dfield-input{color-scheme:light;}
 .dfield-input:focus{border-color:var(--ac);}
 .dfield-ta{min-height:80px;resize:vertical;}
 .dfield-actions{display:flex;gap:6px;margin-top:5px;}
-.dfield-btn{padding:4px 12px;border-radius:2px;font-size:10px;font-weight:700;cursor:pointer;border:none;font-family:var(--font-mono);}
+.dfield-btn{padding:5px 14px;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;border:none;font-family:var(--font-mono);}
 .dfield-ok{background:var(--ac);color:#000;}
 .dfield-cancel{background:var(--s2);color:var(--td);border:1px solid var(--bd);}
-@media(max-width:768px){
-  .dfield-input{font-size:16px!important;padding:10px 12px;}
-  .dfield-ta{min-height:100px;}
-  .dfield-btn{padding:8px 20px;font-size:13px;border-radius:6px;}
-}
+/* Grant Period compact row */
+.period-inputs{display:flex;align-items:center;gap:8px;}
+.period-date{flex:1;min-width:0;background:var(--s2);border:1px solid var(--bd);color:var(--t);padding:6px 8px;border-radius:4px;font-size:12px;font-family:var(--font-mono);outline:none;color-scheme:light dark;-webkit-appearance:none;transition:border-color .15s;}
+html.light .period-date{color-scheme:light;}
+.period-date:focus{border-color:var(--ac);}
+.period-sep{color:var(--tf);font-size:13px;flex-shrink:0;font-weight:300;}
 
 /* ── Login overlay ── */
 #login-overlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;}
@@ -974,12 +978,11 @@ function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
           <div><L>Deadline</L><DField className="ef ef-date" type="date" value={e.deadline||''} label="Deadline" onChange={v=>onChangeField(e.id,'deadline',v)}/></div>
           <div style={{gridColumn:'1/-1'}}>
             <L>Grant Period</L>
-            <div style={{display:'flex',gap:8,alignItems:'flex-end',flexWrap:'wrap'}}>
-              <div><L>Start</L><input type="date" className="dfield-input" value={parsedPeriod.start} onChange={ev=>updatePeriod('start',ev.target.value)} style={{width:'auto'}}/></div>
-              <span style={{color:'var(--tf)',paddingBottom:6,fontSize:12}}>–</span>
-              <div><L>End</L><input type="date" className="dfield-input" value={parsedPeriod.end} onChange={ev=>updatePeriod('end',ev.target.value)} style={{width:'auto'}}/></div>
+            <div className="period-inputs">
+              <input type="date" className="period-date" value={parsedPeriod.start} onChange={ev=>updatePeriod('start',ev.target.value)}/>
+              <span className="period-sep">–</span>
+              <input type="date" className="period-date" value={parsedPeriod.end} onChange={ev=>updatePeriod('end',ev.target.value)}/>
             </div>
-            {e.eligiblePeriod&&<div style={{fontSize:10,color:'var(--tf)',marginTop:3}}>{e.eligiblePeriod}</div>}
           </div>
           <div><L>Project</L><DField className="ef" value={e.projectDates||''} placeholder="Project name" label="Project" onChange={v=>onChangeField(e.id,'projectDates',v)}/></div>
           <div><L>Report Deadline</L><DField className="ef ef-date" type="date" value={e.reportDeadline||''} label="Report Deadline" onChange={v=>onChangeField(e.id,'reportDeadline',v)}/></div>
@@ -1192,8 +1195,8 @@ function SuggestionCard({s,i,onAccept,onReject}){
         {fmtAmt(gd.amount)&&<span className="sugg-meta-item amt">{fmtAmt(gd.amount)}</span>}
         {gd.season&&<span className="sugg-meta-item season">{gd.season}</span>}
       </div>
-      <div style={{marginTop:8}}>
-        <select className={`ns-select ${STEP_CSS[localStep]||'ns-check'}`}
+      <div style={{marginTop:10}}>
+        <select className={`sugg-status-sel ns-select ${STEP_CSS[localStep]||'ns-check'}`}
           value={localStep} onChange={e=>setLocalStep(e.target.value)}>
           {STEPS.map(st=><option key={st} value={st}>{STEP_SHORT[st]}</option>)}
         </select>
