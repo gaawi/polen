@@ -1,0 +1,121 @@
+openapi: 3.1.0
+info:
+  title: Polen Grants Suggestions
+  description: Submit grant suggestions to Polen for review. Use this action to add grants that might be relevant, they will appear as pending suggestions in the Polen app for the user to accept or reject.
+  version: 1.0.0
+servers:
+  - url: https://aqehbiyjofsxavndjfjj.supabase.co/rest/v1
+paths:
+  /suggestions:
+    post:
+      operationId: submitGrantSuggestions
+      summary: Submit one or more grant suggestions
+      description: |
+        Submit an array of grant suggestions. Each suggestion requires a foundation name and grant program name.
+        All other fields are optional but highly encouraged. Suggestions will appear as pending in Polen for review.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                required:
+                  - foundation
+                  - grant_name
+                properties:
+                  foundation:
+                    type: string
+                    description: Name of the foundation or funder
+                    example: Ford Foundation
+                  grant_name:
+                    type: string
+                    description: Name of the grant program
+                    example: Creativity and Free Expression
+                  deadline:
+                    type: string
+                    format: date
+                    nullable: true
+                    description: Application deadline in YYYY-MM-DD format
+                    example: "2026-09-15"
+                  web:
+                    type: string
+                    nullable: true
+                    description: URL of the grant page
+                    example: https://fordfoundation.org/work/our-grants/
+                  notes:
+                    type: string
+                    nullable: true
+                    description: Why this grant is relevant or any important details
+                    example: Strong match for arts & culture programs, accepts international orgs
+                  status:
+                    type: string
+                    default: pending
+                    enum: [pending]
+                    description: Always set to pending
+                  grant_data:
+                    type: object
+                    description: Full grant details as a JSON object with all available fields
+                    properties:
+                      foundation:
+                        type: string
+                      grant:
+                        type: string
+                        description: Grant program name (same as grant_name)
+                      deadline:
+                        type: string
+                        format: date
+                        nullable: true
+                      deadlineType:
+                        type: string
+                        nullable: true
+                        enum: ["DDLNE!", "Estimated"]
+                        description: DDLNE! for hard deadlines, Estimated for rolling/approximate
+                      nextStep:
+                        type: string
+                        nullable: true
+                        description: Workflow status
+                        enum:
+                          - "01 Apply on deadline"
+                          - "02 Check"
+                          - "03 Waiting Results"
+                          - "04 Denied"
+                          - "05 Received"
+                          - "07 Missed Deadline"
+                          - "08 Not Eligible"
+                        default: "02 Check"
+                      amount:
+                        type: number
+                        nullable: true
+                        description: Grant amount in USD (number only, no $ sign)
+                        example: 50000
+                      web:
+                        type: string
+                        nullable: true
+                      eligiblePeriod:
+                        type: string
+                        nullable: true
+                        description: Eligible project period
+                        example: "Jan 1, 2027 – Dec 31, 2027"
+                      reportDeadline:
+                        type: string
+                        format: date
+                        nullable: true
+                      projectDates:
+                        type: string
+                        nullable: true
+                      notes:
+                        type: string
+                        nullable: true
+                      season:
+                        type: string
+                        nullable: true
+                        enum: [Spring, Summer, Fall, Winter, Closed]
+      responses:
+        "201":
+          description: Suggestions submitted successfully
+        "400":
+          description: Bad request — check required fields
+        "401":
+          description: Unauthorized — API key missing or invalid
