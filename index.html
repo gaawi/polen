@@ -560,17 +560,7 @@ body{font-family:var(--font-mono);background:var(--bg);color:var(--t);min-height
   .sheet{min-width:700px;}
   .sheet-toolbar{padding:6px 12px;flex-wrap:wrap;}
 
-  /* ── Click-to-edit popover ── */
-  .cte-pop{
-    min-width:240px;padding:10px;border-radius:14px;
-    box-shadow:0 8px 30px rgba(0,0,0,.35);
-  }
-  .cte-pop input,.cte-pop textarea{
-    font-size:16px;padding:10px 12px;border-radius:10px;
-    -webkit-appearance:none;
-  }
-  .cte-pop .cte-btns{margin-top:8px;gap:6px;}
-  .cte-pop .cte-btn{padding:6px 16px;font-size:12px;border-radius:10px;}
+  /* ── Click-to-edit ── */
   .cte-icon{opacity:.4;font-size:10px;}
 
   /* ── Editable fields ── */
@@ -638,21 +628,25 @@ body{font-family:var(--font-mono);background:var(--bg);color:var(--t);min-height
 .cte{cursor:pointer;display:inline-flex;align-items:center;gap:3px;min-height:18px;min-width:20px;padding:1px 3px;border-radius:2px;transition:background .1s;}
 .cte:hover{background:var(--acbg);}
 .cte-val{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.cte-val.wrap{white-space:normal;overflow:visible;text-overflow:unset;}
 .cte-empty{color:var(--tf);font-style:italic;font-size:10px;}
 .cte-icon{font-size:8px;color:var(--tf);opacity:0;transition:opacity .15s;flex-shrink:0;}
 .cte:hover .cte-icon{opacity:1;}
-/* Popover editor */
-.cte-pop{position:absolute;z-index:100;background:var(--s1);border:1px solid var(--ac);border-radius:3px;padding:6px;box-shadow:0 8px 24px rgba(0,0,0,.4);min-width:160px;}
-.cte-pop input,.cte-pop textarea{width:100%;background:var(--s2);border:1px solid var(--bd);color:var(--t);padding:6px 8px;border-radius:2px;font-size:12px;font-family:var(--font-mono);outline:none;}
-.cte-pop input:focus,.cte-pop textarea:focus{border-color:var(--ac);}
-.cte-pop textarea{min-height:50px;resize:vertical;}
-.cte-pop .cte-btns{display:flex;gap:4px;justify-content:flex-end;margin-top:4px;}
-.cte-pop .cte-btn{padding:3px 10px;border-radius:2px;font-size:10px;font-weight:600;cursor:pointer;border:none;font-family:var(--font-mono);}
-.cte-pop .cte-ok{background:var(--ac);color:#000;}
-.cte-pop .cte-cancel{background:var(--s2);color:var(--td);border:1px solid var(--bd);}
+@media(max-width:768px){.cte-icon{opacity:.4;}}
+/* Inline editor — replaces floating popup */
+.dfield-wrap{display:block;width:100%;}
+.dfield-input{display:block;width:100%;background:var(--s2);border:1px solid var(--ac);color:var(--t);padding:6px 8px;border-radius:2px;font-size:12px;font-family:var(--font-mono);outline:none;color-scheme:light dark;-webkit-appearance:none;}
+html.light .dfield-input{color-scheme:light;}
+.dfield-input:focus{border-color:var(--ac);}
+.dfield-ta{min-height:80px;resize:vertical;}
+.dfield-actions{display:flex;gap:6px;margin-top:5px;}
+.dfield-btn{padding:4px 12px;border-radius:2px;font-size:10px;font-weight:700;cursor:pointer;border:none;font-family:var(--font-mono);}
+.dfield-ok{background:var(--ac);color:#000;}
+.dfield-cancel{background:var(--s2);color:var(--td);border:1px solid var(--bd);}
 @media(max-width:768px){
-  .cte-icon{opacity:.4;}
-  .cte-pop{min-width:200px;left:8px!important;right:8px!important;max-width:calc(100vw - 16px);}
+  .dfield-input{font-size:16px!important;padding:10px 12px;}
+  .dfield-ta{min-height:100px;}
+  .dfield-btn{padding:8px 20px;font-size:13px;border-radius:6px;}
 }
 
 /* ── Login overlay ── */
@@ -814,37 +808,27 @@ function CopyBtn({text}){
 function DField({value,onChange,className,type,placeholder,style,label,multiline}){
   const[editing,setEditing]=useState(false);
   const[local,setLocal]=useState(value||'');
-  const wrapRef=useRef(null);
   const inputRef=useRef(null);
 
-  const open=e=>{
-    e.stopPropagation();
-    setLocal(value||'');
-    setEditing(true);
-  };
+  const open=e=>{e.stopPropagation();setLocal(value||'');setEditing(true);};
   const save=()=>{
-    const v=type==='number'?(local?parseFloat(local):null):local;
-    if((local||'')!==(value||''))onChange(v);
+    const v=type==='number'?(local||local===0?parseFloat(local):null):local;
+    if(String(local||'')!==String(value||''))onChange(v);
     setEditing(false);
   };
   const cancel=()=>setEditing(false);
 
   useEffect(()=>{
-    if(editing&&inputRef.current){inputRef.current.focus();inputRef.current.select&&inputRef.current.select();}
+    if(editing&&inputRef.current){
+      inputRef.current.focus();
+      if(inputRef.current.type!=='date')inputRef.current.select&&inputRef.current.select();
+      setTimeout(()=>inputRef.current&&inputRef.current.scrollIntoView({behavior:'smooth',block:'nearest'}),80);
+    }
   },[editing]);
 
-  // Close on click outside
-  useEffect(()=>{
-    if(!editing)return;
-    const h=e=>{if(wrapRef.current&&!wrapRef.current.contains(e.target))save();};
-    document.addEventListener('mousedown',h);document.addEventListener('touchstart',h);
-    return()=>{document.removeEventListener('mousedown',h);document.removeEventListener('touchstart',h);};
-  });
-
-  // Format display value
   const display=()=>{
     if(!value&&value!==0)return null;
-    if(type==='date'&&value){try{const[y,m,dd]=value.split('-').map(Number);const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return `${months[m-1]} ${dd}, ${y}`;}catch(e){return value;}}
+    if(type==='date'&&value){try{const[y,m,dd]=value.split('-').map(Number);const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return`${months[m-1]} ${dd}, ${y}`;}catch(e){return value;}}
     if(type==='number'&&value!=null)return typeof value==='number'?'$'+value.toLocaleString():value;
     return String(value);
   };
@@ -852,30 +836,32 @@ function DField({value,onChange,className,type,placeholder,style,label,multiline
   const isEmpty=!disp;
   const isAmt=className&&className.includes('ef-amt');
   const isDate=type==='date';
-  const isNote=className&&(className.includes('ef-note')||className.includes('ef-sm'));
+  const isNote=multiline||(className&&(className.includes('ef-note')||className.includes('ef-sm')));
+
+  if(editing)return(
+    <span className="dfield-wrap" onClick={e=>e.stopPropagation()}>
+      {multiline
+        ?<textarea ref={inputRef} value={local} onChange={e=>setLocal(e.target.value)}
+            placeholder={placeholder} className="dfield-input dfield-ta"
+            onKeyDown={e=>{if(e.key==='Escape')cancel();}}/>
+        :<input ref={inputRef} type={type||'text'} value={local}
+            onChange={e=>setLocal(e.target.value)}
+            placeholder={placeholder} className="dfield-input"
+            inputMode={type==='number'?'decimal':undefined}
+            onKeyDown={e=>{if(e.key==='Enter')save();if(e.key==='Escape')cancel();}}/>
+      }
+      <span className="dfield-actions">
+        <button className="dfield-btn dfield-cancel" onClick={cancel}>✕</button>
+        <button className="dfield-btn dfield-ok" onClick={save}>✓</button>
+      </span>
+    </span>
+  );
 
   return(
-    <span style={{position:'relative',display:'inline-block',...(style||{})}} ref={wrapRef}>
-      {!editing?(
-        <span className="cte" onClick={open} title={label||placeholder||'Click to edit'}>
-          {isEmpty?<span className="cte-empty">{placeholder||'—'}</span>:
-           <span className="cte-val" style={isAmt?{fontWeight:700,fontVariantNumeric:'tabular-nums',color:'var(--g)'}:isDate?{fontSize:10,color:'var(--td)'}:isNote?{fontSize:10,color:'var(--tf)'}:{}}>{disp}</span>}
-          <span className="cte-icon">✎</span>
-        </span>
-      ):(
-        <div className="cte-pop" onClick={e=>e.stopPropagation()} style={{top:'100%',left:0}}>
-          {label&&<div style={{fontSize:9,textTransform:'uppercase',letterSpacing:'.4px',color:'var(--tf)',marginBottom:3}}>{label}</div>}
-          {multiline?
-            <textarea ref={inputRef} value={local} onChange={e=>setLocal(e.target.value)} placeholder={placeholder} onKeyDown={e=>{if(e.key==='Escape')cancel();}}/>:
-            <input ref={inputRef} type={type||'text'} value={local} onChange={e=>setLocal(e.target.value)} placeholder={placeholder}
-              onKeyDown={e=>{if(e.key==='Enter')save();if(e.key==='Escape')cancel();}}/>
-          }
-          <div className="cte-btns">
-            <button className="cte-btn cte-cancel" onClick={cancel}>Esc</button>
-            <button className="cte-btn cte-ok" onClick={save}>OK</button>
-          </div>
-        </div>
-      )}
+    <span className="cte" onClick={open} title={label||placeholder||'Tap to edit'} style={style}>
+      {isEmpty?<span className="cte-empty">{placeholder||'—'}</span>:
+        <span className={`cte-val${isNote?' wrap':''}`} style={isAmt?{fontWeight:700,fontVariantNumeric:'tabular-nums',color:'var(--g)'}:isDate?{fontSize:10,color:'var(--td)'}:isNote?{fontSize:11,color:'var(--tf)'}:{}}>{disp}</span>}
+      <span className="cte-icon">✎</span>
     </span>
   );
 }
@@ -926,6 +912,19 @@ function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
   const yr=e.deadline?e.deadline.substring(0,4):'?';
   const dotCls=e.nextStep==='05 Received'?'received':e.nextStep==='04 Denied'?'denied':e.nextStep==='03 Waiting Results'?'waiting':'';
   const L=({children})=><span style={{fontSize:8,textTransform:'uppercase',letterSpacing:'.4px',color:'var(--tf)',display:'block',marginBottom:1}}>{children}</span>;
+  const parsedPeriod=useMemo(()=>{
+    if(!e.eligiblePeriod)return{start:'',end:''};
+    const pts=e.eligiblePeriod.split(/\s*(?:–|—|to|-)\s*/);
+    const toISO=s=>{const d=pDate(s);return d?d.toISOString().substring(0,10):''};
+    return{start:toISO(pts[0]||''),end:pts.length>1?toISO(pts[pts.length-1]):''};
+  },[e.eligiblePeriod]);
+  const updatePeriod=(which,val)=>{
+    const pts=(e.eligiblePeriod||'').split(/\s*(?:–|—|to|-)\s*/);
+    let s=pts[0]||'',en=pts.length>1?pts[pts.length-1]:'';
+    const fmt=v=>v?new Date(v+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'';
+    if(which==='start')s=fmt(val); else en=fmt(val);
+    onChangeField(e.id,'eligiblePeriod',s&&en?`${s} – ${en}`:s||en);
+  };
   return(
     <div className="tl-entry">
       <div className={`tl-dot ${dotCls}`}/>
@@ -945,7 +944,15 @@ function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
         </div>
         <div className="tl-grid" style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'2px 14px',fontSize:11}}>
           <div><L>Deadline</L><DField className="ef ef-date" type="date" value={e.deadline||''} label="Deadline" onChange={v=>onChangeField(e.id,'deadline',v)}/></div>
-          <div><L>Grant Period</L><DField className="ef ef-sm" value={e.eligiblePeriod||''} placeholder="Jan 1 – Dec 31, 2026" label="Grant Period" onChange={v=>onChangeField(e.id,'eligiblePeriod',v)}/></div>
+          <div style={{gridColumn:'1/-1'}}>
+            <L>Grant Period</L>
+            <div style={{display:'flex',gap:8,alignItems:'flex-end',flexWrap:'wrap'}}>
+              <div><L>Start</L><input type="date" className="dfield-input" value={parsedPeriod.start} onChange={ev=>updatePeriod('start',ev.target.value)} style={{width:'auto'}}/></div>
+              <span style={{color:'var(--tf)',paddingBottom:6,fontSize:12}}>–</span>
+              <div><L>End</L><input type="date" className="dfield-input" value={parsedPeriod.end} onChange={ev=>updatePeriod('end',ev.target.value)} style={{width:'auto'}}/></div>
+            </div>
+            {e.eligiblePeriod&&<div style={{fontSize:10,color:'var(--tf)',marginTop:3}}>{e.eligiblePeriod}</div>}
+          </div>
           <div><L>Project</L><DField className="ef" value={e.projectDates||''} placeholder="Project name" label="Project" onChange={v=>onChangeField(e.id,'projectDates',v)}/></div>
           <div><L>Report Deadline</L><DField className="ef ef-date" type="date" value={e.reportDeadline||''} label="Report Deadline" onChange={v=>onChangeField(e.id,'reportDeadline',v)}/></div>
           <div><L>Web / Link</L><DField className="ef ef-sm" value={e.web||''} placeholder="https://..." label="Link" onChange={v=>onChangeField(e.id,'web',v)}/></div>
