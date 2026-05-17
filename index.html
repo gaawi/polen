@@ -70,6 +70,12 @@ body{font-family:var(--font-mono);background:var(--bg);color:var(--t);min-height
 .chip{padding:4px 10px;border-radius:3px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--bd);background:none;color:var(--td);transition:all .15s;font-family:var(--font-mono);}
 .chip.on{border-color:var(--ac);background:var(--acbg);color:var(--acl);}
 .chip:hover:not(.on){border-color:var(--bd2);color:var(--t);}
+.chip-sel-wrap{position:relative;display:inline-flex;align-items:center;}
+.chip-sel-wrap::after{content:'▾';position:absolute;right:7px;font-size:9px;pointer-events:none;color:var(--td);}
+.chip-sel{appearance:none;-webkit-appearance:none;padding:4px 22px 4px 10px;border-radius:3px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--bd);background:var(--bg);color:var(--td);transition:all .15s;font-family:var(--font-mono);}
+.chip-sel:focus{outline:none;border-color:var(--ac);}
+.chip-sel.active{border-color:var(--ac);background:var(--acbg);color:var(--acl);}
+.chip-sel.active~*,.chip-sel-wrap.active::after{color:var(--acl);}
 
 /* Main scroll area */
 .main-area{flex:1;overflow:auto;padding:0;}
@@ -388,6 +394,11 @@ body{font-family:var(--font-mono);background:var(--bg);color:var(--t);min-height
   }
   .chip.on{background:var(--ac);color:#fff;border:none;}
   .chip:hover:not(.on){border:none;background:var(--s2);}
+  .chip-sel-wrap{background:var(--s1);border-radius:20px;}
+  .chip-sel-wrap::after{right:10px;}
+  .chip-sel{padding:6px 26px 6px 12px;border-radius:20px;border:none;background:var(--s1);color:var(--td);font-size:12px;min-height:32px;}
+  .chip-sel.active{background:var(--ac);color:#fff;}
+  .chip-sel.active+*,.chip-sel-wrap.active::after{color:#fff;}
 
   /* ── Save indicator ── */
   .save-indicator{font-size:9px;}
@@ -1402,6 +1413,14 @@ function App({initialGrants}){
         <span className="nav-brand">🌸 POLEN</span>
         <div style={{flex:1}}/>
         <div className="topbar-actions">
+          <button className={`theme-btn${editMode?' edit-active':''}`} title="Edit All" onClick={()=>{setEditMode(v=>!v);setActiveView(false);setCalendarView(false);setSuggView(false);}} style={editMode?{borderColor:'var(--y)',color:'var(--y)',background:'var(--ybg)'}:{}}>✏</button>
+          {editMode&&<>
+            <button className="theme-btn" title="Save" onClick={async()=>{const r=await saveToServer(data);setSaveMsg(r.msg);setTimeout(()=>setSaveMsg(null),2500);}} style={{borderColor:'var(--g)',color:'var(--g)',background:'var(--gbg)'}}>💾</button>
+            <button className="theme-btn" title="Export JSON" onClick={()=>exportJSON(data)} style={{borderColor:'var(--b)',color:'var(--b)'}}>⬇</button>
+            <label className="theme-btn" title="Import JSON" style={{borderColor:'var(--y)',color:'var(--y)',cursor:'pointer'}}>⬆<input type="file" accept=".json" style={{display:'none'}} onChange={e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(Array.isArray(d)){setData(d);setSaveMsg('Imported '+d.length);setTimeout(()=>setSaveMsg(null),2000);}}catch(err){alert('Invalid JSON');}};rd.readAsText(f);e.target.value='';}}/></label>
+            {saveMsg&&<span style={{fontSize:10,color:'var(--g)',fontWeight:700}}>{saveMsg}</span>}
+          </>}
+          <span style={{width:1,height:16,background:'var(--bd)',margin:'0 2px',flexShrink:0}}/>
           <button className="theme-btn btn-reload" onClick={()=>window.location.reload()} title="Reload">🔄</button>
           <button className="theme-btn btn-signout" onClick={doSignOut} title="Sign out">⎋</button>
           <button className="theme-btn" title="Toggle theme" onClick={()=>{setIsDark(d=>{const n=!d;localStorage.setItem('polen-theme',n?'dark':'light');return n;})}}>{isDark?'☀️':'🌙'}</button>
@@ -1411,23 +1430,23 @@ function App({initialGrants}){
 
       <div className="filters">
         <input className="search" placeholder="Search foundation, grant program, notes..." value={search} onChange={e=>setSearch(e.target.value)}/>
-        <div style={{display:'flex',gap:4,flexWrap:'wrap'}}>
-          {[['all','All',stats.total],['apply','Apply',stats.apply],['03 Waiting Results','Waiting',stats.waiting],['05 Received','Awarded',stats.received],['04 Denied','Denied',stats.denied]].map(([k,l,c])=>
-            <button key={k} className={`chip ${statusFilter===k&&!editMode&&!activeView&&!calendarView&&!suggView?'on':''}`} onClick={()=>{setStatusFilter(k);setEditMode(false);setActiveView(false);setCalendarView(false);setSuggView(false);setExpRow(null);}}>{l}{k!=='all'&&c>0&&<span style={{opacity:.6,marginLeft:3,fontSize:10}}>{c}</span>}</button>
-          )}
+        <div style={{display:'flex',gap:4,flexWrap:'wrap',alignItems:'center'}}>
+          <div className={`chip-sel-wrap${statusFilter!=='all'&&!editMode&&!activeView&&!calendarView&&!suggView?' active':''}`}>
+            <select className={`chip-sel${statusFilter!=='all'&&!editMode&&!activeView&&!calendarView&&!suggView?' active':''}`}
+              value={statusFilter}
+              onChange={e=>{setStatusFilter(e.target.value);setEditMode(false);setActiveView(false);setCalendarView(false);setSuggView(false);setExpRow(null);}}>
+              <option value="all">All ({stats.total})</option>
+              <option value="apply">Apply ({stats.apply})</option>
+              <option value="03 Waiting Results">Waiting ({stats.waiting})</option>
+              <option value="05 Received">Awarded ({stats.received})</option>
+              <option value="04 Denied">Denied ({stats.denied})</option>
+            </select>
+          </div>
           <button className={`chip ${activeView&&!editMode&&!calendarView&&!suggView?'on':''}`} onClick={()=>{setActiveView(!activeView);setEditMode(false);setCalendarView(false);setSuggView(false);setExpRow(null);}} style={activeView?{borderColor:'var(--g)',background:'var(--gbg)',color:'var(--g)'}:{}}>✦ Active ({stats.active})</button>
-          <button className={`chip ${calendarView&&!editMode&&!suggView?'on':''}`} onClick={()=>{setCalendarView(!calendarView);setEditMode(false);setActiveView(false);setSuggView(false);setExpRow(null);}} style={calendarView?{borderColor:'var(--o)',background:'var(--obg)',color:'var(--o)'}:{}}>📅 Upcoming {calendarData.reduce((s,m)=>s+m.grants.length,0)>0&&<span style={{background:'var(--obg)',color:'var(--o)',padding:'0 5px',borderRadius:6,fontSize:10,fontWeight:700,marginLeft:2}}>{calendarData.reduce((s,m)=>s+m.grants.length,0)}</span>}</button>
+          <button className={`chip ${calendarView&&!editMode&&!suggView?'on':''}`} onClick={()=>{setCalendarView(!calendarView);setEditMode(false);setActiveView(false);setSuggView(false);setExpRow(null);}} style={calendarView?{borderColor:'var(--o)',background:'var(--obg)',color:'var(--o)'}:{}}>📅 Upcoming{calendarData.reduce((s,m)=>s+m.grants.length,0)>0&&<span style={{background:'var(--obg)',color:'var(--o)',padding:'0 5px',borderRadius:6,fontSize:10,fontWeight:700,marginLeft:2}}>{calendarData.reduce((s,m)=>s+m.grants.length,0)}</span>}</button>
           <button className={`chip ${suggView?'on':''}`} onClick={()=>{setSuggView(v=>!v);setEditMode(false);setActiveView(false);setCalendarView(false);setExpRow(null);}} style={suggView?{borderColor:'var(--b)',background:'var(--bbg)',color:'var(--b)'}:{}}>
             🤖 IA{suggestions.length>0&&<span style={{background:'var(--r)',color:'#fff',borderRadius:2,padding:'0 5px',fontSize:9,fontWeight:800,marginLeft:4}}>{suggestions.length}</span>}
           </button>
-          <span style={{width:1,height:16,background:'var(--bd)',margin:'0 4px'}}/>
-          <button className={`chip ${editMode?'on':''}`} onClick={()=>{setEditMode(!editMode);setActiveView(false);setCalendarView(false);setSuggView(false);}} style={editMode?{borderColor:'var(--y)',background:'var(--ybg)',color:'var(--y)'}:{}}>✏ Edit All</button>
-          {editMode&&<>
-            <button className="chip" onClick={async()=>{const r=await saveToServer(data);setSaveMsg(r.msg);setTimeout(()=>setSaveMsg(null),2500);}} style={{borderColor:'var(--g)',background:'var(--gbg)',color:'var(--g)',fontWeight:700}}>💾 Save</button>
-            <button className="chip" onClick={()=>exportJSON(data)} style={{borderColor:'var(--b)',color:'var(--b)'}}>⬇ JSON</button>
-            <label className="chip" style={{borderColor:'var(--y)',color:'var(--y)',cursor:'pointer'}}>⬆ Import<input type="file" accept=".json" style={{display:'none'}} onChange={e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(Array.isArray(d)){setData(d);setSaveMsg('Imported '+d.length);setTimeout(()=>setSaveMsg(null),2000);}}catch(err){alert('Invalid JSON');}};rd.readAsText(f);e.target.value='';}}/></label>
-            {saveMsg&&<span style={{fontSize:10,color:'var(--g)',fontWeight:600}}>{saveMsg}</span>}
-          </>}
         </div>
         <span style={{fontSize:11,color:'var(--tf)',marginLeft:'auto'}}>
           {editMode?`${data.length} entries`:suggView?`${suggestions.length} sugerencias IA pendientes`:calendarView?`${calendarData.reduce((s,m)=>s+m.grants.length,0)} programs · ${calendarData.length} seasons`:activeView?`${activeGrants.length} active · ${fmt(stats.activeAmt)}`:`${programGroups.length} programs · ${programGroups.reduce((s,g)=>s+g.entries.length,0)} grants`}
