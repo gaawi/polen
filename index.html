@@ -96,9 +96,11 @@ body{font-family:var(--font-mono);background:var(--bg);color:var(--t);min-height
 .sugg-notes-view:hover{border-color:var(--bd);background:var(--s2);}
 .sugg-notes-view em{color:var(--bd2);font-style:italic;}
 .sugg-notes-input{width:100%;background:var(--s2);border:1px solid var(--ac);color:var(--t);padding:6px 8px;font-size:11px;font-family:var(--font-mono);resize:vertical;min-height:64px;outline:none;border-radius:2px;line-height:1.5;}
-.sugg-actions{display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap;}
-.sugg-actions .btn{flex:1;text-align:center;justify-content:center;}
-.sugg-actions .btn-rej{flex:0 0 auto;}
+.sugg-actions{display:flex;gap:8px;margin-top:12px;align-items:stretch;}
+.sugg-actions .btn{flex:1;text-align:center;justify-content:center;padding:10px 16px;font-size:12px;border-radius:6px;font-weight:700;letter-spacing:.02em;}
+.sugg-actions .btn-rej{flex:0 0 44px;padding:10px 0;border-radius:6px;font-size:16px;}
+.sugg-link-btn{display:inline-flex;align-items:center;gap:5px;padding:10px 14px;border-radius:6px;font-size:11px;font-weight:700;color:var(--b);background:var(--bbg);border:1px solid color-mix(in srgb,var(--b) 20%,transparent);cursor:pointer;text-decoration:none;white-space:nowrap;transition:all .15s;font-family:var(--font-mono);flex-shrink:0;}
+.sugg-link-btn:hover{background:var(--b);color:#fff;border-color:var(--b);}
 
 /* Main scroll area */
 .main-area{flex:1;overflow:auto;padding:0;}
@@ -421,7 +423,9 @@ body{font-family:var(--font-mono);background:var(--bg);color:var(--t);min-height
   .chip-sel.active+*,.chip-sel-wrap.active::after{color:#fff;}
   /* Suggestion cards mobile */
   .sugg-card{border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,.1);border:none;}
-  .sugg-actions .btn{min-height:40px;font-size:13px;}
+  .sugg-actions .btn{min-height:44px;font-size:14px;border-radius:10px;}
+  .sugg-actions .btn-rej{min-height:44px;border-radius:10px;}
+  .sugg-link-btn{min-height:44px;border-radius:10px;font-size:12px;}
   .sugg-notes-input{font-size:16px;}
 
   /* ── Save indicator ── */
@@ -1205,7 +1209,7 @@ function SuggestionCard({s,i,onAccept,onReject}){
         }
       </div>
       <div className="sugg-actions">
-        {web&&<a href={web} target="_blank" rel="noreferrer" className="btn-conv" onClick={e=>e.stopPropagation()}>↗ Link</a>}
+        {web&&<a href={web} target="_blank" rel="noreferrer" className="sugg-link-btn" onClick={e=>e.stopPropagation()}>↗ Link</a>}
         <button className="btn btn-pri" onClick={()=>onAccept(enriched)}>✓ Accept</button>
         <button className="btn btn-sec btn-rej" onClick={()=>onReject(s.id)}>✕</button>
       </div>
