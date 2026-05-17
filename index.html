@@ -63,19 +63,42 @@ body{font-family:var(--font-mono);background:var(--bg);color:var(--t);min-height
 .btn-sec{background:var(--s2);color:var(--td);border:1px solid var(--bd);}.btn-sec:hover{color:var(--t);border-color:var(--ac);}
 
 /* Filters */
-.filters{display:flex;gap:6px;padding:8px 16px;background:var(--s1);border-bottom:1px solid var(--bd);flex-shrink:0;flex-wrap:wrap;align-items:center;}
+.filters{display:flex;gap:6px;padding:8px 12px;background:var(--s1);border-bottom:1px solid var(--bd);flex-shrink:0;flex-wrap:wrap;align-items:center;}
 .search{background:var(--s2);border:1px solid var(--bd);color:var(--t);padding:6px 10px;border-radius:3px;font-size:12px;outline:none;width:240px;font-family:var(--font-mono);}
 .search:focus{border-color:var(--ac);}
 .search::placeholder{color:var(--tf);}
-.chip{padding:4px 10px;border-radius:3px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--bd);background:none;color:var(--td);transition:all .15s;font-family:var(--font-mono);}
+.chips-row{display:flex;gap:4px;align-items:center;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;scrollbar-width:none;flex-shrink:0;}
+.chips-row::-webkit-scrollbar{display:none;}
+.chip{padding:4px 10px;border-radius:3px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--bd);background:none;color:var(--td);transition:all .15s;font-family:var(--font-mono);white-space:nowrap;flex-shrink:0;}
 .chip.on{border-color:var(--ac);background:var(--acbg);color:var(--acl);}
 .chip:hover:not(.on){border-color:var(--bd2);color:var(--t);}
-.chip-sel-wrap{position:relative;display:inline-flex;align-items:center;}
+.chip-sel-wrap{position:relative;display:inline-flex;align-items:center;flex-shrink:0;}
 .chip-sel-wrap::after{content:'▾';position:absolute;right:7px;font-size:9px;pointer-events:none;color:var(--td);}
-.chip-sel{appearance:none;-webkit-appearance:none;padding:4px 22px 4px 10px;border-radius:3px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--bd);background:var(--bg);color:var(--td);transition:all .15s;font-family:var(--font-mono);}
+.chip-sel{appearance:none;-webkit-appearance:none;padding:4px 22px 4px 10px;border-radius:3px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--bd);background:var(--bg);color:var(--td);transition:all .15s;font-family:var(--font-mono);white-space:nowrap;}
 .chip-sel:focus{outline:none;border-color:var(--ac);}
 .chip-sel.active{border-color:var(--ac);background:var(--acbg);color:var(--acl);}
 .chip-sel.active~*,.chip-sel-wrap.active::after{color:var(--acl);}
+/* Suggestion cards */
+.sugg-list{padding:12px 14px;display:flex;flex-direction:column;gap:10px;}
+.sugg-card{background:var(--s1);border:1px solid var(--bd);border-radius:6px;padding:14px 16px;}
+.sugg-card-top{display:flex;gap:6px;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+.sugg-num{font-size:10px;color:var(--tf);flex-shrink:0;padding-top:2px;}
+.sugg-foundation{font-size:11px;font-weight:700;color:var(--t);text-transform:uppercase;letter-spacing:.04em;}
+.sugg-grant{font-size:13px;font-weight:600;color:var(--t);margin-top:2px;line-height:1.3;}
+.sugg-sub{font-size:10px;color:var(--tf);margin-top:2px;}
+.sugg-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;align-items:center;}
+.sugg-meta-item{font-size:11px;color:var(--td);}
+.sugg-meta-item.hard{color:var(--r);font-weight:700;}
+.sugg-meta-item.amt{color:var(--g);font-weight:700;}
+.sugg-meta-item.season{font-size:10px;background:var(--s2);border:1px solid var(--bd);padding:1px 6px;border-radius:2px;}
+.sugg-notes-area{margin-top:8px;}
+.sugg-notes-view{font-size:11px;color:var(--tf);line-height:1.5;cursor:text;padding:4px 6px;border-radius:2px;border:1px solid transparent;min-height:24px;}
+.sugg-notes-view:hover{border-color:var(--bd);background:var(--s2);}
+.sugg-notes-view em{color:var(--bd2);font-style:italic;}
+.sugg-notes-input{width:100%;background:var(--s2);border:1px solid var(--ac);color:var(--t);padding:6px 8px;font-size:11px;font-family:var(--font-mono);resize:vertical;min-height:64px;outline:none;border-radius:2px;line-height:1.5;}
+.sugg-actions{display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap;}
+.sugg-actions .btn{flex:1;text-align:center;justify-content:center;}
+.sugg-actions .btn-rej{flex:0 0 auto;}
 
 /* Main scroll area */
 .main-area{flex:1;overflow:auto;padding:0;}
@@ -369,14 +392,10 @@ body{font-family:var(--font-mono);background:var(--bg);color:var(--t);min-height
   .btn{padding:6px 12px;font-size:11px;border-radius:3px;font-weight:700;}
   .theme-btn{padding:4px 8px;font-size:13px;}
 
-  /* ── Filters: segmented control + search ── */
-  .filters{
-    padding:0 16px 10px;gap:8px;flex-wrap:wrap;
-    background:var(--bg);border-bottom:none;
-  }
-  /* Search bar — iOS style */
+  /* ── Filters: search + scrollable chip row ── */
+  .filters{padding:8px 12px;gap:6px;background:var(--bg);border-bottom:none;flex-wrap:wrap;}
   .search{
-    width:100%;order:-1;
+    width:100%;
     font-size:16px;padding:10px 14px;
     border-radius:12px;border:none;
     background:var(--s1);color:var(--t);
@@ -384,21 +403,26 @@ body{font-family:var(--font-mono);background:var(--bg);color:var(--t);min-height
   }
   .search:focus{box-shadow:0 0 0 2px var(--ac);}
   .search::placeholder{color:var(--tf);}
-  /* Chips → iOS segmented control look */
+  .chips-row{width:100%;padding-bottom:2px;}
+  /* Chips → pill look */
   .chip{
-    padding:6px 12px;border-radius:20px;
+    padding:6px 14px;border-radius:20px;
     font-size:12px;font-weight:600;
     border:none;background:var(--s1);color:var(--td);
-    min-height:32px;display:inline-flex;align-items:center;
+    min-height:34px;display:inline-flex;align-items:center;
     -webkit-tap-highlight-color:transparent;
   }
   .chip.on{background:var(--ac);color:#fff;border:none;}
   .chip:hover:not(.on){border:none;background:var(--s2);}
   .chip-sel-wrap{background:var(--s1);border-radius:20px;}
   .chip-sel-wrap::after{right:10px;}
-  .chip-sel{padding:6px 26px 6px 12px;border-radius:20px;border:none;background:var(--s1);color:var(--td);font-size:12px;min-height:32px;}
+  .chip-sel{padding:6px 26px 6px 14px;border-radius:20px;border:none;background:var(--s1);color:var(--td);font-size:12px;min-height:34px;}
   .chip-sel.active{background:var(--ac);color:#fff;}
   .chip-sel.active+*,.chip-sel-wrap.active::after{color:#fff;}
+  /* Suggestion cards mobile */
+  .sugg-card{border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,.1);border:none;}
+  .sugg-actions .btn{min-height:40px;font-size:13px;}
+  .sugg-notes-input{font-size:16px;}
 
   /* ── Save indicator ── */
   .save-indicator{font-size:9px;}
@@ -1137,55 +1161,55 @@ boot();
 
 
 // ── AI Suggestions View ──
-function SuggestionRow({s,i,onAccept,onReject}){
+function SuggestionCard({s,i,onAccept,onReject}){
   const gd=s.grant_data||{};
+  const[localStep,setLocalStep]=useState(gd.nextStep||'02 Check');
+  const[notes,setNotes]=useState(gd.notes||s.notes||'');
+  const[editingNotes,setEditingNotes]=useState(false);
   const foundation=gd.foundation||s.foundation||'—';
   const grant=gd.grant||s.grant_name||'—';
   const deadline=gd.deadline||s.deadline||null;
   const isHard=gd.deadlineType==='DDLNE!';
-  const step=gd.nextStep||'02 Check';
   const web=gd.web||s.web||null;
-  const[notes,setNotes]=useState(gd.notes||s.notes||'');
-  const[editing,setEditing]=useState(false);
-  function fmtAmt(n){if(!n)return'—';if(n>=1e6)return'$'+(n/1e6).toFixed(1)+'M';if(n>=1000)return'$'+(n/1000).toFixed(n>=10000?0:1)+'k';return'$'+n.toLocaleString();}
-  const enriched={...s,grant_data:{...gd,notes}};
+  function fmtAmt(n){if(!n)return null;if(n>=1e6)return'$'+(n/1e6).toFixed(1)+'M';if(n>=1000)return'$'+(n/1000).toFixed(n>=10000?0:1)+'k';return'$'+n.toLocaleString();}
+  const enriched={...s,grant_data:{...gd,notes,nextStep:localStep}};
   return(
-    <tr key={s.id}>
-      <td style={{color:'var(--tf)',fontSize:10,textAlign:'center'}}>{i+1}</td>
-      <td style={{fontWeight:700,fontSize:12}}>{foundation}</td>
-      <td>
-        <div style={{fontSize:12,fontWeight:600}}>{grant}</div>
-        {gd.eligiblePeriod&&<div style={{fontSize:10,color:'var(--tf)',marginTop:1}}>{gd.eligiblePeriod}</div>}
-        {gd.projectDates&&<div style={{fontSize:10,color:'var(--tf)',marginTop:1}}>{gd.projectDates}</div>}
-      </td>
-      <td>
-        {deadline?<><span style={{fontSize:11,fontWeight:600,color:isHard?'var(--r)':'var(--t)'}}>{deadline}</span><br/><span style={{fontSize:9,color:isHard?'var(--r)':'var(--tf)'}}>{isHard?'HARD':'est.'}</span></>:<span style={{color:'var(--tf)'}}>—</span>}
-      </td>
-      <td><span className={`ns ${STEP_CSS[step]||'ns-check'}`}>{STEP_SHORT[step]||step}</span></td>
-      <td style={{fontWeight:700,color:'var(--g)',fontVariantNumeric:'tabular-nums',fontSize:11}}>{fmtAmt(gd.amount)}</td>
-      <td style={{fontSize:10,color:'var(--td)'}}>{gd.season||'—'}</td>
-      <td style={{fontSize:11,color:'var(--tf)',maxWidth:240}}>
-        {editing
-          ? <textarea
-              autoFocus
-              value={notes}
+    <div className="sugg-card">
+      <div className="sugg-card-top">
+        <div style={{flex:1,minWidth:0}}>
+          <div className="sugg-foundation">{foundation}</div>
+          <div className="sugg-grant">{grant}</div>
+          {(gd.eligiblePeriod||gd.projectDates)&&<div className="sugg-sub">{gd.eligiblePeriod||gd.projectDates}</div>}
+        </div>
+        <span className="sugg-num">#{i+1}</span>
+      </div>
+      <div className="sugg-meta">
+        {deadline&&<span className={`sugg-meta-item${isHard?' hard':''}`}>{deadline}{isHard?' · HARD':' · est.'}</span>}
+        {fmtAmt(gd.amount)&&<span className="sugg-meta-item amt">{fmtAmt(gd.amount)}</span>}
+        {gd.season&&<span className="sugg-meta-item season">{gd.season}</span>}
+      </div>
+      <div style={{marginTop:8}}>
+        <select className={`ns-select ${STEP_CSS[localStep]||'ns-check'}`}
+          value={localStep} onChange={e=>setLocalStep(e.target.value)}>
+          {STEPS.map(st=><option key={st} value={st}>{STEP_SHORT[st]}</option>)}
+        </select>
+      </div>
+      <div className="sugg-notes-area">
+        {editingNotes
+          ?<textarea autoFocus className="sugg-notes-input" value={notes}
               onChange={e=>setNotes(e.target.value)}
-              onBlur={()=>setEditing(false)}
-              style={{width:'100%',minHeight:60,background:'var(--s2)',border:'1px solid var(--ac)',color:'var(--t)',padding:'4px 6px',fontSize:11,fontFamily:'inherit',resize:'vertical',lineHeight:1.4}}
-            />
-          : <div style={{lineHeight:1.4,cursor:'text',minHeight:24,color:notes?'var(--tf)':'var(--bd2)'}} onClick={()=>setEditing(true)} title="Click to edit notes">
-              {notes||<span style={{fontStyle:'italic',fontSize:10}}>click to add notes…</span>}
+              onBlur={()=>setEditingNotes(false)}/>
+          :<div className="sugg-notes-view" onClick={()=>setEditingNotes(true)}>
+              {notes||<em>Add note…</em>}
             </div>
         }
-        {web&&<a href={web} target="_blank" rel="noreferrer" className="btn-conv" onClick={e=>e.stopPropagation()} style={{marginTop:4,display:'inline-block'}}>↗ link</a>}
-      </td>
-      <td>
-        <div style={{display:'flex',gap:5,alignItems:'center'}}>
-          <button className="btn btn-pri" style={{fontSize:10,padding:'4px 12px',whiteSpace:'nowrap'}} onClick={()=>onAccept(enriched)}>✓ Accept</button>
-          <button className="btn btn-sec" style={{fontSize:10,padding:'4px 8px'}} onClick={()=>onReject(s.id)}>✕</button>
-        </div>
-      </td>
-    </tr>
+      </div>
+      <div className="sugg-actions">
+        {web&&<a href={web} target="_blank" rel="noreferrer" className="btn-conv" onClick={e=>e.stopPropagation()}>↗ Link</a>}
+        <button className="btn btn-pri" onClick={()=>onAccept(enriched)}>✓ Accept</button>
+        <button className="btn btn-sec btn-rej" onClick={()=>onReject(s.id)}>✕</button>
+      </div>
+    </div>
   );
 }
 function SuggestionsView({suggestions,onAccept,onReject}){
@@ -1199,23 +1223,8 @@ function SuggestionsView({suggestions,onAccept,onReject}){
     </div>
   );
   return(
-    <div style={{overflowX:'auto',WebkitOverflowScrolling:'touch'}}>
-      <table className="flat-table" style={{minWidth:900}}>
-        <thead><tr>
-          <th style={{width:32}}>#</th>
-          <th style={{width:170}}>Foundation</th>
-          <th>Grant Program</th>
-          <th style={{width:95}}>Deadline</th>
-          <th style={{width:80}}>Status</th>
-          <th style={{width:85}}>Amount</th>
-          <th style={{width:55}}>Season</th>
-          <th>Notes <span style={{fontWeight:400,textTransform:'none',fontSize:9,letterSpacing:0,color:'var(--tf)'}}>· click to edit</span></th>
-          <th style={{width:140}}></th>
-        </tr></thead>
-        <tbody>
-          {suggestions.map((s,i)=><SuggestionRow key={s.id} s={s} i={i} onAccept={onAccept} onReject={onReject}/>)}
-        </tbody>
-      </table>
+    <div className="sugg-list">
+      {suggestions.map((s,i)=><SuggestionCard key={s.id} s={s} i={i} onAccept={onAccept} onReject={onReject}/>)}
     </div>
   );
 }
@@ -1437,7 +1446,7 @@ function App({initialGrants}){
 
       <div className="filters">
         <input className="search" placeholder="Search foundation, grant program, notes..." value={search} onChange={e=>setSearch(e.target.value)}/>
-        <div style={{display:'flex',gap:4,flexWrap:'wrap',alignItems:'center'}}>
+        <div className="chips-row">
           <div className={`chip-sel-wrap${statusFilter!=='all'&&!editMode&&!activeView&&!calendarView&&!suggView?' active':''}`}>
             <select className={`chip-sel${statusFilter!=='all'&&!editMode&&!activeView&&!calendarView&&!suggView?' active':''}`}
               value={statusFilter}
@@ -1449,10 +1458,10 @@ function App({initialGrants}){
               <option value="04 Denied">Denied ({stats.denied})</option>
             </select>
           </div>
-          <button className={`chip ${activeView&&!editMode&&!calendarView&&!suggView?'on':''}`} onClick={()=>{setActiveView(!activeView);setEditMode(false);setCalendarView(false);setSuggView(false);setExpRow(null);}} style={activeView?{borderColor:'var(--g)',background:'var(--gbg)',color:'var(--g)'}:{}}>✦ Active ({stats.active})</button>
-          <button className={`chip ${calendarView&&!editMode&&!suggView?'on':''}`} onClick={()=>{setCalendarView(!calendarView);setEditMode(false);setActiveView(false);setSuggView(false);setExpRow(null);}} style={calendarView?{borderColor:'var(--o)',background:'var(--obg)',color:'var(--o)'}:{}}>📅 Upcoming{calendarData.reduce((s,m)=>s+m.grants.length,0)>0&&<span style={{background:'var(--obg)',color:'var(--o)',padding:'0 5px',borderRadius:6,fontSize:10,fontWeight:700,marginLeft:2}}>{calendarData.reduce((s,m)=>s+m.grants.length,0)}</span>}</button>
-          <button className={`chip ${suggView?'on':''}`} onClick={()=>{setSuggView(v=>!v);setEditMode(false);setActiveView(false);setCalendarView(false);setExpRow(null);}} style={suggView?{borderColor:'var(--b)',background:'var(--bbg)',color:'var(--b)'}:{}}>
-            🤖 IA{suggestions.length>0&&<span style={{background:'var(--r)',color:'#fff',borderRadius:2,padding:'0 5px',fontSize:9,fontWeight:800,marginLeft:4}}>{suggestions.length}</span>}
+          <button className={`chip ${activeView&&!editMode&&!calendarView&&!suggView?'on':''}`} onClick={()=>{setActiveView(!activeView);setEditMode(false);setCalendarView(false);setSuggView(false);setExpRow(null);}} style={activeView?{background:'var(--gbg)',color:'var(--g)'}:{}}>✦ Active ({stats.active})</button>
+          <button className={`chip ${calendarView&&!editMode&&!suggView?'on':''}`} onClick={()=>{setCalendarView(!calendarView);setEditMode(false);setActiveView(false);setSuggView(false);setExpRow(null);}} style={calendarView?{background:'var(--obg)',color:'var(--o)'}:{}}>📅 Upcoming{calendarData.reduce((s,m)=>s+m.grants.length,0)>0&&<span style={{marginLeft:5,background:'var(--o)',color:'#fff',borderRadius:10,padding:'0 6px',fontSize:10,fontWeight:800}}>{calendarData.reduce((s,m)=>s+m.grants.length,0)}</span>}</button>
+          <button className={`chip ${suggView?'on':''}`} onClick={()=>{setSuggView(v=>!v);setEditMode(false);setActiveView(false);setCalendarView(false);setExpRow(null);}} style={suggView?{background:'var(--bbg)',color:'var(--b)'}:{}}>
+            🤖 IA{suggestions.length>0&&<span style={{marginLeft:5,background:'var(--r)',color:'#fff',borderRadius:10,padding:'0 6px',fontSize:10,fontWeight:800}}>{suggestions.length}</span>}
           </button>
         </div>
         <span style={{fontSize:11,color:'var(--tf)',marginLeft:'auto'}}>
