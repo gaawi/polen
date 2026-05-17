@@ -1124,6 +1124,76 @@ boot();
 
 
 
+// ── AI Suggestions View ──
+function SuggestionsView({suggestions,onAccept,onReject}){
+  function fmtAmt(n){if(!n)return'—';if(n>=1e6)return'$'+(n/1e6).toFixed(1)+'M';if(n>=1000)return'$'+(n/1000).toFixed(n>=10000?0:1)+'k';return'$'+n.toLocaleString();}
+  if(suggestions.length===0)return(
+    <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:'60px 20px',gap:12,color:'var(--tf)'}}>
+      <div style={{fontSize:32}}>🤖</div>
+      <div style={{fontSize:13,fontWeight:600}}>No hay sugerencias pendientes</div>
+      <div style={{fontSize:11,color:'var(--tf)',textAlign:'center',maxWidth:340,lineHeight:1.6}}>
+        Cuando ChatGPT añada grants desde el formulario <strong style={{color:'var(--td)'}}>+IA</strong>, aparecerán aquí para que los apruebes.
+      </div>
+    </div>
+  );
+  return(
+    <div style={{overflowX:'auto',WebkitOverflowScrolling:'touch'}}>
+      <table className="flat-table" style={{minWidth:900}}>
+        <thead><tr>
+          <th style={{width:32}}>#</th>
+          <th style={{width:170}}>Fundación</th>
+          <th>Grant / Programa</th>
+          <th style={{width:95}}>Deadline</th>
+          <th style={{width:80}}>Estado</th>
+          <th style={{width:85}}>Monto</th>
+          <th style={{width:55}}>Temporada</th>
+          <th>Notas</th>
+          <th style={{width:140}}></th>
+        </tr></thead>
+        <tbody>
+          {suggestions.map((s,i)=>{
+            const gd=s.grant_data||{};
+            const foundation=gd.foundation||s.foundation||'—';
+            const grant=gd.grant||s.grant_name||'—';
+            const deadline=gd.deadline||s.deadline||null;
+            const isHard=gd.deadlineType==='DDLNE!';
+            const step=gd.nextStep||'02 Check';
+            const web=gd.web||s.web||null;
+            const notes=gd.notes||s.notes||null;
+            return(
+              <tr key={s.id}>
+                <td style={{color:'var(--tf)',fontSize:10,textAlign:'center'}}>{i+1}</td>
+                <td style={{fontWeight:700,fontSize:12}}>{foundation}</td>
+                <td>
+                  <div style={{fontSize:12,fontWeight:600}}>{grant}</div>
+                  {gd.eligiblePeriod&&<div style={{fontSize:10,color:'var(--tf)',marginTop:1}}>{gd.eligiblePeriod}</div>}
+                  {gd.projectDates&&<div style={{fontSize:10,color:'var(--tf)',marginTop:1}}>{gd.projectDates}</div>}
+                </td>
+                <td>
+                  {deadline?<><span style={{fontSize:11,fontWeight:600,color:isHard?'var(--r)':'var(--t)'}}>{deadline}</span><br/><span style={{fontSize:9,color:isHard?'var(--r)':'var(--tf)'}}>{isHard?'HARD':'est.'}</span></>:<span style={{color:'var(--tf)'}}>—</span>}
+                </td>
+                <td><span className={`ns ${STEP_CSS[step]||'ns-check'}`}>{STEP_SHORT[step]||step}</span></td>
+                <td style={{fontWeight:700,color:'var(--g)',fontVariantNumeric:'tabular-nums',fontSize:11}}>{fmtAmt(gd.amount)}</td>
+                <td style={{fontSize:10,color:'var(--td)'}}>{gd.season||'—'}</td>
+                <td style={{fontSize:11,color:'var(--tf)',maxWidth:220}}>
+                  {notes&&<div style={{marginBottom:web?3:0,lineHeight:1.4}}>{notes}</div>}
+                  {web&&<a href={web} target="_blank" rel="noreferrer" className="btn-conv" onClick={e=>e.stopPropagation()} style={{marginTop:2}}>↗ link</a>}
+                </td>
+                <td>
+                  <div style={{display:'flex',gap:5,alignItems:'center'}}>
+                    <button className="btn btn-pri" style={{fontSize:10,padding:'4px 12px',whiteSpace:'nowrap'}} onClick={()=>onAccept(s)}>✓ Añadir</button>
+                    <button className="btn btn-sec" style={{fontSize:10,padding:'4px 8px'}} onClick={()=>onReject(s.id)}>✕</button>
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 // ── APP ──
 function App({initialGrants}){
   const[data,setData]=useState(()=>initialGrants.map(g=>({...g})));
@@ -1140,6 +1210,7 @@ function App({initialGrants}){
   const[isDark,setIsDark]=useState(true);
   const[suggestions,setSuggestions]=useState([]);
   const[showSuggestions,setShowSuggestions]=useState(false);
+  const[suggView,setSuggView]=useState(false);
   useEffect(()=>{document.documentElement.classList.toggle('light',!isDark);},[isDark]);
   useEffect(()=>{loadSuggestions().then(setSuggestions);},[]);
 
@@ -1324,9 +1395,8 @@ function App({initialGrants}){
         <div className="topbar-actions">
           <button className="theme-btn" onClick={()=>window.location.reload()} title="Reload from server">🔄</button>
           <button className="theme-btn" onClick={doSignOut} title="Sign out">⎋</button>
-          <button className="theme-btn" onClick={()=>setShowSuggestions(true)} title="Suggestions inbox" style={{position:'relative'}}>
-            💡{suggestions.length>0&&<span style={{position:'absolute',top:0,right:0,background:'var(--r)',color:'#fff',borderRadius:'50%',fontSize:9,fontWeight:800,width:14,height:14,display:'flex',alignItems:'center',justifyContent:'center',lineHeight:1}}>{suggestions.length}</span>}
-          </button>
+          <button className="theme-btn" onClick={()=>window.open(window.location.href.replace(/[^/]*$/,'grants-cc14d57ccd.html'),'_blank')} title="Feed público de grants (ChatGPT lee esto)" style={{fontSize:12,letterSpacing:'-.02em'}}>FEED</button>
+          <button className="theme-btn" onClick={()=>window.open(window.location.href.replace(/[^/]*$/,'suggest-a51084f11a.html'),'_blank')} title="Formulario para que ChatGPT sugiera grants" style={{fontSize:12,letterSpacing:'-.02em'}}>+IA</button>
           <button className="theme-btn" onClick={()=>setIsDark(d=>!d)} title="Toggle light/dark">{isDark?'☀️':'🌙'}</button>
           <button className="btn btn-pri" onClick={()=>setShowAdd(true)}>+ Add Grant</button>
         </div>
@@ -1336,12 +1406,15 @@ function App({initialGrants}){
         <input className="search" placeholder="Search foundation, grant program, notes..." value={search} onChange={e=>setSearch(e.target.value)}/>
         <div style={{display:'flex',gap:4,flexWrap:'wrap'}}>
           {[['all','All',stats.total],['apply','Apply',stats.apply],['03 Waiting Results','Waiting',stats.waiting],['05 Received','Awarded',stats.received],['04 Denied','Denied',stats.denied]].map(([k,l,c])=>
-            <button key={k} className={`chip ${statusFilter===k&&!editMode&&!activeView&&!calendarView?'on':''}`} onClick={()=>{setStatusFilter(k);setEditMode(false);setActiveView(false);setCalendarView(false);setExpRow(null);}}>{l}{k!=='all'&&c>0&&<span style={{opacity:.6,marginLeft:3,fontSize:10}}>{c}</span>}</button>
+            <button key={k} className={`chip ${statusFilter===k&&!editMode&&!activeView&&!calendarView&&!suggView?'on':''}`} onClick={()=>{setStatusFilter(k);setEditMode(false);setActiveView(false);setCalendarView(false);setSuggView(false);setExpRow(null);}}>{l}{k!=='all'&&c>0&&<span style={{opacity:.6,marginLeft:3,fontSize:10}}>{c}</span>}</button>
           )}
-          <button className={`chip ${activeView&&!editMode&&!calendarView?'on':''}`} onClick={()=>{setActiveView(!activeView);setEditMode(false);setCalendarView(false);setExpRow(null);}} style={activeView?{borderColor:'var(--g)',background:'var(--gbg)',color:'var(--g)'}:{}}>✦ Active ({stats.active})</button>
-          <button className={`chip ${calendarView&&!editMode?'on':''}`} onClick={()=>{setCalendarView(!calendarView);setEditMode(false);setActiveView(false);setExpRow(null);}} style={calendarView?{borderColor:'var(--o)',background:'var(--obg)',color:'var(--o)'}:{}}>📅 Upcoming {calendarData.reduce((s,m)=>s+m.grants.length,0)>0&&<span style={{background:'var(--obg)',color:'var(--o)',padding:'0 5px',borderRadius:6,fontSize:10,fontWeight:700,marginLeft:2}}>{calendarData.reduce((s,m)=>s+m.grants.length,0)}</span>}</button>
+          <button className={`chip ${activeView&&!editMode&&!calendarView&&!suggView?'on':''}`} onClick={()=>{setActiveView(!activeView);setEditMode(false);setCalendarView(false);setSuggView(false);setExpRow(null);}} style={activeView?{borderColor:'var(--g)',background:'var(--gbg)',color:'var(--g)'}:{}}>✦ Active ({stats.active})</button>
+          <button className={`chip ${calendarView&&!editMode&&!suggView?'on':''}`} onClick={()=>{setCalendarView(!calendarView);setEditMode(false);setActiveView(false);setSuggView(false);setExpRow(null);}} style={calendarView?{borderColor:'var(--o)',background:'var(--obg)',color:'var(--o)'}:{}}>📅 Upcoming {calendarData.reduce((s,m)=>s+m.grants.length,0)>0&&<span style={{background:'var(--obg)',color:'var(--o)',padding:'0 5px',borderRadius:6,fontSize:10,fontWeight:700,marginLeft:2}}>{calendarData.reduce((s,m)=>s+m.grants.length,0)}</span>}</button>
+          <button className={`chip ${suggView?'on':''}`} onClick={()=>{setSuggView(v=>!v);setEditMode(false);setActiveView(false);setCalendarView(false);setExpRow(null);}} style={suggView?{borderColor:'var(--b)',background:'var(--bbg)',color:'var(--b)'}:{}}>
+            🤖 IA{suggestions.length>0&&<span style={{background:'var(--r)',color:'#fff',borderRadius:2,padding:'0 5px',fontSize:9,fontWeight:800,marginLeft:4}}>{suggestions.length}</span>}
+          </button>
           <span style={{width:1,height:16,background:'var(--bd)',margin:'0 4px'}}/>
-          <button className={`chip ${editMode?'on':''}`} onClick={()=>{setEditMode(!editMode);setActiveView(false);setCalendarView(false);}} style={editMode?{borderColor:'var(--y)',background:'var(--ybg)',color:'var(--y)'}:{}}>✏ Edit All</button>
+          <button className={`chip ${editMode?'on':''}`} onClick={()=>{setEditMode(!editMode);setActiveView(false);setCalendarView(false);setSuggView(false);}} style={editMode?{borderColor:'var(--y)',background:'var(--ybg)',color:'var(--y)'}:{}}>✏ Edit All</button>
           {editMode&&<>
             <button className="chip" onClick={async()=>{const r=await saveToServer(data);setSaveMsg(r.msg);setTimeout(()=>setSaveMsg(null),2500);}} style={{borderColor:'var(--g)',background:'var(--gbg)',color:'var(--g)',fontWeight:700}}>💾 Save</button>
             <button className="chip" onClick={()=>exportJSON(data)} style={{borderColor:'var(--b)',color:'var(--b)'}}>⬇ JSON</button>
@@ -1350,7 +1423,7 @@ function App({initialGrants}){
           </>}
         </div>
         <span style={{fontSize:11,color:'var(--tf)',marginLeft:'auto'}}>
-          {editMode?`${data.length} entries`:calendarView?`${calendarData.reduce((s,m)=>s+m.grants.length,0)} programs · ${calendarData.length} seasons`:activeView?`${activeGrants.length} active · ${fmt(stats.activeAmt)}`:`${programGroups.length} programs · ${programGroups.reduce((s,g)=>s+g.entries.length,0)} grants`}
+          {editMode?`${data.length} entries`:suggView?`${suggestions.length} sugerencias IA pendientes`:calendarView?`${calendarData.reduce((s,m)=>s+m.grants.length,0)} programs · ${calendarData.length} seasons`:activeView?`${activeGrants.length} active · ${fmt(stats.activeAmt)}`:`${programGroups.length} programs · ${programGroups.reduce((s,g)=>s+g.entries.length,0)} grants`}
           {lastSaved&&<span className="save-indicator"><span className={`dot ${saveStatus}`}/>{saveStatus==='ok'?'Saved':saveStatus==='saving'?'Saving...':'Error'} · {lastSaved.toLocaleTimeString()}</span>}
         </span>
       </div>
@@ -1358,6 +1431,8 @@ function App({initialGrants}){
       <div className="main-area">
         {editMode?(
           <EditSheet data={data} setData={setData} search={search}/>
+        ):suggView?(
+          <SuggestionsView suggestions={suggestions} onAccept={s=>acceptSuggestion(s,add,setSuggestions)} onReject={id=>rejectSuggestion(id,setSuggestions)}/>
         ):calendarView?(
           <div className="cal-view">
             {calendarData.length===0?(
