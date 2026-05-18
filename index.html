@@ -1292,23 +1292,16 @@ function App({initialGrants}){
 
   // Group entries by grant program (foundation + grant combo)
   const programGroups=useMemo(()=>{
-    let r=[...data];
-    if(statusFilter==='apply')r=r.filter(g=>g.nextStep==='01 Apply on deadline'||g.nextStep==='00 Send Proposal');
-    else if(statusFilter!=='all')r=r.filter(g=>g.nextStep===statusFilter);
-    if(search){
-      const q=search.toLowerCase();
-      r=r.filter(g=>(g.foundation||'').toLowerCase().includes(q)||(g.grant||'').toLowerCase().includes(q)||(g.notes||'').toLowerCase().includes(q)||(g.projectDates||'').toLowerCase().includes(q));
-    }
-    // Group by foundation + grant
+    // Group ALL entries first — status filter applied at group level so full history is visible when expanded
     const groups={};
-    r.forEach(g=>{
+    data.forEach(g=>{
       const key=(g.foundation||'').trim()+'|||'+(g.grant||'').trim();
       if(!groups[key])groups[key]={key,foundation:(g.foundation||'').trim(),grant:(g.grant||'').trim(),entries:[]};
       groups[key].entries.push(g);
     });
     const now=new Date();now.setHours(0,0,0,0);
     // For each group, compute stats and find next deadline
-    return Object.values(groups).map(grp=>{
+    let result=Object.values(groups).map(grp=>{
       grp.entries.sort((a,b)=>(b.deadline||'').localeCompare(a.deadline||'')); // newest first
       const futureEntries=grp.entries.filter(e=>e.deadline&&new Date(e.deadline+'T00:00:00')>=now).sort((a,b)=>a.deadline.localeCompare(b.deadline));
       grp.nextDeadline=futureEntries[0]||null;
@@ -1318,7 +1311,16 @@ function App({initialGrants}){
       grp.waiting=grp.entries.filter(e=>e.nextStep==='03 Waiting Results').length;
       grp.totalAmt=grp.entries.filter(e=>e.nextStep==='05 Received').reduce((s,e)=>s+(e.amountReceived||e.amount||0),0);
       return grp;
-    }).sort((a,b)=>{
+    });
+    // Filter groups by status of their most recent (primary) entry
+    if(statusFilter==='apply')result=result.filter(grp=>grp.primary.nextStep==='01 Apply on deadline'||grp.primary.nextStep==='00 Send Proposal');
+    else if(statusFilter!=='all')result=result.filter(grp=>grp.primary.nextStep===statusFilter);
+    // Search: match any entry's foundation, grant, notes, or projectDates
+    if(search){
+      const q=search.toLowerCase();
+      result=result.filter(grp=>(grp.foundation||'').toLowerCase().includes(q)||(grp.grant||'').toLowerCase().includes(q)||grp.entries.some(e=>(e.notes||'').toLowerCase().includes(q)||(e.projectDates||'').toLowerCase().includes(q)));
+    }
+    return result.sort((a,b)=>{
       // Groups with future deadlines first (soonest), then past (most recent)
       const aD=a.nextDeadline?a.nextDeadline.deadline:'9999';
       const bD=b.nextDeadline?b.nextDeadline.deadline:'9999';
