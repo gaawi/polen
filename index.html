@@ -1608,7 +1608,8 @@ function App({initialGrants}){
               <th style={{width:75}}>Status</th>
               <th style={{width:60}}>Apps</th>
               <th style={{width:80}}>Results</th>
-              <th style={{width:80}}>Amount</th>
+              <th style={{width:80}}>Requested</th>
+              <th style={{width:80}}>Won</th>
               <th style={{width:120}}></th>
             </tr></thead>
             <tbody>
@@ -1661,6 +1662,7 @@ function App({initialGrants}){
                         {grp.denied>0&&<span className="ms ms-r">✗{grp.denied}</span>}
                       </div>
                     </td>
+                    <td className="desk-only" style={{fontVariantNumeric:'tabular-nums',fontSize:11,color:'var(--td)'}}>{grp.primary.amount?fmt(grp.primary.amount):''}</td>
                     <td className="desk-only" style={{fontVariantNumeric:'tabular-nums',fontWeight:700,color:'var(--g)',fontSize:11}}>{grp.totalAmt>0?fmt(grp.totalAmt):''}</td>
                     <td className="desk-only" style={{textAlign:'center'}}>
                       <div style={{display:'flex',gap:5,justifyContent:'center'}}>
@@ -1675,11 +1677,12 @@ function App({initialGrants}){
                       {grp.received>0&&<span className="ms ms-g" style={{fontSize:8}}>✓{grp.received}</span>}
                       {grp.waiting>0&&<span className="ms ms-b" style={{fontSize:8}}>⏳{grp.waiting}</span>}
                       {grp.denied>0&&<span className="ms ms-r" style={{fontSize:8}}>✗{grp.denied}</span>}
+                      {grp.primary.amount&&grp.totalAmt===0&&<span style={{fontVariantNumeric:'tabular-nums',fontSize:9,color:'var(--td)'}}>{fmt(grp.primary.amount)}</span>}
                       {grp.totalAmt>0&&<span style={{fontVariantNumeric:'tabular-nums',fontWeight:700,color:'var(--g)',fontSize:9}}>{fmt(grp.totalAmt)}</span>}
                     </td>
                   </tr>
                   {isExp&&(
-                    <tr><td colSpan={9} style={{padding:0}}>
+                    <tr><td colSpan={10} style={{padding:0}}>
                       <div className="hist-panel" onClick={e=>e.stopPropagation()}>
                         {/* Application Timeline */}
                         <div>
