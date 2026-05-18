@@ -1,12 +1,85 @@
 openapi: 3.1.0
 info:
-  title: Polen Grants Suggestions
-  description: Submit grant suggestions to Polen for review. Use this action to add grants that might be relevant, they will appear as pending suggestions in the Polen app for the user to accept or reject.
-  version: 1.0.0
+  title: Polen Grants
+  description: |
+    Read the full grants database and submit new grant suggestions to Polen.
+    Use getGrants to see all current grants (history, status, amounts).
+    Use getSuggestions to see pending suggestions awaiting review.
+    Use submitGrantSuggestions to propose new grants for the user to accept or reject.
+  version: 2.0.0
 servers:
   - url: https://aqehbiyjofsxavndjfjj.supabase.co/rest/v1
 paths:
+  /grants_blob:
+    get:
+      operationId: getGrants
+      summary: Get full grants database
+      description: |
+        Returns the complete grants history. The response contains a `data` array with every
+        grant entry ever tracked — all years, all statuses. Key fields per entry:
+        foundation, grant, deadline, nextStep (status), amount, amountReceived, currency,
+        eligiblePeriod, notes, season, web, bases.
+        Status values: "01 Apply on deadline", "02 Check", "03 Waiting Results",
+        "04 Denied", "05 Received", "06 Not Applied", "07 Missed Deadline", "08 Not Eligible".
+      parameters:
+        - in: query
+          name: select
+          schema:
+            type: string
+            default: data
+          required: false
+        - in: query
+          name: id
+          schema:
+            type: string
+            default: eq.1
+          required: false
+      responses:
+        "200":
+          description: Array with one object containing the full grants data array
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        type: object
+        "401":
+          description: Unauthorized
+
   /suggestions:
+    get:
+      operationId: getSuggestions
+      summary: Get pending grant suggestions
+      description: Returns all suggestions submitted to Polen (pending and processed).
+      parameters:
+        - in: query
+          name: select
+          schema:
+            type: string
+            default: "*"
+          required: false
+        - in: query
+          name: order
+          schema:
+            type: string
+            default: created_at.desc
+          required: false
+      responses:
+        "200":
+          description: Array of suggestion objects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+        "401":
+          description: Unauthorized
     post:
       operationId: submitGrantSuggestions
       summary: Submit one or more grant suggestions
