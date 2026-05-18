@@ -664,6 +664,10 @@ body{font-family:var(--font-mono);background:var(--bg);color:var(--t);min-height
 .ef-sm{font-size:10px;}
 .ef-date{width:90px;font-size:10px;color:var(--td);}
 .ef-amt{width:70px;font-size:11px;font-variant-numeric:tabular-nums;}
+.cur-toggle{display:inline-flex;border:1px solid var(--bd);border-radius:3px;overflow:hidden;flex-shrink:0;height:22px;}
+.cur-btn{background:none;border:none;padding:0 6px;font-size:10px;font-weight:600;cursor:pointer;color:var(--td);font-family:var(--font-mono);transition:all .12s;line-height:1;}
+.cur-btn.on{background:var(--acbg);color:var(--ac);}
+.cur-btn:hover:not(.on){background:var(--s3);}
 .ef-note{font-size:10px;color:var(--tf);}
 /* Click-to-edit display value */
 .cte{cursor:pointer;display:inline-flex;align-items:center;gap:3px;min-height:18px;min-width:20px;padding:1px 3px;border-radius:2px;transition:background .1s;}
@@ -818,6 +822,7 @@ async function acceptSuggestion(sug,addFn,setSuggestions){
     notes:(gd.notes||sug.notes||'')+'\n[Suggested by AI]',
     amount:gd.amount||null,
     amountReceived:gd.amountReceived||null,
+    currency:gd.currency||'USD',
     eligiblePeriod:gd.eligiblePeriod||'',
     projectDates:gd.projectDates||'',
     improvements:'',
@@ -910,7 +915,8 @@ function DField({value,onChange,className,type,placeholder,style,label,multiline
     </span>
   );
 }
-function fmt(n){return n?'$'+n.toLocaleString('en-US',{maximumFractionDigits:0}):'—';}
+function fmt(n,cur='USD'){if(!n)return'—';const sym=cur==='EUR'?'€':'$';if(n>=1e6)return sym+(n/1e6).toFixed(1)+'M';if(n>=1000)return sym+(n/1000).toFixed(n>=10000?0:1)+'k';return sym+n.toLocaleString('en-US',{maximumFractionDigits:0});}
+function fmtByCur(byCur){return Object.entries(byCur).filter(([,v])=>v>0).map(([c,v])=>fmt(v,c)).join(' · ')||'—';}
 function parseDeadline(d){if(!d)return null;const p=new Date(d+'T00:00:00');return isNaN(p.getTime())?null:p;}
 function daysUntil(d){const dt=parseDeadline(d);if(!dt)return 9999;return Math.ceil((dt-new Date())/864e5);}
 function dlClass(days){if(days<0)return'past';if(days<=7)return'soon';if(days<=30)return'upcoming';return'future';}
@@ -985,8 +991,12 @@ function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
           </div>
           <div className="tl-meta" style={{display:'flex',gap:5,alignItems:'center'}}>
             <StatusBadge entryId={e.id} currentStep={e.nextStep} onChangeStatus={onChangeStatus}/>
-            <DField className="ef ef-amt" type="number" value={e.amount||''} placeholder="Req $" label="Amount Requested" onChange={v=>onChangeField(e.id,'amount',v)}/>
-            <DField className="ef ef-amt" type="number" value={e.amountReceived||''} placeholder="Recv $" label="Amount Received" style={{fontSize:10}} onChange={v=>onChangeField(e.id,'amountReceived',v)}/>
+            <DField className="ef ef-amt" type="number" value={e.amount||''} placeholder={`Req ${e.currency==='EUR'?'€':'$'}`} label="Amount Requested" onChange={v=>onChangeField(e.id,'amount',v)}/>
+            <DField className="ef ef-amt" type="number" value={e.amountReceived||''} placeholder={`Recv ${e.currency==='EUR'?'€':'$'}`} label="Amount Received" style={{fontSize:10}} onChange={v=>onChangeField(e.id,'amountReceived',v)}/>
+            <div className="cur-toggle">
+              <button className={`cur-btn${(e.currency||'USD')==='USD'?' on':''}`} onClick={ev=>{ev.stopPropagation();onChangeField(e.id,'currency','USD');}}>$</button>
+              <button className={`cur-btn${e.currency==='EUR'?' on':''}`} onClick={ev=>{ev.stopPropagation();onChangeField(e.id,'currency','EUR');}}>€</button>
+            </div>
           </div>
         </div>
         <div className="tl-grid" style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'2px 14px',fontSize:11}}>
@@ -1032,7 +1042,7 @@ function EditSheet({data,setData,search}){
   const[sortCol,setSortCol]=useState('foundation');
   const[sortDir,setSortDir]=useState('asc');
   const[colWidths,setColWidths]=useState({
-    id:35,foundation:170,grant:150,projectDates:120,deadline:100,deadlineType:70,season:70,nextStep:78,amount:85,amountReceived:85,eligiblePeriodStart:90,eligiblePeriodEnd:90,reportDeadline:95,source:55,web:120,bases:120,notes:140,del:28
+    id:35,foundation:170,grant:150,projectDates:120,deadline:100,deadlineType:70,season:70,nextStep:78,currency:55,amount:85,amountReceived:85,eligiblePeriodStart:90,eligiblePeriodEnd:90,reportDeadline:95,source:55,web:120,bases:120,notes:140,del:28
   });
   const resizing=useRef(null);
 
@@ -1118,6 +1128,7 @@ function EditSheet({data,setData,search}){
           <th style={{width:colWidths.deadlineType}}>Type<RH col="deadlineType"/></th>
           <th onClick={()=>doSort('season')} className={sortCol==='season'?'so':''} style={{width:colWidths.season}}>Season <AR c="season"/><RH col="season"/></th>
           <th onClick={()=>doSort('nextStep')} className={sortCol==='nextStep'?'so':''} style={{width:colWidths.nextStep}}>Status <AR c="nextStep"/><RH col="nextStep"/></th>
+          <th style={{width:colWidths.currency}}>Cur<RH col="currency"/></th>
           <th onClick={()=>doSort('amount')} className={sortCol==='amount'?'so':''} style={{width:colWidths.amount}}>Requested <AR c="amount"/><RH col="amount"/></th>
           <th onClick={()=>doSort('amountReceived')} className={sortCol==='amountReceived'?'so':''} style={{width:colWidths.amountReceived}}>Received <AR c="amountReceived"/><RH col="amountReceived"/></th>
           <th style={{width:colWidths.eligiblePeriodStart}}>Period Start<RH col="eligiblePeriodStart"/></th>
@@ -1142,6 +1153,7 @@ function EditSheet({data,setData,search}){
               <td><select value={g.deadlineType||'Estimated'} onChange={e=>upd(g.id,'deadlineType',e.target.value)}><option value="DDLNE!">Hard</option><option value="Estimated">Est.</option></select></td>
               <td><select value={g.season||''} onChange={e=>upd(g.id,'season',e.target.value)} style={{fontSize:9}}><option value="">—</option><option value="Spring">🌱 Spr</option><option value="Summer">☀️ Sum</option><option value="Fall">🍂 Fall</option><option value="Winter">❄️ Win</option><option value="Closed">🚫 Closed</option></select></td>
               <td><select value={g.nextStep} onChange={e=>upd(g.id,'nextStep',e.target.value)} style={{fontSize:9}}>{STEPS.map(st=><option key={st} value={st}>{STEP_SHORT[st]}</option>)}</select></td>
+              <td><select value={g.currency||'USD'} onChange={e=>upd(g.id,'currency',e.target.value)} style={{fontSize:10}}><option value="USD">$</option><option value="EUR">€</option></select></td>
               <td className="cell-amt"><input type="number" value={g.amount||''} onChange={e=>upd(g.id,'amount',e.target.value?parseFloat(e.target.value):null)} placeholder="—"/></td>
               <td className="cell-amt"><input type="number" value={g.amountReceived||''} onChange={e=>upd(g.id,'amountReceived',e.target.value?parseFloat(e.target.value):null)} placeholder="—"/></td>
               <td className="cell-date" onClick={ev=>{const inp=ev.currentTarget.querySelector('input');if(inp)inp.showPicker?.();}}><span className="date-disp">{pd.start?fmtDate(pd.start):'—'}</span><input type="date" value={pd.start} onChange={e=>updPeriod(g.id,'start',e.target.value)} className="date-hidden"/></td>
@@ -1309,7 +1321,9 @@ function App({initialGrants}){
       grp.received=grp.entries.filter(e=>e.nextStep==='05 Received').length;
       grp.denied=grp.entries.filter(e=>e.nextStep==='04 Denied').length;
       grp.waiting=grp.entries.filter(e=>e.nextStep==='03 Waiting Results').length;
-      grp.totalAmt=grp.entries.filter(e=>e.nextStep==='05 Received').reduce((s,e)=>s+(e.amountReceived||e.amount||0),0);
+      grp.totalAmtByCur={};
+      grp.entries.filter(e=>e.nextStep==='05 Received').forEach(e=>{const c=e.currency||'USD';grp.totalAmtByCur[c]=(grp.totalAmtByCur[c]||0)+(e.amountReceived||e.amount||0);});
+      grp.totalAmt=Object.values(grp.totalAmtByCur).reduce((s,v)=>s+v,0);
       return grp;
     });
     // Filter groups by status of their most recent (primary) entry
@@ -1433,7 +1447,7 @@ function App({initialGrants}){
     total:data.length,
     apply:data.filter(g=>g.nextStep==='01 Apply on deadline'||g.nextStep==='00 Send Proposal').length,
     waiting:data.filter(g=>g.nextStep==='03 Waiting Results').length,
-    waitingAmt:data.filter(g=>g.nextStep==='03 Waiting Results').reduce((s,g)=>s+(g.amount||0),0),
+    waitingAmtByCur:(()=>{const m={};data.filter(g=>g.nextStep==='03 Waiting Results').forEach(g=>{const c=g.currency||'USD';m[c]=(m[c]||0)+(g.amount||0);});return m;})(),
     received:data.filter(g=>g.nextStep==='05 Received').length,
     denied:data.filter(g=>g.nextStep==='04 Denied').length,
     active:activeGrants.length,
@@ -1477,10 +1491,10 @@ function App({initialGrants}){
         <input className="search" placeholder="Search foundation, grant program, notes..." value={search} onChange={e=>setSearch(e.target.value)}/>
         <div className="chips-row">
           {/* Desktop: individual pills */}
-          {[['all','All',stats.total,null],['apply','Apply',stats.apply,null],['03 Waiting Results','Waiting',stats.waiting,stats.waitingAmt],['05 Received','Awarded',stats.received,null],['04 Denied','Denied',stats.denied,null]].map(([k,l,c,amt])=>
+          {[['all','All',stats.total,null],['apply','Apply',stats.apply,null],['03 Waiting Results','Waiting',stats.waiting,stats.waitingAmtByCur],['05 Received','Awarded',stats.received,null],['04 Denied','Denied',stats.denied,null]].map(([k,l,c,amtByCur])=>
             <button key={k} className={`chip status-chip-desktop ${statusFilter===k&&!editMode&&!activeView&&!calendarView&&!suggView?'on':''}`}
               onClick={()=>{setStatusFilter(k);setEditMode(false);setActiveView(false);setCalendarView(false);setSuggView(false);setExpRow(null);}}>
-              {l}{k!=='all'&&c>0&&<span style={{opacity:.65,marginLeft:4,fontSize:10}}>{c}</span>}{amt>0&&<span style={{opacity:.55,marginLeft:4,fontSize:9}}>{fmt(amt)}</span>}
+              {l}{k!=='all'&&c>0&&<span style={{opacity:.65,marginLeft:4,fontSize:10}}>{c}</span>}{amtByCur&&Object.values(amtByCur).some(v=>v>0)&&<span style={{opacity:.55,marginLeft:4,fontSize:9}}>{fmtByCur(amtByCur)}</span>}
             </button>
           )}
           {/* Mobile: dropdown */}
@@ -1663,8 +1677,8 @@ function App({initialGrants}){
                         {grp.denied>0&&<span className="ms ms-r">✗{grp.denied}</span>}
                       </div>
                     </td>
-                    <td className="desk-only" style={{fontVariantNumeric:'tabular-nums',fontSize:11,color:'var(--td)'}}>{grp.primary.amount?fmt(grp.primary.amount):''}</td>
-                    <td className="desk-only" style={{fontVariantNumeric:'tabular-nums',fontWeight:700,color:'var(--g)',fontSize:11}}>{grp.totalAmt>0?fmt(grp.totalAmt):''}</td>
+                    <td className="desk-only" style={{fontVariantNumeric:'tabular-nums',fontSize:11,color:'var(--td)'}}>{grp.primary.amount?fmt(grp.primary.amount,grp.primary.currency||'USD'):''}</td>
+                    <td className="desk-only" style={{fontVariantNumeric:'tabular-nums',fontWeight:700,color:'var(--g)',fontSize:11}}>{grp.totalAmt>0?fmtByCur(grp.totalAmtByCur):''}</td>
                     <td className="desk-only" style={{textAlign:'center'}}>
                       <div style={{display:'flex',gap:5,justifyContent:'center'}}>
                         {grp.primary.web&&<a href={grp.primary.web} target="_blank" rel="noreferrer" className="btn-icon btn-icon-web" onClick={e=>e.stopPropagation()} title="Ver Convocatoria">🔗</a>}
@@ -1678,8 +1692,8 @@ function App({initialGrants}){
                       {grp.received>0&&<span className="ms ms-g" style={{fontSize:8}}>✓{grp.received}</span>}
                       {grp.waiting>0&&<span className="ms ms-b" style={{fontSize:8}}>⏳{grp.waiting}</span>}
                       {grp.denied>0&&<span className="ms ms-r" style={{fontSize:8}}>✗{grp.denied}</span>}
-                      {grp.primary.amount&&grp.totalAmt===0&&<span style={{fontVariantNumeric:'tabular-nums',fontSize:9,color:'var(--td)'}}>{fmt(grp.primary.amount)}</span>}
-                      {grp.totalAmt>0&&<span style={{fontVariantNumeric:'tabular-nums',fontWeight:700,color:'var(--g)',fontSize:9}}>{fmt(grp.totalAmt)}</span>}
+                      {grp.primary.amount&&grp.totalAmt===0&&<span style={{fontVariantNumeric:'tabular-nums',fontSize:9,color:'var(--td)'}}>{fmt(grp.primary.amount,grp.primary.currency||'USD')}</span>}
+                      {grp.totalAmt>0&&<span style={{fontVariantNumeric:'tabular-nums',fontWeight:700,color:'var(--g)',fontSize:9}}>{fmtByCur(grp.totalAmtByCur)}</span>}
                     </td>
                   </tr>
                   {isExp&&(
@@ -1706,14 +1720,14 @@ function App({initialGrants}){
                 </td>
                 <td className="desk-only" colSpan={3}/>
                 <td className="desk-only" style={{padding:'6px 10px',fontVariantNumeric:'tabular-nums',fontSize:11,color:'var(--td)',fontWeight:700}}>
-                  {(()=>{const t=programGroups.reduce((s,g)=>s+(g.primary.amount||0),0);return t>0?fmt(t):''})()}
+                  {(()=>{const m={};programGroups.forEach(g=>{if(g.primary.amount){const c=g.primary.currency||'USD';m[c]=(m[c]||0)+g.primary.amount;}});return fmtByCur(m)!=='—'?fmtByCur(m):''})()}
                 </td>
                 <td className="desk-only" style={{padding:'6px 10px',fontVariantNumeric:'tabular-nums',fontSize:11,color:'var(--g)',fontWeight:700}}>
-                  {(()=>{const t=programGroups.reduce((s,g)=>s+g.totalAmt,0);return t>0?fmt(t):''})()}
+                  {(()=>{const m={};programGroups.forEach(g=>Object.entries(g.totalAmtByCur).forEach(([c,v])=>{m[c]=(m[c]||0)+v;}));return fmtByCur(m)!=='—'?fmtByCur(m):''})()}
                 </td>
                 <td className="desk-only"/>
                 <td className="mob-right" style={{padding:'6px 10px',fontSize:9,color:'var(--tf)',textAlign:'right'}}>
-                  {(()=>{const req=programGroups.reduce((s,g)=>s+(g.primary.amount||0),0);const won=programGroups.reduce((s,g)=>s+g.totalAmt,0);return[req>0&&<span key="r" style={{color:'var(--td)',fontWeight:700,marginRight:4}}>{fmt(req)}</span>,won>0&&<span key="w" style={{color:'var(--g)',fontWeight:700}}>{fmt(won)}</span>];})()}
+                  {(()=>{const req={};const won={};programGroups.forEach(g=>{if(g.primary.amount){const c=g.primary.currency||'USD';req[c]=(req[c]||0)+g.primary.amount;}Object.entries(g.totalAmtByCur).forEach(([c,v])=>{won[c]=(won[c]||0)+v;});});const rs=fmtByCur(req)!=='—'?fmtByCur(req):'';const ws=fmtByCur(won)!=='—'?fmtByCur(won):'';return[rs&&<span key="r" style={{color:'var(--td)',fontWeight:700,marginRight:4}}>{rs}</span>,ws&&<span key="w" style={{color:'var(--g)',fontWeight:700}}>{ws}</span>];})()}
                 </td>
               </tr>
             </tfoot>
@@ -1785,7 +1799,7 @@ function App({initialGrants}){
 
 function AddModal({onClose,onAdd,prefill}){
   const pf=prefill||{};
-  const[f,sF]=useState({id:Date.now(),deadline:'',deadlineType:'Estimated',foundation:pf.foundation||'',grant:pf.grant||'',nextStep:'02 Check',web:pf.web||'',bases:'',notes:'',amount:null,amountReceived:null,eligiblePeriod:'',projectDates:'',improvements:'',source:'calendar',reportDeadline:'',season:pf.season||''});
+  const[f,sF]=useState({id:Date.now(),deadline:'',deadlineType:'Estimated',foundation:pf.foundation||'',grant:pf.grant||'',nextStep:'02 Check',web:pf.web||'',bases:'',notes:'',amount:null,amountReceived:null,currency:'USD',eligiblePeriod:'',projectDates:'',improvements:'',source:'calendar',reportDeadline:'',season:pf.season||''});
   const s=(k,v)=>sF(p=>({...p,[k]:v}));
   return(
     <>
@@ -1799,8 +1813,9 @@ function AddModal({onClose,onAdd,prefill}){
         <div className="mf" style={{flex:1}}><label>Season</label><select value={f.season||''} onChange={e=>s('season',e.target.value)}><option value="">—</option><option value="Spring">🌱 Spring</option><option value="Summer">☀️ Summer</option><option value="Fall">🍂 Fall</option><option value="Winter">❄️ Winter</option><option value="Closed">🚫 Closed</option></select></div>
       </div>
       <div style={{display:'flex',gap:8}}>
-        <div className="mf" style={{flex:1}}><label>Amount Requested ($)</label><input type="number" value={f.amount||''} onChange={e=>s('amount',e.target.value?parseFloat(e.target.value):null)}/></div>
-        <div className="mf" style={{flex:1}}><label>Amount Received ($)</label><input type="number" value={f.amountReceived||''} onChange={e=>s('amountReceived',e.target.value?parseFloat(e.target.value):null)}/></div>
+        <div className="mf" style={{flex:1}}><label>Amount Requested</label><input type="number" value={f.amount||''} onChange={e=>s('amount',e.target.value?parseFloat(e.target.value):null)}/></div>
+        <div className="mf" style={{flex:1}}><label>Amount Received</label><input type="number" value={f.amountReceived||''} onChange={e=>s('amountReceived',e.target.value?parseFloat(e.target.value):null)}/></div>
+        <div className="mf" style={{flex:'0 0 auto'}}><label>Currency</label><div className="cur-toggle" style={{height:28}}><button type="button" className={`cur-btn${f.currency==='USD'?' on':''}`} onClick={()=>s('currency','USD')}>$ USD</button><button type="button" className={`cur-btn${f.currency==='EUR'?' on':''}`} onClick={()=>s('currency','EUR')}>€ EUR</button></div></div>
       </div>
       <div style={{display:'flex',gap:8}}>
         <div className="mf" style={{flex:1}}><label>Web / Link</label><input value={f.web} onChange={e=>s('web',e.target.value)} placeholder="https://..."/></div>
