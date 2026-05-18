@@ -1515,8 +1515,14 @@ function App({initialGrants}){
             🤖 IA{suggestions.length>0&&<span style={{marginLeft:5,background:'var(--r)',color:'#fff',borderRadius:10,padding:'0 6px',fontSize:10,fontWeight:800}}>{suggestions.length}</span>}
           </button>
         </div>
-        <span style={{fontSize:11,color:'var(--tf)',marginLeft:'auto'}}>
-          {editMode?`${data.length} entries`:suggView?`${suggestions.length} sugerencias IA pendientes`:calendarView?`${calendarData.reduce((s,m)=>s+m.grants.length,0)} programs · ${calendarData.length} seasons`:activeView?`${activeGrants.length} active · ${fmt(stats.activeAmt)}`:`${programGroups.length} programs · ${programGroups.reduce((s,g)=>s+g.entries.length,0)} grants`}
+        <span style={{fontSize:11,color:'var(--tf)',marginLeft:'auto',display:'flex',alignItems:'center',gap:8,flexWrap:'wrap',justifyContent:'flex-end'}}>
+          {editMode?`${data.length} entries`:suggView?`${suggestions.length} sugerencias IA pendientes`:calendarView?`${calendarData.reduce((s,m)=>s+m.grants.length,0)} programs · ${calendarData.length} seasons`:activeView?`${activeGrants.length} active · ${fmt(stats.activeAmt)}`:(()=>{
+            const reqByCur={};programGroups.forEach(g=>{if(g.primary.amount){const c=g.primary.currency||'USD';reqByCur[c]=(reqByCur[c]||0)+g.primary.amount;}});
+            const wonByCur={};programGroups.forEach(g=>Object.entries(g.totalAmtByCur).forEach(([c,v])=>{wonByCur[c]=(wonByCur[c]||0)+v;}));
+            const reqStr=fmtByCur(reqByCur)!=='—'?fmtByCur(reqByCur):'';
+            const wonStr=fmtByCur(wonByCur)!=='—'?fmtByCur(wonByCur):'';
+            return <>{`${programGroups.length} programs · ${programGroups.reduce((s,g)=>s+g.entries.length,0)} grants`}{reqStr&&<span style={{borderLeft:'1px solid var(--bd)',paddingLeft:8}}>req <strong style={{color:'var(--td)'}}>{reqStr}</strong></span>}{wonStr&&<span>· won <strong style={{color:'var(--g)'}}>{wonStr}</strong></span>}</>;
+          })()}
           {lastSaved&&<span className="save-indicator"><span className={`dot ${saveStatus}`}/>{saveStatus==='ok'?'Saved':saveStatus==='saving'?'Saving...':'Error'} · {lastSaved.toLocaleTimeString()}</span>}
         </span>
       </div>
@@ -1697,7 +1703,7 @@ function App({initialGrants}){
                     </td>
                   </tr>
                   {isExp&&(
-                    <tr><td colSpan={10} style={{padding:0}}>
+                    <tr><td colSpan={9} style={{padding:0}}>
                       <div className="hist-panel" onClick={e=>e.stopPropagation()}>
                         {/* Application Timeline */}
                         <div>
@@ -1713,24 +1719,6 @@ function App({initialGrants}){
                 );
               })}
             </tbody>
-            <tfoot>
-              <tr style={{borderTop:'2px solid var(--bd)'}}>
-                <td colSpan={3} style={{padding:'6px 10px',fontSize:10,color:'var(--tf)',fontWeight:700,letterSpacing:'.04em'}}>
-                  {programGroups.length} programs shown
-                </td>
-                <td className="desk-only" colSpan={3}/>
-                <td className="desk-only" style={{padding:'6px 10px',fontVariantNumeric:'tabular-nums',fontSize:11,color:'var(--td)',fontWeight:700}}>
-                  {(()=>{const m={};programGroups.forEach(g=>{if(g.primary.amount){const c=g.primary.currency||'USD';m[c]=(m[c]||0)+g.primary.amount;}});return fmtByCur(m)!=='—'?fmtByCur(m):''})()}
-                </td>
-                <td className="desk-only" style={{padding:'6px 10px',fontVariantNumeric:'tabular-nums',fontSize:11,color:'var(--g)',fontWeight:700}}>
-                  {(()=>{const m={};programGroups.forEach(g=>Object.entries(g.totalAmtByCur).forEach(([c,v])=>{m[c]=(m[c]||0)+v;}));return fmtByCur(m)!=='—'?fmtByCur(m):''})()}
-                </td>
-                <td className="desk-only"/>
-                <td className="mob-right" style={{padding:'6px 10px',fontSize:9,color:'var(--tf)',textAlign:'right'}}>
-                  {(()=>{const req={};const won={};programGroups.forEach(g=>{if(g.primary.amount){const c=g.primary.currency||'USD';req[c]=(req[c]||0)+g.primary.amount;}Object.entries(g.totalAmtByCur).forEach(([c,v])=>{won[c]=(won[c]||0)+v;});});const rs=fmtByCur(req)!=='—'?fmtByCur(req):'';const ws=fmtByCur(won)!=='—'?fmtByCur(won):'';return[rs&&<span key="r" style={{color:'var(--td)',fontWeight:700,marginRight:4}}>{rs}</span>,ws&&<span key="w" style={{color:'var(--g)',fontWeight:700}}>{ws}</span>];})()}
-                </td>
-              </tr>
-            </tfoot>
           </table>
           </div>
         )}
