@@ -78,6 +78,12 @@ body{font-family:var(--font-mono);background:var(--bg);color:var(--t);min-height
 .chip-sel:focus{outline:none;border-color:var(--ac);}
 .chip-sel.active{border-color:var(--ac);background:var(--acbg);color:var(--acl);}
 .chip-sel.active~*,.chip-sel-wrap.active::after{color:var(--acl);}
+/* Show pills on desktop, dropdown on mobile */
+.status-sel-mobile{display:none;}
+@media(max-width:768px){
+  .status-chip-desktop{display:none;}
+  .status-sel-mobile{display:inline-flex;}
+}
 /* Suggestion cards */
 .sugg-list{padding:12px 14px;display:flex;flex-direction:column;gap:10px;}
 .sugg-card{background:var(--s1);border:1px solid var(--bd);border-radius:6px;padding:14px 16px;}
@@ -1457,7 +1463,15 @@ function App({initialGrants}){
       <div className="filters">
         <input className="search" placeholder="Search foundation, grant program, notes..." value={search} onChange={e=>setSearch(e.target.value)}/>
         <div className="chips-row">
-          <div className={`chip-sel-wrap${statusFilter!=='all'&&!editMode&&!activeView&&!calendarView&&!suggView?' active':''}`}>
+          {/* Desktop: individual pills */}
+          {[['all','All',stats.total],['apply','Apply',stats.apply],['03 Waiting Results','Waiting',stats.waiting],['05 Received','Awarded',stats.received],['04 Denied','Denied',stats.denied]].map(([k,l,c])=>
+            <button key={k} className={`chip status-chip-desktop ${statusFilter===k&&!editMode&&!activeView&&!calendarView&&!suggView?'on':''}`}
+              onClick={()=>{setStatusFilter(k);setEditMode(false);setActiveView(false);setCalendarView(false);setSuggView(false);setExpRow(null);}}>
+              {l}{k!=='all'&&c>0&&<span style={{opacity:.65,marginLeft:4,fontSize:10}}>{c}</span>}
+            </button>
+          )}
+          {/* Mobile: dropdown */}
+          <div className={`chip-sel-wrap status-sel-mobile${statusFilter!=='all'&&!editMode&&!activeView&&!calendarView&&!suggView?' active':''}`}>
             <select className={`chip-sel${statusFilter!=='all'&&!editMode&&!activeView&&!calendarView&&!suggView?' active':''}`}
               value={statusFilter}
               onChange={e=>{setStatusFilter(e.target.value);setEditMode(false);setActiveView(false);setCalendarView(false);setSuggView(false);setExpRow(null);}}>
