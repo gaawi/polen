@@ -304,6 +304,11 @@ body{font-family:var(--font-mono);background:var(--bg);color:var(--t);min-height
 .btn-conv:hover{background:var(--b);color:#fff;}
 .btn-conv .conv-arrow{font-size:8px;transition:transform .15s;}
 .btn-conv:hover .conv-arrow{transform:translateX(2px);}
+/* Mini icon link buttons */
+.btn-icon{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:4px;font-size:13px;text-decoration:none;border:none;cursor:pointer;transition:all .15s;flex-shrink:0;line-height:1;}
+.btn-icon:hover{transform:scale(1.15);opacity:.85;}
+.btn-icon-web{background:var(--bbg);color:var(--b);}
+.btn-icon-pdf{background:var(--rbg);color:var(--r);}
 .mob-right{display:none;}
 
 ::-webkit-scrollbar{width:5px;height:5px;}
@@ -973,6 +978,8 @@ function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
         <div className="tl-header" style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:3}}>
           <div style={{display:'flex',alignItems:'center',gap:6}}>
             <span style={{fontSize:14,fontWeight:800,color:'var(--acl)'}}>{yr}</span>
+            {e.web&&<a href={e.web} target="_blank" rel="noreferrer" className="btn-icon btn-icon-web" onClick={ev=>ev.stopPropagation()} title="Ver Convocatoria">🔗</a>}
+            {e.bases&&<a href={e.bases} target="_blank" rel="noreferrer" className="btn-icon btn-icon-pdf" onClick={ev=>ev.stopPropagation()} title="Ver Bases (PDF)">📄</a>}
             <button className="tl-action" title="Duplicate" onClick={ev=>{ev.stopPropagation();onDuplicate(e.id);}}>⧉</button>
             <button className="tl-action tl-del" title="Delete" onClick={ev=>{ev.stopPropagation();onDelete(e.id);}}>✕</button>
           </div>
@@ -999,10 +1006,6 @@ function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
           <div><L>Bases (PDF)</L><DField className="ef ef-sm" value={e.bases||''} placeholder="https://...pdf" label="Bases PDF" onChange={v=>onChangeField(e.id,'bases',v)}/></div>
           <div><L>Deadline Type</L><span style={{cursor:'pointer',display:'inline-block'}} onClick={ev=>{ev.stopPropagation();onChangeField(e.id,'deadlineType',e.deadlineType==='DDLNE!'?'Estimated':'DDLNE!');}}><span className={`fd-type ${e.deadlineType==='DDLNE!'?'hard':'est'}`}>{e.deadlineType==='DDLNE!'?'Hard Deadline':'Estimated'}</span></span></div>
           <div style={{gridColumn:'1/-1'}}><L>Notes</L><DField className="ef ef-note" value={e.notes||e.improvements||''} placeholder="Notes..." label="Notes" multiline={true} onChange={v=>onChangeField(e.id,'notes',v)}/></div>
-        </div>
-        <div style={{display:'flex',gap:8,marginTop:6,flexWrap:'wrap'}}>
-          {e.web&&<a href={e.web} target="_blank" rel="noreferrer" className="btn-conv" onClick={ev=>ev.stopPropagation()}>Ver Convocatoria <span className="conv-arrow">→</span></a>}
-          {e.bases&&<a href={e.bases} target="_blank" rel="noreferrer" className="btn-conv" onClick={ev=>ev.stopPropagation()} style={{color:'var(--r)',background:'var(--rbg)'}}>📄 Bases <span className="conv-arrow">→</span></a>}
         </div>
         {e.eligiblePeriod&&<Thermo period={e.eligiblePeriod} deadline={e.deadline} reportDeadline={e.reportDeadline}/>}
       </div>
@@ -1658,9 +1661,9 @@ function App({initialGrants}){
                     </td>
                     <td className="desk-only" style={{fontVariantNumeric:'tabular-nums',fontWeight:700,color:'var(--g)',fontSize:11}}>{grp.totalAmt>0?fmt(grp.totalAmt):''}</td>
                     <td className="desk-only" style={{textAlign:'center'}}>
-                      <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
-                        {grp.primary.web&&<a href={grp.primary.web} target="_blank" rel="noreferrer" className="btn-conv" onClick={e=>e.stopPropagation()}>Ver Convocatoria <span className="conv-arrow">→</span></a>}
-                        {grp.primary.bases&&<a href={grp.primary.bases} target="_blank" rel="noreferrer" className="btn-conv" onClick={e=>e.stopPropagation()} style={{color:'var(--r)',background:'var(--rbg)'}}>📄 Bases <span className="conv-arrow">→</span></a>}
+                      <div style={{display:'flex',gap:5,justifyContent:'center'}}>
+                        {grp.primary.web&&<a href={grp.primary.web} target="_blank" rel="noreferrer" className="btn-icon btn-icon-web" onClick={e=>e.stopPropagation()} title="Ver Convocatoria">🔗</a>}
+                        {grp.primary.bases&&<a href={grp.primary.bases} target="_blank" rel="noreferrer" className="btn-icon btn-icon-pdf" onClick={e=>e.stopPropagation()} title="Ver Bases (PDF)">📄</a>}
                       </div>
                     </td>
                     {/* Mobile-only: combined right-side stats */}
