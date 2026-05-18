@@ -1433,6 +1433,7 @@ function App({initialGrants}){
     total:data.length,
     apply:data.filter(g=>g.nextStep==='01 Apply on deadline'||g.nextStep==='00 Send Proposal').length,
     waiting:data.filter(g=>g.nextStep==='03 Waiting Results').length,
+    waitingAmt:data.filter(g=>g.nextStep==='03 Waiting Results').reduce((s,g)=>s+(g.amount||0),0),
     received:data.filter(g=>g.nextStep==='05 Received').length,
     denied:data.filter(g=>g.nextStep==='04 Denied').length,
     active:activeGrants.length,
@@ -1476,10 +1477,10 @@ function App({initialGrants}){
         <input className="search" placeholder="Search foundation, grant program, notes..." value={search} onChange={e=>setSearch(e.target.value)}/>
         <div className="chips-row">
           {/* Desktop: individual pills */}
-          {[['all','All',stats.total],['apply','Apply',stats.apply],['03 Waiting Results','Waiting',stats.waiting],['05 Received','Awarded',stats.received],['04 Denied','Denied',stats.denied]].map(([k,l,c])=>
+          {[['all','All',stats.total,null],['apply','Apply',stats.apply,null],['03 Waiting Results','Waiting',stats.waiting,stats.waitingAmt],['05 Received','Awarded',stats.received,null],['04 Denied','Denied',stats.denied,null]].map(([k,l,c,amt])=>
             <button key={k} className={`chip status-chip-desktop ${statusFilter===k&&!editMode&&!activeView&&!calendarView&&!suggView?'on':''}`}
               onClick={()=>{setStatusFilter(k);setEditMode(false);setActiveView(false);setCalendarView(false);setSuggView(false);setExpRow(null);}}>
-              {l}{k!=='all'&&c>0&&<span style={{opacity:.65,marginLeft:4,fontSize:10}}>{c}</span>}
+              {l}{k!=='all'&&c>0&&<span style={{opacity:.65,marginLeft:4,fontSize:10}}>{c}</span>}{amt>0&&<span style={{opacity:.55,marginLeft:4,fontSize:9}}>{fmt(amt)}</span>}
             </button>
           )}
           {/* Mobile: dropdown */}
@@ -1698,6 +1699,24 @@ function App({initialGrants}){
                 );
               })}
             </tbody>
+            <tfoot>
+              <tr style={{borderTop:'2px solid var(--bd)'}}>
+                <td colSpan={3} style={{padding:'6px 10px',fontSize:10,color:'var(--tf)',fontWeight:700,letterSpacing:'.04em'}}>
+                  {programGroups.length} programs shown
+                </td>
+                <td className="desk-only" colSpan={3}/>
+                <td className="desk-only" style={{padding:'6px 10px',fontVariantNumeric:'tabular-nums',fontSize:11,color:'var(--td)',fontWeight:700}}>
+                  {(()=>{const t=programGroups.reduce((s,g)=>s+(g.primary.amount||0),0);return t>0?fmt(t):''})()}
+                </td>
+                <td className="desk-only" style={{padding:'6px 10px',fontVariantNumeric:'tabular-nums',fontSize:11,color:'var(--g)',fontWeight:700}}>
+                  {(()=>{const t=programGroups.reduce((s,g)=>s+g.totalAmt,0);return t>0?fmt(t):''})()}
+                </td>
+                <td className="desk-only"/>
+                <td className="mob-right" style={{padding:'6px 10px',fontSize:9,color:'var(--tf)',textAlign:'right'}}>
+                  {(()=>{const req=programGroups.reduce((s,g)=>s+(g.primary.amount||0),0);const won=programGroups.reduce((s,g)=>s+g.totalAmt,0);return[req>0&&<span key="r" style={{color:'var(--td)',fontWeight:700,marginRight:4}}>{fmt(req)}</span>,won>0&&<span key="w" style={{color:'var(--g)',fontWeight:700}}>{fmt(won)}</span>];})()}
+                </td>
+              </tr>
+            </tfoot>
           </table>
           </div>
         )}
