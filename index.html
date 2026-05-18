@@ -680,6 +680,8 @@ html.light .dfield-input{color-scheme:light;}
 html.light .period-date{color-scheme:light;}
 .period-date:focus{border-color:var(--ac);}
 .period-sep{color:var(--tf);font-size:13px;flex-shrink:0;font-weight:300;}
+.period-clear{flex-shrink:0;width:22px;height:22px;border-radius:50%;border:none;background:var(--s3);color:var(--tf);font-size:13px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;padding:0;font-family:var(--font-mono);}
+.period-clear:hover{background:var(--rbg);color:var(--r);}
 
 /* ── Login overlay ── */
 #login-overlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;}
@@ -982,6 +984,7 @@ function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
               <input type="date" className="period-date" value={parsedPeriod.start} onChange={ev=>updatePeriod('start',ev.target.value)}/>
               <span className="period-sep">–</span>
               <input type="date" className="period-date" value={parsedPeriod.end} onChange={ev=>updatePeriod('end',ev.target.value)}/>
+              {(parsedPeriod.start||parsedPeriod.end)&&<button className="period-clear" title="Clear dates" onClick={ev=>{ev.stopPropagation();onChangeField(e.id,'eligiblePeriod','');}}>×</button>}
             </div>
           </div>
           <div><L>Project</L><DField className="ef" value={e.projectDates||''} placeholder="Project name" label="Project" onChange={v=>onChangeField(e.id,'projectDates',v)}/></div>
