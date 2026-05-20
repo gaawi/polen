@@ -67,7 +67,7 @@ paths:
           name: order
           schema:
             type: string
-            default: created_at.desc
+            default: submitted_at.desc
           required: false
       responses:
         "200":

@@ -21,7 +21,7 @@ const H={'apikey':KEY,'Authorization':'Bearer '+KEY};
   try{
     const[r1,r2]=await Promise.all([
       fetch(`${SB}/rest/v1/grants_blob?select=data&id=eq.1`,{headers:H}),
-      fetch(`${SB}/rest/v1/suggestions?select=*&order=created_at.desc`,{headers:H})
+      fetch(`${SB}/rest/v1/suggestions?select=*&order=submitted_at.desc`,{headers:H})
     ]);
     const[b,s]=await Promise.all([r1.json(),r2.json()]);
     document.getElementById('msg').style.display='none';
