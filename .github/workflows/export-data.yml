@@ -1,0 +1,48 @@
+name: Export data to static JSON
+
+on:
+  schedule:
+    - cron: '0 */2 * * *'   # every 2 hours
+  workflow_dispatch:          # manual trigger from GitHub UI
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/github-pages-supabase-setup-EOLbq
+
+      - name: Fetch from Supabase and write JSON
+        env:
+          KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxZWhiaXlqb2ZzeGF2bmRqZmpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3NjUwMzUsImV4cCI6MjA5NDM0MTAzNX0.WgMseUQ6YbtZPjjx1i_VuRXTpSI7n9OD6QLUImmmPU0
+        run: |
+          curl -sf \
+            -H "apikey: $KEY" \
+            -H "Authorization: Bearer $KEY" \
+            "https://aqehbiyjofsxavndjfjj.supabase.co/rest/v1/grants_blob?select=data&id=eq.1" \
+            -o grants_raw.json
+
+          curl -sf \
+            -H "apikey: $KEY" \
+            -H "Authorization: Bearer $KEY" \
+            "https://aqehbiyjofsxavndjfjj.supabase.co/rest/v1/suggestions?select=*&order=submitted_at.desc" \
+            -o suggestions_raw.json
+
+          node -e "
+            const g = JSON.parse(require('fs').readFileSync('grants_raw.json'));
+            const s = JSON.parse(require('fs').readFileSync('suggestions_raw.json'));
+            require('fs').writeFileSync('data-3e8f1a7b4c2d9e0f.json', JSON.stringify({
+              exported_at: new Date().toISOString(),
+              grants: g[0]?.data || [],
+              suggestions: s
+            }, null, 2));
+          "
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data-3e8f1a7b4c2d9e0f.json
+          git diff --staged --quiet || git commit -m "chore: update data export [skip ci]"
+          git push
