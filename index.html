@@ -696,6 +696,22 @@ html.light .period-date{color-scheme:light;}
 .period-sep{color:var(--tf);font-size:13px;flex-shrink:0;font-weight:300;}
 .period-clear{flex-shrink:0;width:22px;height:22px;border-radius:50%;border:none;background:var(--s3);color:var(--tf);font-size:13px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;padding:0;font-family:var(--font-mono);}
 .period-clear:hover{background:var(--rbg);color:var(--r);}
+/* Documents */
+.docs-section{margin-top:8px;border-top:1px solid var(--s3);padding-top:8px;}
+.docs-attach-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.doc-type-sel{background:var(--s2);border:1px solid var(--bd);color:var(--t);border-radius:3px;padding:3px 6px;font-size:10px;font-family:var(--font-mono);outline:none;cursor:pointer;}
+.doc-upload-btn{background:var(--s2);border:1px solid var(--bd);color:var(--td);border-radius:3px;padding:3px 8px;font-size:10px;font-family:var(--font-mono);cursor:pointer;transition:all .15s;white-space:nowrap;}
+.doc-upload-btn:hover{border-color:var(--ac);color:var(--t);}
+.doc-upload-btn:disabled{opacity:.5;cursor:not-allowed;}
+.doc-list{display:flex;flex-direction:column;gap:4px;margin-top:6px;}
+.doc-item{display:flex;align-items:center;gap:6px;padding:4px 7px;background:var(--s2);border-radius:3px;font-size:10px;}
+.doc-badge{font-size:9px;font-weight:700;padding:1px 5px;border-radius:2px;background:var(--s3);color:var(--td);white-space:nowrap;flex-shrink:0;}
+.doc-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--td);}
+.doc-link{color:var(--b);text-decoration:none;flex-shrink:0;font-size:11px;}
+.doc-link:hover{text-decoration:underline;}
+.doc-del{background:none;border:none;color:var(--tf);cursor:pointer;padding:0 2px;font-size:12px;line-height:1;flex-shrink:0;}
+.doc-del:hover{color:var(--r);}
+.doc-err{font-size:10px;color:var(--r);margin-top:4px;}
 
 /* ── Login overlay ── */
 #login-overlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;}
@@ -843,6 +859,28 @@ async function rejectSuggestion(id,setSuggestions){
 const {useState,useMemo,useCallback,useRef,useEffect}=React;
 const STEPS=['01 Apply on deadline','02 Check','03 Waiting Results','05 Received','04 Denied','06 Not Applied','07 Missed Deadline','08 Not Eligible'];
 const STEP_SHORT={'00 Send Proposal':'Apply','01 Apply on deadline':'Apply','02 Check':'Check','03 Waiting Results':'Waiting','04 Denied':'Denied','05 Received':'Received','06 Not Applied':'Not Applied','07 Missed Deadline':'Missed','08 Not Eligible':'Not Eligible'};
+
+const DOC_TYPES=[
+  {value:'bases',     label:'Bases',                icon:'📋'},
+  {value:'contrato',  label:'Contrato / Convenio',  icon:'🤝'},
+  {value:'modelos',   label:'Modelos / Formularios',icon:'📝'},
+  {value:'factura',   label:'Factura / Justificación',icon:'🧾'},
+  {value:'resolucion',label:'Resolución',            icon:'✅'},
+  {value:'memoria',   label:'Memoria / Informe',     icon:'📊'},
+  {value:'otro',      label:'Otro',                  icon:'📁'},
+];
+
+async function uploadDoc(grantId, file){
+  const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+  const path=`grants/${grantId}/${Date.now()}-${safe}`;
+  const r=await fetch(`${SUPABASE_URL}/storage/v1/object/grant-docs/${path}`,{
+    method:'POST',
+    headers:{'apikey':SUPABASE_ANON,'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':file.type||'application/octet-stream'},
+    body:file
+  });
+  if(!r.ok){const t=await r.text();throw new Error(t);}
+  return`${SUPABASE_URL}/storage/v1/object/public/grant-docs/${path}`;
+}
 const STEP_CSS={'00 Send Proposal':'ns-apply','01 Apply on deadline':'ns-apply','02 Check':'ns-check','03 Waiting Results':'ns-waiting','04 Denied':'ns-denied','05 Received':'ns-received','06 Not Applied':'ns-notsent','07 Missed Deadline':'ns-missed','08 Not Eligible':'ns-notelig'};
 
 function CopyBtn({text}){
@@ -1019,7 +1057,62 @@ function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
           <div style={{gridColumn:'1/-1'}}><L>Notes</L><DField className="ef ef-note" value={e.notes||e.improvements||''} placeholder="Notes..." label="Notes" multiline={true} onChange={v=>onChangeField(e.id,'notes',v)}/></div>
         </div>
         {e.eligiblePeriod&&<Thermo period={e.eligiblePeriod} deadline={e.deadline} reportDeadline={e.reportDeadline}/>}
+        <DocsSection e={e} onChangeField={onChangeField}/>
       </div>
+    </div>
+  );
+}
+
+function DocsSection({e,onChangeField}){
+  const[docType,setDocType]=useState('bases');
+  const[uploading,setUploading]=useState(false);
+  const[err,setErr]=useState('');
+  const fileRef=useRef(null);
+  const docs=e.documents||[];
+
+  const handleFile=async(file)=>{
+    if(!file)return;
+    setErr('');setUploading(true);
+    try{
+      const url=await uploadDoc(e.id,file);
+      const doc={name:file.name,url,type:docType,uploadedAt:new Date().toISOString()};
+      onChangeField(e.id,'documents',[...docs,doc]);
+    }catch(ex){setErr('Error: '+ex.message);}
+    setUploading(false);
+    if(fileRef.current)fileRef.current.value='';
+  };
+
+  const delDoc=(i)=>onChangeField(e.id,'documents',docs.filter((_,j)=>j!==i));
+
+  const typeInfo=(t)=>DOC_TYPES.find(d=>d.value===t)||DOC_TYPES[DOC_TYPES.length-1];
+
+  return(
+    <div className="docs-section">
+      <div className="docs-attach-row">
+        <select className="doc-type-sel" value={docType} onChange={ev=>setDocType(ev.target.value)} onClick={ev=>ev.stopPropagation()}>
+          {DOC_TYPES.map(t=><option key={t.value} value={t.value}>{t.icon} {t.label}</option>)}
+        </select>
+        <button className="doc-upload-btn" disabled={uploading} onClick={ev=>{ev.stopPropagation();fileRef.current&&fileRef.current.click();}}>
+          {uploading?'Uploading…':'📎 Attach'}
+        </button>
+        <input ref={fileRef} type="file" style={{display:'none'}} onChange={ev=>{handleFile(ev.target.files[0]);}} onClick={ev=>ev.stopPropagation()}/>
+      </div>
+      {err&&<div className="doc-err">{err}</div>}
+      {docs.length>0&&(
+        <div className="doc-list">
+          {docs.map((d,i)=>{
+            const ti=typeInfo(d.type);
+            return(
+              <div key={i} className="doc-item">
+                <span className="doc-badge">{ti.icon} {ti.label}</span>
+                <span className="doc-name" title={d.name}>{d.name}</span>
+                <a href={d.url} target="_blank" rel="noreferrer" className="doc-link" onClick={ev=>ev.stopPropagation()}>↗</a>
+                <button className="doc-del" title="Remove" onClick={ev=>{ev.stopPropagation();delDoc(i);}}>×</button>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
