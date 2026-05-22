@@ -245,6 +245,9 @@ body{font-family:var(--font-mono);background:var(--bg);color:var(--t);min-height
 .tl-dot.waiting{border-color:var(--b);}
 .tl-line{position:absolute;left:8px;top:16px;bottom:-2px;width:2px;background:var(--bd);border-radius:1px;}
 .tl-card{background:var(--s2);border:1px solid var(--bd);border-radius:3px;padding:8px 12px;margin-bottom:8px;}
+.tl-header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;}
+.tl-meta{display:flex;align-items:center;gap:5px;margin-bottom:3px;flex-wrap:wrap;}
+.tl-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px 14px;font-size:11px;}
 /* Timeline action buttons (duplicate/delete) */
 .tl-action{background:none;border:none;cursor:pointer;font-size:11px;color:var(--tf);padding:2px 4px;border-radius:2px;opacity:0;transition:all .15s;line-height:1;}
 .tl-card:hover .tl-action{opacity:1;}
@@ -524,33 +527,36 @@ body{font-family:var(--font-mono);background:var(--bg);color:var(--t);min-height
     padding:10px 0 6px;
     background:transparent;border-top:none;
   }
-  .tl-entry{padding-left:20px;margin-bottom:0;}
-  .tl-dot{left:2px;top:6px;width:10px;height:10px;}
-  .tl-line{left:6px;top:18px;width:2px;}
+  .tl-entry{padding-left:18px;margin-bottom:0;}
+  .tl-dot{left:2px;top:8px;width:9px;height:9px;}
+  .tl-line{left:5px;top:18px;width:2px;}
   .tl-card{
     padding:10px 12px;margin-bottom:8px;
     border-radius:12px;border:none;
     background:var(--s1);
-    box-shadow:0 1px 3px rgba(0,0,0,.12);
-    word-break:break-word;overflow-wrap:anywhere;
+    box-shadow:0 1px 4px rgba(0,0,0,.1);
+    overflow:hidden;
   }
-  /* Always show action buttons on mobile (no hover) */
-  .tl-action{opacity:.5!important;}
-  .tl-action:active{opacity:1!important;}
-  /* Header: year+links left, actions right, no wrap */
-  .tl-card .tl-header{flex-wrap:nowrap!important;align-items:center!important;gap:4px!important;margin-bottom:6px!important;}
-  /* Meta row: wrap nicely */
-  .tl-card .tl-meta{flex-wrap:wrap;gap:4px!important;}
-  /* btn-icon on mobile: no coloured background, just emoji */
-  .btn-icon{background:transparent!important;box-shadow:none!important;width:22px!important;height:22px!important;font-size:15px!important;}
-  .tl-card .tl-grid{grid-template-columns:1fr 1fr!important;gap:8px 12px!important;font-size:12px!important;margin-top:8px;}
-  .tl-card .tl-grid span[style]{font-size:9px!important;}
-  /* Period: compact inputs */
-  .period-inputs{gap:4px!important;}
-  .period-date{font-size:12px!important;padding:5px 6px!important;}
-  /* Thermo — slightly bigger for touch */
-  .thermo-bar{height:8px;border-radius:5px;}
-  .thermo-mk{height:14px;width:4px;top:-3px;}
+  /* Row 1: year+links | actions — always single line */
+  .tl-header-top{margin-bottom:6px;}
+  /* Row 2: status + amounts wrap onto next line if needed */
+  .tl-meta{margin-bottom:6px;flex-wrap:wrap;gap:4px;}
+  /* btn-icon: transparent bg on mobile */
+  .btn-icon{background:transparent!important;border:none!important;width:20px!important;height:20px!important;}
+  .btn-icon i{font-size:13px!important;}
+  /* action buttons always visible */
+  .tl-action{opacity:.6!important;}
+  /* grid: 2 cols, compact */
+  .tl-grid{grid-template-columns:1fr 1fr!important;gap:8px 12px!important;font-size:11px!important;margin-top:4px;}
+  /* period inputs: compact, don't overflow */
+  .period-inputs{gap:3px!important;flex-wrap:nowrap;}
+  .period-date{font-size:11px!important;padding:4px 5px!important;min-width:0;flex:1;}
+  /* text fields: truncate long values */
+  .tl-grid .cte-val{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px;display:inline-block;}
+  .tl-grid .cte-val.wrap{white-space:normal;max-width:none;}
+  /* Thermo */
+  .thermo-bar{height:7px;border-radius:5px;}
+  .thermo-mk{height:13px;width:3px;top:-3px;}
   .thermo-dates{font-size:10px;margin-top:3px;}
   .thermo-st{font-size:10px;padding:3px 8px;margin-top:4px;}
 
@@ -1036,25 +1042,30 @@ function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
       <div className={`tl-dot ${dotCls}`}/>
       {!isLast&&<div className="tl-line"/>}
       <div className="tl-card">
-        <div className="tl-header" style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:3}}>
+        {/* Row 1: year + links | actions */}
+        <div className="tl-header-top">
           <div style={{display:'flex',alignItems:'center',gap:6}}>
-            <span style={{fontSize:14,fontWeight:800,color:'var(--acl)'}}>{yr}</span>
+            <span style={{fontSize:14,fontWeight:800,color:'var(--acl)',whiteSpace:'nowrap'}}>{yr}</span>
             {e.web&&<a href={e.web} target="_blank" rel="noreferrer" className="btn-icon btn-icon-web" onClick={ev=>ev.stopPropagation()} title="Ver Convocatoria"><i className="fa-solid fa-arrow-up-right-from-square"/></a>}
             {e.bases&&<a href={e.bases} target="_blank" rel="noreferrer" className="btn-icon btn-icon-pdf" onClick={ev=>ev.stopPropagation()} title="Ver Bases (PDF)"><i className="fa-solid fa-file-pdf"/></a>}
+          </div>
+          <div style={{display:'flex',alignItems:'center',gap:4}}>
             <button className="tl-action" title="Duplicate" onClick={ev=>{ev.stopPropagation();onDuplicate(e.id);}}><i className="fa-solid fa-clone"/></button>
             <button className="tl-action tl-del" title="Delete" onClick={ev=>{ev.stopPropagation();onDelete(e.id);}}><i className="fa-solid fa-xmark"/></button>
           </div>
-          <div className="tl-meta" style={{display:'flex',gap:5,alignItems:'center'}}>
-            <StatusBadge entryId={e.id} currentStep={e.nextStep} onChangeStatus={onChangeStatus}/>
-            <DField className="ef ef-amt" type="number" value={e.amount||''} placeholder={`Req ${e.currency==='EUR'?'€':'$'}`} label="Amount Requested" onChange={v=>onChangeField(e.id,'amount',v)}/>
-            <DField className="ef ef-amt" type="number" value={e.amountReceived||''} placeholder={`Recv ${e.currency==='EUR'?'€':'$'}`} label="Amount Received" style={{fontSize:10}} onChange={v=>onChangeField(e.id,'amountReceived',v)}/>
-            <div className="cur-toggle">
-              <button className={`cur-btn${(e.currency||'USD')==='USD'?' on':''}`} onClick={ev=>{ev.stopPropagation();onChangeField(e.id,'currency','USD');}}>$</button>
-              <button className={`cur-btn${e.currency==='EUR'?' on':''}`} onClick={ev=>{ev.stopPropagation();onChangeField(e.id,'currency','EUR');}}>€</button>
-            </div>
+        </div>
+        {/* Row 2: status + amounts + currency */}
+        <div className="tl-meta">
+          <StatusBadge entryId={e.id} currentStep={e.nextStep} onChangeStatus={onChangeStatus}/>
+          <DField className="ef ef-amt" type="number" value={e.amount||''} placeholder={`Req ${e.currency==='EUR'?'€':'$'}`} label="Amount Requested" onChange={v=>onChangeField(e.id,'amount',v)}/>
+          <DField className="ef ef-amt" type="number" value={e.amountReceived||''} placeholder={`Recv ${e.currency==='EUR'?'€':'$'}`} label="Amount Received" style={{fontSize:10}} onChange={v=>onChangeField(e.id,'amountReceived',v)}/>
+          <div className="cur-toggle">
+            <button className={`cur-btn${(e.currency||'USD')==='USD'?' on':''}`} onClick={ev=>{ev.stopPropagation();onChangeField(e.id,'currency','USD');}}>$</button>
+            <button className={`cur-btn${e.currency==='EUR'?' on':''}`} onClick={ev=>{ev.stopPropagation();onChangeField(e.id,'currency','EUR');}}>€</button>
           </div>
         </div>
-        <div className="tl-grid" style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'2px 14px',fontSize:11}}>
+        {/* Fields grid */}
+        <div className="tl-grid" style={{marginTop:2}}>
           <div><L>Deadline</L><DField className="ef ef-date" type="date" value={e.deadline||''} label="Deadline" onChange={v=>onChangeField(e.id,'deadline',v)}/></div>
           <div style={{gridColumn:'1/-1'}}>
             <L>Grant Period</L>
