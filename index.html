@@ -883,6 +883,7 @@ async function acceptSuggestion(sug,addFn,setSuggestions){
     web:gd.web||sug.web||'',
     bases:gd.bases||'',
     aiWorkspace:gd.aiWorkspace||'',
+    aiProfile:gd.aiProfile||'',
     notes:(gd.notes||sug.notes||'')+'\n[Suggested by AI]',
     amount:gd.amount||null,
     amountReceived:gd.amountReceived||null,
@@ -1052,6 +1053,9 @@ function Thermo({period,deadline,reportDeadline}){
 function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
   const[editingAi,setEditingAi]=useState(false);
   const[aiDraft,setAiDraft]=useState('');
+  const[aiProfileDraft,setAiProfileDraft]=useState('');
+  const[aiCopied,setAiCopied]=useState(false);
+  const isMobile=typeof window!=='undefined'&&(window.matchMedia('(max-width:768px)').matches||/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
   const yr=e.deadline?e.deadline.substring(0,4):'?';
   const dotCls=e.nextStep==='05 Received'?'received':e.nextStep==='04 Denied'?'denied':e.nextStep==='03 Waiting Results'?'waiting':'';
   const L=({children})=><span style={{fontSize:8,textTransform:'uppercase',letterSpacing:'.4px',color:'var(--tf)',display:'block',marginBottom:1}}>{children}</span>;
@@ -1079,7 +1083,11 @@ function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
             <span style={{fontSize:14,fontWeight:800,color:'var(--acl)',whiteSpace:'nowrap'}}>{yr}</span>
             {e.web&&<a href={e.web} target="_blank" rel="noreferrer" className="btn-icon btn-icon-web" onClick={ev=>ev.stopPropagation()} title="Ver Convocatoria"><i className="fa-solid fa-arrow-up-right-from-square"/></a>}
             {e.bases&&<a href={e.bases} target="_blank" rel="noreferrer" className="btn-icon btn-icon-pdf" onClick={ev=>ev.stopPropagation()} title="Ver Bases (PDF)"><i className="fa-solid fa-file-pdf"/></a>}
-            {e.aiWorkspace&&<a href={e.aiWorkspace} target="_blank" rel="noreferrer" className="btn-icon btn-icon-ai" onClick={ev=>ev.stopPropagation()} title="AI Workspace"><i className="fa-solid fa-robot"/></a>}
+            {e.aiWorkspace&&(e.aiProfile&&!isMobile?(
+              <button className="btn-icon btn-icon-ai" title={`Copy command to open in Chrome ${e.aiProfile}`} onClick={ev=>{ev.stopPropagation();const cmd=`open -na "Google Chrome" --args --profile-directory="${e.aiProfile}" "${e.aiWorkspace}"`;navigator.clipboard.writeText(cmd).then(()=>{setAiCopied(true);setTimeout(()=>setAiCopied(false),2000);});}}><i className={`fa-solid ${aiCopied?'fa-check':'fa-robot'}`}/></button>
+            ):(
+              <a href={e.aiWorkspace} target="_blank" rel="noreferrer" className="btn-icon btn-icon-ai" onClick={ev=>ev.stopPropagation()} title="AI Workspace"><i className="fa-solid fa-robot"/></a>
+            ))}
           </div>
           <div style={{display:'flex',alignItems:'center',gap:4}}>
             <button className="tl-action" title="Duplicate" onClick={ev=>{ev.stopPropagation();onDuplicate(e.id);}}><i className="fa-solid fa-clone"/></button>
@@ -1114,25 +1122,43 @@ function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
           <div><L>Web / Link</L><DField className="ef ef-sm" value={e.web||''} placeholder="https://..." label="Link" onChange={v=>onChangeField(e.id,'web',v)}/></div>
           <div><L>Bases (PDF)</L><DField className="ef ef-sm" value={e.bases||''} placeholder="https://...pdf" label="Bases PDF" onChange={v=>onChangeField(e.id,'bases',v)}/></div>
           <div onClick={ev=>ev.stopPropagation()}>
-            <L>AI Workspace</L>
+            <L>AI Workspace{e.aiProfile&&!isMobile&&<span style={{textTransform:'none',letterSpacing:0,color:'var(--acl)',marginLeft:4}}>· {e.aiProfile}</span>}</L>
             {editingAi?(
-              <div style={{display:'flex',gap:4,alignItems:'center'}}>
-                <input autoFocus className="ef ef-sm" style={{flex:1,background:'var(--s2)',border:'1px solid var(--bd)',color:'var(--t)',padding:'3px 6px',borderRadius:2,fontFamily:'var(--font-mono)',fontSize:10,outline:'none'}}
+              <div style={{display:'flex',flexDirection:'column',gap:3}}>
+                <input autoFocus className="ef ef-sm" style={{background:'var(--s2)',border:'1px solid var(--bd)',color:'var(--t)',padding:'3px 6px',borderRadius:2,fontFamily:'var(--font-mono)',fontSize:10,outline:'none'}}
                   value={aiDraft} placeholder="https://..."
                   onChange={ev=>setAiDraft(ev.target.value)}
-                  onKeyDown={ev=>{if(ev.key==='Enter'){onChangeField(e.id,'aiWorkspace',aiDraft.trim());setEditingAi(false);}if(ev.key==='Escape'){setEditingAi(false);}}}
+                  onKeyDown={ev=>{if(ev.key==='Enter'){onChangeField(e.id,'aiWorkspace',aiDraft.trim());onChangeField(e.id,'aiProfile',aiProfileDraft.trim());setEditingAi(false);}if(ev.key==='Escape'){setEditingAi(false);}}}
                 />
-                <button className="btn-icon btn-icon-ai" style={{flexShrink:0}} onClick={()=>{onChangeField(e.id,'aiWorkspace',aiDraft.trim());setEditingAi(false);}}><i className="fa-solid fa-check" style={{fontSize:9}}/></button>
+                <div style={{display:'flex',gap:3,alignItems:'center'}}>
+                  <input className="ef ef-sm" style={{flex:1,background:'var(--s2)',border:'1px solid var(--bd)',color:'var(--t)',padding:'3px 6px',borderRadius:2,fontFamily:'var(--font-mono)',fontSize:10,outline:'none'}}
+                    value={aiProfileDraft} placeholder="Chrome profile (e.g. Profile 10) — desktop only"
+                    onChange={ev=>setAiProfileDraft(ev.target.value)}
+                    onKeyDown={ev=>{if(ev.key==='Enter'){onChangeField(e.id,'aiWorkspace',aiDraft.trim());onChangeField(e.id,'aiProfile',aiProfileDraft.trim());setEditingAi(false);}if(ev.key==='Escape'){setEditingAi(false);}}}
+                  />
+                  <button className="btn-icon btn-icon-ai" style={{flexShrink:0}} onClick={()=>{onChangeField(e.id,'aiWorkspace',aiDraft.trim());onChangeField(e.id,'aiProfile',aiProfileDraft.trim());setEditingAi(false);}}><i className="fa-solid fa-check" style={{fontSize:9}}/></button>
+                </div>
               </div>
             ):e.aiWorkspace?(
-              <div style={{display:'flex',alignItems:'center',gap:4}}>
-                <a href={e.aiWorkspace} target="_blank" rel="noreferrer" className="btn-icon btn-icon-ai" style={{display:'inline-flex',alignItems:'center',gap:5,padding:'3px 8px',width:'auto',fontSize:10,fontWeight:600,textDecoration:'none',borderRadius:3}} onClick={ev=>ev.stopPropagation()}>
-                  <i className="fa-solid fa-robot" style={{fontSize:10}}/> AI Workspace
-                </a>
-                <button style={{background:'none',border:'none',cursor:'pointer',color:'var(--tf)',padding:2}} title="Edit URL" onClick={()=>{setAiDraft(e.aiWorkspace);setEditingAi(true);}}><i className="fa-solid fa-pencil" style={{fontSize:9}}/></button>
+              <div style={{display:'flex',alignItems:'center',gap:4,flexWrap:'wrap'}}>
+                {e.aiProfile&&!isMobile?(
+                  <button className="btn-icon btn-icon-ai" style={{display:'inline-flex',alignItems:'center',gap:5,padding:'3px 8px',width:'auto',fontSize:10,fontWeight:600,borderRadius:3,border:'none',cursor:'pointer'}}
+                    title={`Copy: open -na "Google Chrome" --args --profile-directory="${e.aiProfile}" "${e.aiWorkspace}"`}
+                    onClick={()=>{
+                      const cmd=`open -na "Google Chrome" --args --profile-directory="${e.aiProfile}" "${e.aiWorkspace}"`;
+                      navigator.clipboard.writeText(cmd).then(()=>{setAiCopied(true);setTimeout(()=>setAiCopied(false),2000);});
+                    }}>
+                    <i className={`fa-solid ${aiCopied?'fa-check':'fa-robot'}`} style={{fontSize:10}}/> {aiCopied?'Copied! Paste in Terminal':'AI Workspace'}
+                  </button>
+                ):(
+                  <a href={e.aiWorkspace} target="_blank" rel="noreferrer" className="btn-icon btn-icon-ai" style={{display:'inline-flex',alignItems:'center',gap:5,padding:'3px 8px',width:'auto',fontSize:10,fontWeight:600,textDecoration:'none',borderRadius:3}} onClick={ev=>ev.stopPropagation()}>
+                    <i className="fa-solid fa-robot" style={{fontSize:10}}/> AI Workspace
+                  </a>
+                )}
+                <button style={{background:'none',border:'none',cursor:'pointer',color:'var(--tf)',padding:2}} title="Edit URL / Profile" onClick={()=>{setAiDraft(e.aiWorkspace);setAiProfileDraft(e.aiProfile||'');setEditingAi(true);}}><i className="fa-solid fa-pencil" style={{fontSize:9}}/></button>
               </div>
             ):(
-              <button style={{background:'none',border:'none',cursor:'pointer',color:'var(--tf)',fontSize:10,padding:'2px 0',display:'flex',alignItems:'center',gap:4,fontFamily:'var(--font-mono)'}} onClick={()=>{setAiDraft('');setEditingAi(true);}}>
+              <button style={{background:'none',border:'none',cursor:'pointer',color:'var(--tf)',fontSize:10,padding:'2px 0',display:'flex',alignItems:'center',gap:4,fontFamily:'var(--font-mono)'}} onClick={()=>{setAiDraft('');setAiProfileDraft('');setEditingAi(true);}}>
                 Add URL <i className="fa-solid fa-pencil" style={{fontSize:9}}/>
               </button>
             )}
