@@ -884,6 +884,7 @@ async function acceptSuggestion(sug,addFn,setSuggestions){
     bases:gd.bases||'',
     aiWorkspace:gd.aiWorkspace||'',
     aiProfile:gd.aiProfile||'',
+    aiChromeIos:gd.aiChromeIos||false,
     notes:(gd.notes||sug.notes||'')+'\n[Suggested by AI]',
     amount:gd.amount||null,
     amountReceived:gd.amountReceived||null,
@@ -1086,7 +1087,7 @@ function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
             {e.aiWorkspace&&(e.aiProfile&&!isMobile?(
               <button className="btn-icon btn-icon-ai" title={`Copy command to open in Chrome ${e.aiProfile}`} onClick={ev=>{ev.stopPropagation();const cmd=`open -na "Google Chrome" --args --profile-directory="${e.aiProfile}" "${e.aiWorkspace}"`;navigator.clipboard.writeText(cmd).then(()=>{setAiCopied(true);setTimeout(()=>setAiCopied(false),2000);});}}><i className={`fa-solid ${aiCopied?'fa-check':'fa-robot'}`}/></button>
             ):(
-              <a href={e.aiWorkspace} target="_blank" rel="noreferrer" className="btn-icon btn-icon-ai" onClick={ev=>ev.stopPropagation()} title="AI Workspace"><i className="fa-solid fa-robot"/></a>
+              <a href={isMobile&&e.aiChromeIos?e.aiWorkspace.replace(/^https:\/\//,'googlechromes://').replace(/^http:\/\//,'googlechrome://'):e.aiWorkspace} target="_blank" rel="noreferrer" className="btn-icon btn-icon-ai" onClick={ev=>ev.stopPropagation()} title="AI Workspace"><i className="fa-solid fa-robot"/></a>
             ))}
           </div>
           <div style={{display:'flex',alignItems:'center',gap:4}}>
@@ -1138,6 +1139,10 @@ function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
                   />
                   <button className="btn-icon btn-icon-ai" style={{flexShrink:0}} onClick={()=>{onChangeField(e.id,'aiWorkspace',aiDraft.trim());onChangeField(e.id,'aiProfile',aiProfileDraft.trim());setEditingAi(false);}}><i className="fa-solid fa-check" style={{fontSize:9}}/></button>
                 </div>
+                <label style={{display:'flex',alignItems:'center',gap:5,fontSize:10,color:'var(--tf)',cursor:'pointer',userSelect:'none'}}>
+                  <input type="checkbox" checked={!!e.aiChromeIos} onChange={ev=>onChangeField(e.id,'aiChromeIos',ev.target.checked)}/>
+                  Open in Chrome iOS (iPhone)
+                </label>
               </div>
             ):e.aiWorkspace?(
               <div style={{display:'flex',alignItems:'center',gap:4,flexWrap:'wrap'}}>
@@ -1151,7 +1156,7 @@ function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
                     <i className={`fa-solid ${aiCopied?'fa-check':'fa-robot'}`} style={{fontSize:10}}/> {aiCopied?'Copied! Paste in Terminal':'AI Workspace'}
                   </button>
                 ):(
-                  <a href={e.aiWorkspace} target="_blank" rel="noreferrer" className="btn-icon btn-icon-ai" style={{display:'inline-flex',alignItems:'center',gap:5,padding:'3px 8px',width:'auto',fontSize:10,fontWeight:600,textDecoration:'none',borderRadius:3}} onClick={ev=>ev.stopPropagation()}>
+                  <a href={isMobile&&e.aiChromeIos?e.aiWorkspace.replace(/^https:\/\//,'googlechromes://').replace(/^http:\/\//,'googlechrome://'):e.aiWorkspace} target="_blank" rel="noreferrer" className="btn-icon btn-icon-ai" style={{display:'inline-flex',alignItems:'center',gap:5,padding:'3px 8px',width:'auto',fontSize:10,fontWeight:600,textDecoration:'none',borderRadius:3}} onClick={ev=>ev.stopPropagation()}>
                     <i className="fa-solid fa-robot" style={{fontSize:10}}/> AI Workspace
                   </a>
                 )}
