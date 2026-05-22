@@ -527,21 +527,26 @@ body{font-family:var(--font-mono);background:var(--bg);color:var(--t);min-height
   .tl-dot{left:2px;top:6px;width:10px;height:10px;}
   .tl-line{left:6px;top:18px;width:2px;}
   .tl-card{
-    padding:12px 14px;margin-bottom:8px;
-    border-radius:14px;border:none;
+    padding:10px 12px;margin-bottom:8px;
+    border-radius:12px;border:none;
     background:var(--s1);
     box-shadow:0 1px 3px rgba(0,0,0,.12);
     word-break:break-word;overflow-wrap:anywhere;
   }
-  .tl-card .tl-header{flex-wrap:wrap;gap:6px!important;}
-  .tl-card .tl-header>span:first-child{font-size:18px!important;}
+  /* Always show action buttons on mobile (no hover) */
+  .tl-action{opacity:.5!important;}
+  .tl-action:active{opacity:1!important;}
+  /* Header: year+links left, actions right, no wrap */
+  .tl-card .tl-header{flex-wrap:nowrap!important;align-items:center!important;gap:4px!important;margin-bottom:6px!important;}
+  /* Meta row: wrap nicely */
   .tl-card .tl-meta{flex-wrap:wrap;gap:4px!important;}
-  .tl-card .tl-meta .ns-select{font-size:11px;padding:4px 12px;}
-  .tl-card .tl-grid{grid-template-columns:1fr 1fr!important;gap:10px 14px!important;font-size:12px!important;}
+  /* btn-icon on mobile: no coloured background, just emoji */
+  .btn-icon{background:transparent!important;box-shadow:none!important;width:22px!important;height:22px!important;font-size:15px!important;}
+  .tl-card .tl-grid{grid-template-columns:1fr 1fr!important;gap:8px 12px!important;font-size:12px!important;margin-top:8px;}
   .tl-card .tl-grid span[style]{font-size:9px!important;}
-  .period-inputs{gap:6px!important;}
-  .period-date{font-size:13px!important;padding:6px 8px!important;}
-
+  /* Period: compact inputs */
+  .period-inputs{gap:4px!important;}
+  .period-date{font-size:12px!important;padding:5px 6px!important;}
   /* Thermo — slightly bigger for touch */
   .thermo-bar{height:8px;border-radius:5px;}
   .thermo-mk{height:14px;width:4px;top:-3px;}
