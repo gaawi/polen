@@ -932,7 +932,9 @@ function DField({value,onChange,className,type,placeholder,style,label,multiline
     if(!value&&value!==0)return null;
     if(type==='date'&&value){try{const[y,m,dd]=value.split('-').map(Number);const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return`${months[m-1]} ${dd}, ${y}`;}catch(e){return value;}}
     if(type==='number'&&value!=null)return typeof value==='number'?'$'+value.toLocaleString():value;
-    return String(value);
+    const s=String(value);
+    if(s.match(/^https?:\/\//)){try{return new URL(s).hostname.replace(/^www\./,'');}catch(e){return s;}}
+    return s;
   };
   const disp=display();
   const isEmpty=!disp;
