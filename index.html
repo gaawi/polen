@@ -314,6 +314,8 @@ body{font-family:var(--font-mono);background:var(--bg);color:var(--t);min-height
 .btn-icon:hover{transform:scale(1.15);opacity:.85;}
 .btn-icon-web{background:var(--bbg);color:var(--b);}
 .btn-icon-pdf{background:var(--rbg);color:var(--r);}
+.btn-icon-ai{background:#ede9fe;color:#7c3aed;}
+html.dark .btn-icon-ai{background:#2e1065;color:#a78bfa;}
 .mob-right{display:none;}
 
 ::-webkit-scrollbar{width:5px;height:5px;}
@@ -880,6 +882,7 @@ async function acceptSuggestion(sug,addFn,setSuggestions){
     nextStep:gd.nextStep||'02 Check',
     web:gd.web||sug.web||'',
     bases:gd.bases||'',
+    aiWorkspace:gd.aiWorkspace||'',
     notes:(gd.notes||sug.notes||'')+'\n[Suggested by AI]',
     amount:gd.amount||null,
     amountReceived:gd.amountReceived||null,
@@ -1074,6 +1077,7 @@ function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
             <span style={{fontSize:14,fontWeight:800,color:'var(--acl)',whiteSpace:'nowrap'}}>{yr}</span>
             {e.web&&<a href={e.web} target="_blank" rel="noreferrer" className="btn-icon btn-icon-web" onClick={ev=>ev.stopPropagation()} title="Ver Convocatoria"><i className="fa-solid fa-arrow-up-right-from-square"/></a>}
             {e.bases&&<a href={e.bases} target="_blank" rel="noreferrer" className="btn-icon btn-icon-pdf" onClick={ev=>ev.stopPropagation()} title="Ver Bases (PDF)"><i className="fa-solid fa-file-pdf"/></a>}
+            {e.aiWorkspace&&<a href={e.aiWorkspace} target="_blank" rel="noreferrer" className="btn-icon btn-icon-ai" onClick={ev=>ev.stopPropagation()} title="AI Workspace"><i className="fa-solid fa-robot"/></a>}
           </div>
           <div style={{display:'flex',alignItems:'center',gap:4}}>
             <button className="tl-action" title="Duplicate" onClick={ev=>{ev.stopPropagation();onDuplicate(e.id);}}><i className="fa-solid fa-clone"/></button>
@@ -1107,6 +1111,7 @@ function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
           <div><L>Report Deadline</L><DField className="ef ef-date" type="date" value={e.reportDeadline||''} label="Report Deadline" onChange={v=>onChangeField(e.id,'reportDeadline',v)}/></div>
           <div><L>Web / Link</L><DField className="ef ef-sm" value={e.web||''} placeholder="https://..." label="Link" onChange={v=>onChangeField(e.id,'web',v)}/></div>
           <div><L>Bases (PDF)</L><DField className="ef ef-sm" value={e.bases||''} placeholder="https://...pdf" label="Bases PDF" onChange={v=>onChangeField(e.id,'bases',v)}/></div>
+          <div><L>AI Workspace</L><DField className="ef ef-sm" value={e.aiWorkspace||''} placeholder="https://..." label="AI Workspace" onChange={v=>onChangeField(e.id,'aiWorkspace',v)}/></div>
           <div><L>Deadline Type</L><span style={{cursor:'pointer',display:'inline-block'}} onClick={ev=>{ev.stopPropagation();onChangeField(e.id,'deadlineType',e.deadlineType==='DDLNE!'?'Estimated':'DDLNE!');}}><span className={`fd-type ${e.deadlineType==='DDLNE!'?'hard':'est'}`}>{e.deadlineType==='DDLNE!'?'Hard Deadline':'Estimated'}</span></span></div>
           <div style={{gridColumn:'1/-1'}}><L>Notes</L><DField className="ef ef-note" value={e.notes||e.improvements||''} placeholder="Notes..." label="Notes" multiline={true} onChange={v=>onChangeField(e.id,'notes',v)}/></div>
         </div>
