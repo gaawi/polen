@@ -340,13 +340,14 @@ body{font-family:var(--font-mono);background:var(--bg);color:var(--t);min-height
 .ac-report{font-size:9px;color:var(--td);margin-top:2px;}
 .ac-notes{font-size:10px;color:var(--tf);margin-top:8px;padding-top:8px;border-top:1px solid var(--bd);line-height:1.4;}
 
-/* ═══ Archive View ═══ */
-.archive-view{padding:12px 16px;display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;}
-.archive-group{background:var(--s1);border:1px solid var(--bd);border-radius:3px;padding:10px 12px;}
-.archive-group-hdr{display:flex;align-items:baseline;gap:6px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--bd);}
-.archive-foundation{font-size:12px;font-weight:800;color:var(--fg);}
-.archive-grant{font-size:11px;color:var(--td);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.archive-count{font-size:9px;color:var(--tf);flex-shrink:0;margin-left:auto;}
+/* ═══ Active 2-Column View ═══ */
+.active-2col{padding:12px 16px;display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;}
+.active-2col-group{background:var(--s1);border:1px solid var(--bd);border-radius:3px;padding:10px 12px;}
+.active-2col-hdr{display:flex;align-items:baseline;gap:6px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--bd);flex-wrap:wrap;}
+.active-2col-foundation{font-size:12px;font-weight:800;color:var(--fg);}
+.active-2col-grant{font-size:11px;color:var(--td);}
+.active-2col-proj{font-size:10px;color:var(--tf);font-style:italic;}
+.active-2col-count{font-size:9px;color:var(--tf);flex-shrink:0;margin-left:auto;}
 
 /* ═══ Calendar / Upcoming View ═══ */
 .cal-view{padding:16px 20px;}
@@ -572,7 +573,7 @@ body{font-family:var(--font-mono);background:var(--bg);color:var(--t);min-height
      ACTIVE GRANTS — iOS cards
      ════════════════════════════════════ */
   .active-grid{padding:8px 12px;grid-template-columns:1fr;gap:10px;}
-  .archive-view{padding:8px 12px;grid-template-columns:1fr;gap:10px;}
+  .active-2col{padding:8px 12px;grid-template-columns:1fr;gap:10px;}
   .active-card{
     padding:14px 16px;border-radius:16px;
     border:none;background:var(--s1);
@@ -1434,7 +1435,6 @@ function App({initialGrants}){
   const[editMode,setEditMode]=useState(false);
   const[activeView,setActiveView]=useState(false); // "Active Grants" view
   const[calendarView,setCalendarView]=useState(false); // "Upcoming/Calendar" view
-  const[archiveView,setArchiveView]=useState(false); // "Archive" view
   const[isDark,setIsDark]=useState(()=>localStorage.getItem('polen-theme')==='dark');
   const[suggestions,setSuggestions]=useState([]);
   const[showSuggestions,setShowSuggestions]=useState(false);
@@ -1544,21 +1544,6 @@ function App({initialGrants}){
       return(pa?pa.end:new Date('9999'))-(pb?pb.end:new Date('9999'));
     });
   },[activeGrants]);
-
-  const ARCHIVE_STEPS=new Set(['04 Denied','06 Not Applied','07 Missed Deadline','08 Not Eligible']);
-  const archiveGroups=useMemo(()=>{
-    const groups={};
-    data.filter(g=>ARCHIVE_STEPS.has(g.nextStep)).forEach(g=>{
-      const key=(g.foundation||'').trim()+'|||'+(g.grant||'').trim();
-      if(!groups[key])groups[key]={key,foundation:(g.foundation||'').trim(),grant:(g.grant||'').trim(),entries:[]};
-      groups[key].entries.push(g);
-    });
-    return Object.values(groups).map(grp=>{
-      grp.entries.sort((a,b)=>(b.deadline||'').localeCompare(a.deadline||''));
-      grp.primary=grp.entries[0];
-      return grp;
-    }).sort((a,b)=>(a.foundation||'').localeCompare(b.foundation||'')||( a.grant||'').localeCompare(b.grant||''));
-  },[data]);
 
   // Calendar view: only shows grant programs that have an explicit season field
   const calendarData=useMemo(()=>{
@@ -1704,15 +1689,14 @@ function App({initialGrants}){
               <option value="04 Denied">Denied ({stats.denied})</option>
             </select>
           </div>
-          <button className={`chip ${activeView&&!editMode&&!calendarView&&!archiveView&&!suggView?'on':''}`} onClick={()=>{setActiveView(!activeView);setEditMode(false);setCalendarView(false);setArchiveView(false);setSuggView(false);setExpRow(null);}} style={activeView?{background:'var(--gbg)',color:'var(--g)'}:{}}><i className="fa-solid fa-bolt"/> Active ({stats.active})</button>
-          <button className={`chip ${calendarView&&!editMode&&!suggView?'on':''}`} onClick={()=>{setCalendarView(!calendarView);setEditMode(false);setActiveView(false);setArchiveView(false);setSuggView(false);setExpRow(null);}} style={calendarView?{background:'var(--obg)',color:'var(--o)'}:{}}><i className="fa-solid fa-calendar-days"/> Upcoming{calendarData.reduce((s,m)=>s+m.grants.length,0)>0&&<span style={{marginLeft:5,background:'var(--o)',color:'#fff',borderRadius:10,padding:'0 6px',fontSize:10,fontWeight:800}}>{calendarData.reduce((s,m)=>s+m.grants.length,0)}</span>}</button>
-          <button className={`chip ${archiveView&&!editMode&&!suggView?'on':''}`} onClick={()=>{setArchiveView(!archiveView);setEditMode(false);setActiveView(false);setCalendarView(false);setSuggView(false);setExpRow(null);}} style={archiveView?{background:'var(--s3)',color:'var(--td)'}:{}}><i className="fa-solid fa-box-archive"/> Archive ({archiveGroups.reduce((s,g)=>s+g.entries.length,0)})</button>
-          <button className={`chip ${suggView?'on':''}`} onClick={()=>{setSuggView(v=>!v);setEditMode(false);setActiveView(false);setCalendarView(false);setArchiveView(false);setExpRow(null);}} style={suggView?{background:'var(--bbg)',color:'var(--b)'}:{}}>
+          <button className={`chip ${activeView&&!editMode&&!calendarView&&!suggView?'on':''}`} onClick={()=>{setActiveView(!activeView);setEditMode(false);setCalendarView(false);setSuggView(false);setExpRow(null);}} style={activeView?{background:'var(--gbg)',color:'var(--g)'}:{}}><i className="fa-solid fa-bolt"/> Active ({stats.active})</button>
+          <button className={`chip ${calendarView&&!editMode&&!suggView?'on':''}`} onClick={()=>{setCalendarView(!calendarView);setEditMode(false);setActiveView(false);setSuggView(false);setExpRow(null);}} style={calendarView?{background:'var(--obg)',color:'var(--o)'}:{}}><i className="fa-solid fa-calendar-days"/> Upcoming{calendarData.reduce((s,m)=>s+m.grants.length,0)>0&&<span style={{marginLeft:5,background:'var(--o)',color:'#fff',borderRadius:10,padding:'0 6px',fontSize:10,fontWeight:800}}>{calendarData.reduce((s,m)=>s+m.grants.length,0)}</span>}</button>
+          <button className={`chip ${suggView?'on':''}`} onClick={()=>{setSuggView(v=>!v);setEditMode(false);setActiveView(false);setCalendarView(false);setExpRow(null);}} style={suggView?{background:'var(--bbg)',color:'var(--b)'}:{}}>
             <i className="fa-solid fa-robot"/> IA{suggestions.length>0&&<span style={{marginLeft:5,background:'var(--r)',color:'#fff',borderRadius:10,padding:'0 6px',fontSize:10,fontWeight:800}}>{suggestions.length}</span>}
           </button>
         </div>
         <span style={{fontSize:11,color:'var(--tf)',marginLeft:'auto',display:'flex',alignItems:'center',gap:8,flexWrap:'wrap',justifyContent:'flex-end'}}>
-          {editMode?`${data.length} entries`:suggView?`${suggestions.length} sugerencias IA pendientes`:calendarView?`${calendarData.reduce((s,m)=>s+m.grants.length,0)} programs · ${calendarData.length} seasons`:activeView?`${activeGroups.length} programs · ${activeGrants.length} active grants`:archiveView?`${archiveGroups.length} programs · ${archiveGroups.reduce((s,g)=>s+g.entries.length,0)} archived grants`:(()=>{
+          {editMode?`${data.length} entries`:suggView?`${suggestions.length} sugerencias IA pendientes`:calendarView?`${calendarData.reduce((s,m)=>s+m.grants.length,0)} programs · ${calendarData.length} seasons`:activeView?`${activeGroups.length} programs · ${activeGrants.length} active grants`:(()=>{
             const reqByCur={};programGroups.forEach(g=>{if(g.primary.amount){const c=g.primary.currency||'USD';reqByCur[c]=(reqByCur[c]||0)+g.primary.amount;}});
             const wonByCur={};programGroups.forEach(g=>Object.entries(g.totalAmtByCur).forEach(([c,v])=>{wonByCur[c]=(wonByCur[c]||0)+v;}));
             const reqStr=fmtByCur(reqByCur)!=='—'?fmtByCur(reqByCur):'';
@@ -1728,23 +1712,6 @@ function App({initialGrants}){
           <EditSheet data={data} setData={setData} search={search}/>
         ):suggView?(
           <SuggestionsView suggestions={suggestions} onAccept={s=>acceptSuggestion(s,add,setSuggestions)} onReject={id=>rejectSuggestion(id,setSuggestions)}/>
-        ):archiveView?(
-          archiveGroups.length===0?(
-            <div style={{textAlign:'center',padding:40,color:'var(--tf)'}}>No archived grants yet.</div>
-          ):(
-          <div className="archive-view">
-            {archiveGroups.map(grp=>(
-              <div key={grp.key} className="archive-group">
-                <div className="archive-group-hdr">
-                  <span className="archive-foundation">{grp.foundation}</span>
-                  {grp.grant&&<span className="archive-grant">{grp.grant}</span>}
-                  <span className="archive-count">{grp.entries.length} app{grp.entries.length>1?'s':''}</span>
-                </div>
-                {grp.entries.map((e,i)=><AppEntry key={e.id} e={e} isLast={i===grp.entries.length-1} onChangeStatus={changeStatus} onChangeField={changeField} onDelete={delEntry} onDuplicate={dupEntry}/>)}
-              </div>
-            ))}
-          </div>
-          )
         ):calendarView?(
           <div className="cal-view">
             {calendarData.length===0?(
@@ -1809,102 +1776,18 @@ function App({initialGrants}){
           activeGroups.length===0?(
             <div style={{textAlign:'center',padding:40,color:'var(--tf)'}}>No active grants with a defined grant period right now.</div>
           ):(
-          <div style={{overflowX:'auto',WebkitOverflowScrolling:'touch'}}>
-          <table className="flat-table">
-            <thead><tr>
-              <th style={{width:110}}>Deadline</th>
-              <th>Foundation</th>
-              <th>Grant Program</th>
-              <th className="desk-only" style={{width:130}}>Project</th>
-              <th style={{width:75}}>Status</th>
-              <th style={{width:60}}>Apps</th>
-              <th style={{width:80}}>Results</th>
-              <th style={{width:80}}>Requested</th>
-              <th style={{width:80}}>Won</th>
-              <th style={{width:120}}></th>
-            </tr></thead>
-            <tbody>
-              {activeGroups.map(grp=>{
-                const nd=grp.nextDeadline||grp.primary;
-                const days=nd&&nd.deadline?daysUntil(nd.deadline):9999;
-                const dc=dlClass(days);
-                const isExp=expRow===grp.key;
-                const relStr=days<0?`${Math.abs(days)}d ago`:days===0?'Today':days<=60?`${days}d`:`${Math.round(days/30)}mo`;
-                const latestStep=grp.primary.nextStep;
-                const dType=nd?nd.deadlineType:'';
-                const semEntries=grp.entries.slice().sort((a,b)=>(a.deadline||'').localeCompare(b.deadline||''));
-                return(
-                  <React.Fragment key={grp.key}>
-                  <tr className={isExp?'g-sel':''} onClick={()=>setExpRow(isExp?null:grp.key)} style={{cursor:'pointer'}}>
-                    <td className="mob-line1">
-                      <span style={{fontSize:10,color:'var(--tf)',transition:'transform .2s',display:'inline-block',transform:isExp?'rotate(90deg)':'rotate(0deg)'}}><i className="fa-solid fa-chevron-right"/></span>
-                      {nd&&nd.deadline?(
-                        <span className={`g-deadline ${dc}`}>{fmtDateShort(nd.deadline)}</span>
-                      ):(
-                        <span className="g-deadline" style={{color:'var(--tf)'}}>—</span>
-                      )}
-                      {nd&&nd.deadline&&<span className={`fd-rel ${dc}`} style={{fontSize:8,fontWeight:600,whiteSpace:'nowrap'}}>{relStr}</span>}
-                      {dType&&<span className={`fd-type ${dType==='DDLNE!'?'hard':'est'}`}>{dType==='DDLNE!'?'Hard':'Est.'}</span>}
-                    </td>
-                    <td className="flat-fname" style={{fontWeight:600,maxWidth:220,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>
-                      {grp.foundation}<CopyBtn text={grp.foundation}/>
-                    </td>
-                    <td className="flat-gname">
-                      <span className="g-name" style={{display:'inline'}}>{grp.grant||'—'}{grp.grant&&<CopyBtn text={grp.grant}/>}</span>
-                      <span className="prog-sem" style={{marginLeft:6}}>
-                        {semEntries.map(e=>{
-                          const yr=e.deadline?e.deadline.substring(2,4):'?';
-                          const cls=e.nextStep==='05 Received'?'received':e.nextStep==='04 Denied'?'denied':e.nextStep==='03 Waiting Results'?'waiting':e.nextStep==='07 Missed Deadline'?'missed':e.nextStep==='08 Not Eligible'?'notelig':e.nextStep==='02 Check'?'check':'apply';
-                          return <span key={e.id} className="sem-yr"><span className={`sem-dot ${cls}`}/><span className="sem-lbl">{yr}</span></span>;
-                        })}
-                      </span>
-                      {grp.primary.projectDates&&<div style={{fontSize:10,color:'var(--tf)',marginTop:2,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis',display:'none'}} className="proj-mob">{grp.primary.projectDates}</div>}
-                    </td>
-                    <td className="desk-only" style={{fontSize:10,color:'var(--td)',maxWidth:130,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{grp.primary.projectDates||''}</td>
-                    <td className="desk-only"><span className={`ns ${STEP_CSS[latestStep]||'ns-check'}`}>{STEP_SHORT[latestStep]||latestStep}</span></td>
-                    <td className="desk-only" style={{fontSize:10,color:'var(--td)'}}>{grp.entries.length} app{grp.entries.length>1?'s':''}</td>
-                    <td className="desk-only">
-                      <div style={{display:'flex',gap:3}}>
-                        {grp.received>0&&<span className="ms ms-g">✓{grp.received}</span>}
-                        {grp.waiting>0&&<span className="ms ms-b"><i className="fa-solid fa-hourglass-half"/>{grp.waiting}</span>}
-                        {grp.denied>0&&<span className="ms ms-r">✗{grp.denied}</span>}
-                      </div>
-                    </td>
-                    <td className="desk-only" style={{fontVariantNumeric:'tabular-nums',fontSize:11,color:'var(--td)'}}>{grp.primary.amount?fmt(grp.primary.amount,grp.primary.currency||'USD'):''}</td>
-                    <td className="desk-only" style={{fontVariantNumeric:'tabular-nums',fontWeight:700,color:'var(--g)',fontSize:11}}>{grp.totalAmt>0?fmtByCur(grp.totalAmtByCur):''}</td>
-                    <td className="desk-only" style={{textAlign:'center'}}>
-                      <div style={{display:'flex',gap:5,justifyContent:'center'}}>
-                        {grp.primary.web&&<a href={grp.primary.web} target="_blank" rel="noreferrer" className="btn-icon btn-icon-web" onClick={e=>e.stopPropagation()} title="Ver Convocatoria"><i className="fa-solid fa-arrow-up-right-from-square"/></a>}
-                        {grp.primary.bases&&<a href={grp.primary.bases} target="_blank" rel="noreferrer" className="btn-icon btn-icon-pdf" onClick={e=>e.stopPropagation()} title="Ver Bases (PDF)"><i className="fa-solid fa-file-pdf"/></a>}
-                      </div>
-                    </td>
-                    <td className="mob-right">
-                      <span className={`ns ${STEP_CSS[latestStep]||'ns-check'}`}>{STEP_SHORT[latestStep]||latestStep}</span>
-                      <span style={{fontSize:9,color:'var(--td)'}}>{grp.entries.length}</span>
-                      {grp.received>0&&<span className="ms ms-g" style={{fontSize:8}}>✓{grp.received}</span>}
-                      {grp.waiting>0&&<span className="ms ms-b" style={{fontSize:8}}><i className="fa-solid fa-hourglass-half"/>{grp.waiting}</span>}
-                      {grp.denied>0&&<span className="ms ms-r" style={{fontSize:8}}>✗{grp.denied}</span>}
-                      {grp.primary.amount&&grp.totalAmt===0&&<span style={{fontVariantNumeric:'tabular-nums',fontSize:9,color:'var(--td)'}}>{fmt(grp.primary.amount,grp.primary.currency||'USD')}</span>}
-                      {grp.totalAmt>0&&<span style={{fontVariantNumeric:'tabular-nums',fontWeight:700,color:'var(--g)',fontSize:9}}>{fmtByCur(grp.totalAmtByCur)}</span>}
-                    </td>
-                  </tr>
-                  {isExp&&(
-                    <tr><td colSpan={10} style={{padding:0}}>
-                      <div className="hist-panel" onClick={e=>e.stopPropagation()}>
-                        <div>
-                          <div style={{fontSize:10,fontWeight:700,textTransform:'uppercase',letterSpacing:'.4px',color:'var(--tf)',marginBottom:8}}>
-                            Application Timeline ({grp.entries.length})
-                          </div>
-                          {grp.entries.map((e,i)=><AppEntry key={e.id} e={e} isLast={i===grp.entries.length-1} onChangeStatus={changeStatus} onChangeField={changeField} onDelete={delEntry} onDuplicate={dupEntry}/>)}
-                        </div>
-                      </div>
-                    </td></tr>
-                  )}
-                  </React.Fragment>
-                );
-              })}
-            </tbody>
-          </table>
+          <div className="active-2col">
+            {activeGroups.map(grp=>(
+              <div key={grp.key} className="active-2col-group">
+                <div className="active-2col-hdr">
+                  <span className="active-2col-foundation">{grp.foundation}</span>
+                  {grp.grant&&<span className="active-2col-grant">{grp.grant}</span>}
+                  {grp.primary.projectDates&&<span className="active-2col-proj">{grp.primary.projectDates}</span>}
+                  <span className="active-2col-count">{grp.entries.length} app{grp.entries.length>1?'s':''}</span>
+                </div>
+                {grp.entries.map((e,i)=><AppEntry key={e.id} e={e} isLast={i===grp.entries.length-1} onChangeStatus={changeStatus} onChangeField={changeField} onDelete={delEntry} onDuplicate={dupEntry}/>)}
+              </div>
+            ))}
           </div>
           )
         ):(
