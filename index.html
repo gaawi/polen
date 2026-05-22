@@ -340,6 +340,14 @@ body{font-family:var(--font-mono);background:var(--bg);color:var(--t);min-height
 .ac-report{font-size:9px;color:var(--td);margin-top:2px;}
 .ac-notes{font-size:10px;color:var(--tf);margin-top:8px;padding-top:8px;border-top:1px solid var(--bd);line-height:1.4;}
 
+/* ═══ Archive View ═══ */
+.archive-view{padding:12px 16px;display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;}
+.archive-group{background:var(--s1);border:1px solid var(--bd);border-radius:3px;padding:10px 12px;}
+.archive-group-hdr{display:flex;align-items:baseline;gap:6px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--bd);}
+.archive-foundation{font-size:12px;font-weight:800;color:var(--fg);}
+.archive-grant{font-size:11px;color:var(--td);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.archive-count{font-size:9px;color:var(--tf);flex-shrink:0;margin-left:auto;}
+
 /* ═══ Calendar / Upcoming View ═══ */
 .cal-view{padding:16px 20px;}
 .cal-season{margin-bottom:28px;}
@@ -564,6 +572,7 @@ body{font-family:var(--font-mono);background:var(--bg);color:var(--t);min-height
      ACTIVE GRANTS — iOS cards
      ════════════════════════════════════ */
   .active-grid{padding:8px 12px;grid-template-columns:1fr;gap:10px;}
+  .archive-view{padding:8px 12px;grid-template-columns:1fr;gap:10px;}
   .active-card{
     padding:14px 16px;border-radius:16px;
     border:none;background:var(--s1);
@@ -633,6 +642,7 @@ body{font-family:var(--font-mono);background:var(--bg);color:var(--t);min-height
   .stat .sv{font-size:12px;}
   .flat-table td.flat-fname{font-size:14px;}
   .flat-table td.flat-gname{font-size:12px;}
+  .proj-mob{display:block!important;}
   .chip{font-size:11px;padding:5px 10px;}
 }
 /* Theme toggle button */
@@ -1424,6 +1434,7 @@ function App({initialGrants}){
   const[editMode,setEditMode]=useState(false);
   const[activeView,setActiveView]=useState(false); // "Active Grants" view
   const[calendarView,setCalendarView]=useState(false); // "Upcoming/Calendar" view
+  const[archiveView,setArchiveView]=useState(false); // "Archive" view
   const[isDark,setIsDark]=useState(()=>localStorage.getItem('polen-theme')==='dark');
   const[suggestions,setSuggestions]=useState([]);
   const[showSuggestions,setShowSuggestions]=useState(false);
@@ -1533,6 +1544,21 @@ function App({initialGrants}){
       return(pa?pa.end:new Date('9999'))-(pb?pb.end:new Date('9999'));
     });
   },[activeGrants]);
+
+  const ARCHIVE_STEPS=new Set(['04 Denied','06 Not Applied','07 Missed Deadline','08 Not Eligible']);
+  const archiveGroups=useMemo(()=>{
+    const groups={};
+    data.filter(g=>ARCHIVE_STEPS.has(g.nextStep)).forEach(g=>{
+      const key=(g.foundation||'').trim()+'|||'+(g.grant||'').trim();
+      if(!groups[key])groups[key]={key,foundation:(g.foundation||'').trim(),grant:(g.grant||'').trim(),entries:[]};
+      groups[key].entries.push(g);
+    });
+    return Object.values(groups).map(grp=>{
+      grp.entries.sort((a,b)=>(b.deadline||'').localeCompare(a.deadline||''));
+      grp.primary=grp.entries[0];
+      return grp;
+    }).sort((a,b)=>(a.foundation||'').localeCompare(b.foundation||'')||( a.grant||'').localeCompare(b.grant||''));
+  },[data]);
 
   // Calendar view: only shows grant programs that have an explicit season field
   const calendarData=useMemo(()=>{
@@ -1678,14 +1704,15 @@ function App({initialGrants}){
               <option value="04 Denied">Denied ({stats.denied})</option>
             </select>
           </div>
-          <button className={`chip ${activeView&&!editMode&&!calendarView&&!suggView?'on':''}`} onClick={()=>{setActiveView(!activeView);setEditMode(false);setCalendarView(false);setSuggView(false);setExpRow(null);}} style={activeView?{background:'var(--gbg)',color:'var(--g)'}:{}}><i className="fa-solid fa-bolt"/> Active ({stats.active})</button>
-          <button className={`chip ${calendarView&&!editMode&&!suggView?'on':''}`} onClick={()=>{setCalendarView(!calendarView);setEditMode(false);setActiveView(false);setSuggView(false);setExpRow(null);}} style={calendarView?{background:'var(--obg)',color:'var(--o)'}:{}}><i className="fa-solid fa-calendar-days"/> Upcoming{calendarData.reduce((s,m)=>s+m.grants.length,0)>0&&<span style={{marginLeft:5,background:'var(--o)',color:'#fff',borderRadius:10,padding:'0 6px',fontSize:10,fontWeight:800}}>{calendarData.reduce((s,m)=>s+m.grants.length,0)}</span>}</button>
-          <button className={`chip ${suggView?'on':''}`} onClick={()=>{setSuggView(v=>!v);setEditMode(false);setActiveView(false);setCalendarView(false);setExpRow(null);}} style={suggView?{background:'var(--bbg)',color:'var(--b)'}:{}}>
+          <button className={`chip ${activeView&&!editMode&&!calendarView&&!archiveView&&!suggView?'on':''}`} onClick={()=>{setActiveView(!activeView);setEditMode(false);setCalendarView(false);setArchiveView(false);setSuggView(false);setExpRow(null);}} style={activeView?{background:'var(--gbg)',color:'var(--g)'}:{}}><i className="fa-solid fa-bolt"/> Active ({stats.active})</button>
+          <button className={`chip ${calendarView&&!editMode&&!suggView?'on':''}`} onClick={()=>{setCalendarView(!calendarView);setEditMode(false);setActiveView(false);setArchiveView(false);setSuggView(false);setExpRow(null);}} style={calendarView?{background:'var(--obg)',color:'var(--o)'}:{}}><i className="fa-solid fa-calendar-days"/> Upcoming{calendarData.reduce((s,m)=>s+m.grants.length,0)>0&&<span style={{marginLeft:5,background:'var(--o)',color:'#fff',borderRadius:10,padding:'0 6px',fontSize:10,fontWeight:800}}>{calendarData.reduce((s,m)=>s+m.grants.length,0)}</span>}</button>
+          <button className={`chip ${archiveView&&!editMode&&!suggView?'on':''}`} onClick={()=>{setArchiveView(!archiveView);setEditMode(false);setActiveView(false);setCalendarView(false);setSuggView(false);setExpRow(null);}} style={archiveView?{background:'var(--s3)',color:'var(--td)'}:{}}><i className="fa-solid fa-box-archive"/> Archive ({archiveGroups.reduce((s,g)=>s+g.entries.length,0)})</button>
+          <button className={`chip ${suggView?'on':''}`} onClick={()=>{setSuggView(v=>!v);setEditMode(false);setActiveView(false);setCalendarView(false);setArchiveView(false);setExpRow(null);}} style={suggView?{background:'var(--bbg)',color:'var(--b)'}:{}}>
             <i className="fa-solid fa-robot"/> IA{suggestions.length>0&&<span style={{marginLeft:5,background:'var(--r)',color:'#fff',borderRadius:10,padding:'0 6px',fontSize:10,fontWeight:800}}>{suggestions.length}</span>}
           </button>
         </div>
         <span style={{fontSize:11,color:'var(--tf)',marginLeft:'auto',display:'flex',alignItems:'center',gap:8,flexWrap:'wrap',justifyContent:'flex-end'}}>
-          {editMode?`${data.length} entries`:suggView?`${suggestions.length} sugerencias IA pendientes`:calendarView?`${calendarData.reduce((s,m)=>s+m.grants.length,0)} programs · ${calendarData.length} seasons`:activeView?`${activeGroups.length} programs · ${activeGrants.length} active grants`:(()=>{
+          {editMode?`${data.length} entries`:suggView?`${suggestions.length} sugerencias IA pendientes`:calendarView?`${calendarData.reduce((s,m)=>s+m.grants.length,0)} programs · ${calendarData.length} seasons`:activeView?`${activeGroups.length} programs · ${activeGrants.length} active grants`:archiveView?`${archiveGroups.length} programs · ${archiveGroups.reduce((s,g)=>s+g.entries.length,0)} archived grants`:(()=>{
             const reqByCur={};programGroups.forEach(g=>{if(g.primary.amount){const c=g.primary.currency||'USD';reqByCur[c]=(reqByCur[c]||0)+g.primary.amount;}});
             const wonByCur={};programGroups.forEach(g=>Object.entries(g.totalAmtByCur).forEach(([c,v])=>{wonByCur[c]=(wonByCur[c]||0)+v;}));
             const reqStr=fmtByCur(reqByCur)!=='—'?fmtByCur(reqByCur):'';
@@ -1701,6 +1728,23 @@ function App({initialGrants}){
           <EditSheet data={data} setData={setData} search={search}/>
         ):suggView?(
           <SuggestionsView suggestions={suggestions} onAccept={s=>acceptSuggestion(s,add,setSuggestions)} onReject={id=>rejectSuggestion(id,setSuggestions)}/>
+        ):archiveView?(
+          archiveGroups.length===0?(
+            <div style={{textAlign:'center',padding:40,color:'var(--tf)'}}>No archived grants yet.</div>
+          ):(
+          <div className="archive-view">
+            {archiveGroups.map(grp=>(
+              <div key={grp.key} className="archive-group">
+                <div className="archive-group-hdr">
+                  <span className="archive-foundation">{grp.foundation}</span>
+                  {grp.grant&&<span className="archive-grant">{grp.grant}</span>}
+                  <span className="archive-count">{grp.entries.length} app{grp.entries.length>1?'s':''}</span>
+                </div>
+                {grp.entries.map((e,i)=><AppEntry key={e.id} e={e} isLast={i===grp.entries.length-1} onChangeStatus={changeStatus} onChangeField={changeField} onDelete={delEntry} onDuplicate={dupEntry}/>)}
+              </div>
+            ))}
+          </div>
+          )
         ):calendarView?(
           <div className="cal-view">
             {calendarData.length===0?(
@@ -1771,6 +1815,7 @@ function App({initialGrants}){
               <th style={{width:110}}>Deadline</th>
               <th>Foundation</th>
               <th>Grant Program</th>
+              <th className="desk-only" style={{width:130}}>Project</th>
               <th style={{width:75}}>Status</th>
               <th style={{width:60}}>Apps</th>
               <th style={{width:80}}>Results</th>
@@ -1813,7 +1858,9 @@ function App({initialGrants}){
                           return <span key={e.id} className="sem-yr"><span className={`sem-dot ${cls}`}/><span className="sem-lbl">{yr}</span></span>;
                         })}
                       </span>
+                      {grp.primary.projectDates&&<div style={{fontSize:10,color:'var(--tf)',marginTop:2,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis',display:'none'}} className="proj-mob">{grp.primary.projectDates}</div>}
                     </td>
+                    <td className="desk-only" style={{fontSize:10,color:'var(--td)',maxWidth:130,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{grp.primary.projectDates||''}</td>
                     <td className="desk-only"><span className={`ns ${STEP_CSS[latestStep]||'ns-check'}`}>{STEP_SHORT[latestStep]||latestStep}</span></td>
                     <td className="desk-only" style={{fontSize:10,color:'var(--td)'}}>{grp.entries.length} app{grp.entries.length>1?'s':''}</td>
                     <td className="desk-only">
@@ -1842,7 +1889,7 @@ function App({initialGrants}){
                     </td>
                   </tr>
                   {isExp&&(
-                    <tr><td colSpan={9} style={{padding:0}}>
+                    <tr><td colSpan={10} style={{padding:0}}>
                       <div className="hist-panel" onClick={e=>e.stopPropagation()}>
                         <div>
                           <div style={{fontSize:10,fontWeight:700,textTransform:'uppercase',letterSpacing:'.4px',color:'var(--tf)',marginBottom:8}}>
@@ -1867,6 +1914,7 @@ function App({initialGrants}){
               <th style={{width:110}}>Deadline</th>
               <th>Foundation</th>
               <th>Grant Program</th>
+              <th className="desk-only" style={{width:130}}>Project</th>
               <th style={{width:75}}>Status</th>
               <th style={{width:60}}>Apps</th>
               <th style={{width:80}}>Results</th>
@@ -1913,7 +1961,9 @@ function App({initialGrants}){
                           return <span key={e.id} className="sem-yr"><span className={`sem-dot ${cls}`}/><span className="sem-lbl">{yr}</span></span>;
                         })}
                       </span>
+                      {grp.primary.projectDates&&<div style={{fontSize:10,color:'var(--tf)',marginTop:2,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis',display:'none'}} className="proj-mob">{grp.primary.projectDates}</div>}
                     </td>
+                    <td className="desk-only" style={{fontSize:10,color:'var(--td)',maxWidth:130,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{grp.primary.projectDates||''}</td>
                     {/* Desktop-only separate cells */}
                     <td className="desk-only"><span className={`ns ${STEP_CSS[latestStep]||'ns-check'}`}>{STEP_SHORT[latestStep]||latestStep}</span></td>
                     <td className="desk-only" style={{fontSize:10,color:'var(--td)'}}>{grp.entries.length} app{grp.entries.length>1?'s':''}</td>
@@ -1944,7 +1994,7 @@ function App({initialGrants}){
                     </td>
                   </tr>
                   {isExp&&(
-                    <tr><td colSpan={9} style={{padding:0}}>
+                    <tr><td colSpan={10} style={{padding:0}}>
                       <div className="hist-panel" onClick={e=>e.stopPropagation()}>
                         {/* Application Timeline */}
                         <div>
