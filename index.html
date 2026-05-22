@@ -1007,6 +1007,7 @@ function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
               <input type="date" className="period-date" value={parsedPeriod.start} onChange={ev=>updatePeriod('start',ev.target.value)}/>
               <span className="period-sep">–</span>
               <input type="date" className="period-date" value={parsedPeriod.end} onChange={ev=>updatePeriod('end',ev.target.value)}/>
+              {e.deadline&&<button className="period-clear" title="Fill full year from deadline" onClick={ev=>{ev.stopPropagation();const yr=e.deadline.substring(0,4);const fmtD=v=>new Date(v+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});onChangeField(e.id,'eligiblePeriod',`${fmtD(yr+'-01-01')} – ${fmtD(yr+'-12-31')}`);}} style={{fontSize:11}}>↺</button>}
               {(parsedPeriod.start||parsedPeriod.end)&&<button className="period-clear" title="Clear dates" onClick={ev=>{ev.stopPropagation();onChangeField(e.id,'eligiblePeriod','');}}>×</button>}
             </div>
           </div>
