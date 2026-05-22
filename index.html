@@ -1505,6 +1505,30 @@ function App({initialGrants}){
     });
   },[data]);
 
+  const activeGroups=useMemo(()=>{
+    const groups={};
+    activeGrants.forEach(g=>{
+      const key=(g.foundation||'').trim()+'|||'+(g.grant||'').trim();
+      if(!groups[key])groups[key]={key,foundation:(g.foundation||'').trim(),grant:(g.grant||'').trim(),entries:[]};
+      groups[key].entries.push(g);
+    });
+    return Object.values(groups).map(grp=>{
+      grp.entries.sort((a,b)=>(b.deadline||'').localeCompare(a.deadline||''));
+      grp.primary=grp.entries[0];
+      grp.nextDeadline=grp.entries.find(e=>e.deadline&&new Date(e.deadline+'T00:00:00')>=new Date())||grp.primary;
+      grp.received=grp.entries.filter(e=>e.nextStep==='05 Received').length;
+      grp.denied=grp.entries.filter(e=>e.nextStep==='04 Denied').length;
+      grp.waiting=grp.entries.filter(e=>e.nextStep==='03 Waiting Results').length;
+      grp.totalAmtByCur={};
+      grp.entries.filter(e=>e.nextStep==='05 Received').forEach(e=>{const c=e.currency||'USD';grp.totalAmtByCur[c]=(grp.totalAmtByCur[c]||0)+(e.amountReceived||e.amount||0);});
+      grp.totalAmt=Object.values(grp.totalAmtByCur).reduce((s,v)=>s+v,0);
+      return grp;
+    }).sort((a,b)=>{
+      const pa=pPeriod(a.primary.eligiblePeriod), pb=pPeriod(b.primary.eligiblePeriod);
+      return(pa?pa.end:new Date('9999'))-(pb?pb.end:new Date('9999'));
+    });
+  },[activeGrants]);
+
   // Calendar view: only shows grant programs that have an explicit season field
   const calendarData=useMemo(()=>{
     const SEASONS=[
@@ -1656,7 +1680,7 @@ function App({initialGrants}){
           </button>
         </div>
         <span style={{fontSize:11,color:'var(--tf)',marginLeft:'auto',display:'flex',alignItems:'center',gap:8,flexWrap:'wrap',justifyContent:'flex-end'}}>
-          {editMode?`${data.length} entries`:suggView?`${suggestions.length} sugerencias IA pendientes`:calendarView?`${calendarData.reduce((s,m)=>s+m.grants.length,0)} programs · ${calendarData.length} seasons`:activeView?`${activeGrants.length} active · ${fmt(stats.activeAmt)}`:(()=>{
+          {editMode?`${data.length} entries`:suggView?`${suggestions.length} sugerencias IA pendientes`:calendarView?`${calendarData.reduce((s,m)=>s+m.grants.length,0)} programs · ${calendarData.length} seasons`:activeView?`${activeGroups.length} programs · ${activeGrants.length} active grants`:(()=>{
             const reqByCur={};programGroups.forEach(g=>{if(g.primary.amount){const c=g.primary.currency||'USD';reqByCur[c]=(reqByCur[c]||0)+g.primary.amount;}});
             const wonByCur={};programGroups.forEach(g=>Object.entries(g.totalAmtByCur).forEach(([c,v])=>{wonByCur[c]=(wonByCur[c]||0)+v;}));
             const reqStr=fmtByCur(reqByCur)!=='—'?fmtByCur(reqByCur):'';
@@ -1733,32 +1757,104 @@ function App({initialGrants}){
             ))}
           </div>
         ):activeView?(
-          <div className="active-grid">
-            {activeGrants.length===0?(
-              <div style={{textAlign:'center',padding:40,color:'var(--tf)'}}>No active grants with a defined grant period right now.</div>
-            ):activeGrants.map(g=>{
-              const p=pPeriod(g.eligiblePeriod);
-              const daysLeft=p?Math.ceil((p.end-new Date())/864e5):null;
-              return(
-                <div key={g.id} className="active-card">
-                  <div className="ac-top">
-                    <div className="ac-info">
-                      <div className="ac-foundation">{g.foundation}<CopyBtn text={g.foundation}/></div>
-                      <div className="ac-grant">{g.grant||'—'}{g.grant&&<CopyBtn text={g.grant}/>}</div>
-                      {g.projectDates&&<div className="ac-project">{g.projectDates}</div>}
-                    </div>
-                    <div className="ac-amounts">
-                      <div className="ac-amt">{fmt(g.amountReceived||g.amount)}</div>
-                      {daysLeft!=null&&<div className="ac-days" style={{color:daysLeft<=30?'var(--r)':daysLeft<=90?'var(--y)':'var(--g)'}}>{daysLeft}d left</div>}
-                      {g.reportDeadline&&<div className="ac-report">Report: {fmtDateShort(g.reportDeadline)}</div>}
-                    </div>
-                  </div>
-                  <Thermo period={g.eligiblePeriod} deadline={g.deadline} reportDeadline={g.reportDeadline}/>
-                  {g.notes&&<div className="ac-notes">{g.notes}</div>}
-                </div>
-              );
-            })}
+          activeGroups.length===0?(
+            <div style={{textAlign:'center',padding:40,color:'var(--tf)'}}>No active grants with a defined grant period right now.</div>
+          ):(
+          <div style={{overflowX:'auto',WebkitOverflowScrolling:'touch'}}>
+          <table className="flat-table">
+            <thead><tr>
+              <th style={{width:110}}>Deadline</th>
+              <th>Foundation</th>
+              <th>Grant Program</th>
+              <th style={{width:75}}>Status</th>
+              <th style={{width:60}}>Apps</th>
+              <th style={{width:80}}>Results</th>
+              <th style={{width:80}}>Requested</th>
+              <th style={{width:80}}>Won</th>
+              <th style={{width:120}}></th>
+            </tr></thead>
+            <tbody>
+              {activeGroups.map(grp=>{
+                const nd=grp.nextDeadline||grp.primary;
+                const days=nd&&nd.deadline?daysUntil(nd.deadline):9999;
+                const dc=dlClass(days);
+                const isExp=expRow===grp.key;
+                const relStr=days<0?`${Math.abs(days)}d ago`:days===0?'Today':days<=60?`${days}d`:`${Math.round(days/30)}mo`;
+                const latestStep=grp.primary.nextStep;
+                const dType=nd?nd.deadlineType:'';
+                const semEntries=grp.entries.slice().sort((a,b)=>(a.deadline||'').localeCompare(b.deadline||''));
+                return(
+                  <React.Fragment key={grp.key}>
+                  <tr className={isExp?'g-sel':''} onClick={()=>setExpRow(isExp?null:grp.key)} style={{cursor:'pointer'}}>
+                    <td className="mob-line1">
+                      <span style={{fontSize:10,color:'var(--tf)',transition:'transform .2s',display:'inline-block',transform:isExp?'rotate(90deg)':'rotate(0deg)'}}><i className="fa-solid fa-chevron-right"/></span>
+                      {nd&&nd.deadline?(
+                        <span className={`g-deadline ${dc}`}>{fmtDateShort(nd.deadline)}</span>
+                      ):(
+                        <span className="g-deadline" style={{color:'var(--tf)'}}>—</span>
+                      )}
+                      {nd&&nd.deadline&&<span className={`fd-rel ${dc}`} style={{fontSize:8,fontWeight:600,whiteSpace:'nowrap'}}>{relStr}</span>}
+                      {dType&&<span className={`fd-type ${dType==='DDLNE!'?'hard':'est'}`}>{dType==='DDLNE!'?'Hard':'Est.'}</span>}
+                    </td>
+                    <td className="flat-fname" style={{fontWeight:600,maxWidth:220,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>
+                      {grp.foundation}<CopyBtn text={grp.foundation}/>
+                    </td>
+                    <td className="flat-gname">
+                      <span className="g-name" style={{display:'inline'}}>{grp.grant||'—'}{grp.grant&&<CopyBtn text={grp.grant}/>}</span>
+                      <span className="prog-sem" style={{marginLeft:6}}>
+                        {semEntries.map(e=>{
+                          const yr=e.deadline?e.deadline.substring(2,4):'?';
+                          const cls=e.nextStep==='05 Received'?'received':e.nextStep==='04 Denied'?'denied':e.nextStep==='03 Waiting Results'?'waiting':e.nextStep==='07 Missed Deadline'?'missed':e.nextStep==='08 Not Eligible'?'notelig':e.nextStep==='02 Check'?'check':'apply';
+                          return <span key={e.id} className="sem-yr"><span className={`sem-dot ${cls}`}/><span className="sem-lbl">{yr}</span></span>;
+                        })}
+                      </span>
+                    </td>
+                    <td className="desk-only"><span className={`ns ${STEP_CSS[latestStep]||'ns-check'}`}>{STEP_SHORT[latestStep]||latestStep}</span></td>
+                    <td className="desk-only" style={{fontSize:10,color:'var(--td)'}}>{grp.entries.length} app{grp.entries.length>1?'s':''}</td>
+                    <td className="desk-only">
+                      <div style={{display:'flex',gap:3}}>
+                        {grp.received>0&&<span className="ms ms-g">✓{grp.received}</span>}
+                        {grp.waiting>0&&<span className="ms ms-b"><i className="fa-solid fa-hourglass-half"/>{grp.waiting}</span>}
+                        {grp.denied>0&&<span className="ms ms-r">✗{grp.denied}</span>}
+                      </div>
+                    </td>
+                    <td className="desk-only" style={{fontVariantNumeric:'tabular-nums',fontSize:11,color:'var(--td)'}}>{grp.primary.amount?fmt(grp.primary.amount,grp.primary.currency||'USD'):''}</td>
+                    <td className="desk-only" style={{fontVariantNumeric:'tabular-nums',fontWeight:700,color:'var(--g)',fontSize:11}}>{grp.totalAmt>0?fmtByCur(grp.totalAmtByCur):''}</td>
+                    <td className="desk-only" style={{textAlign:'center'}}>
+                      <div style={{display:'flex',gap:5,justifyContent:'center'}}>
+                        {grp.primary.web&&<a href={grp.primary.web} target="_blank" rel="noreferrer" className="btn-icon btn-icon-web" onClick={e=>e.stopPropagation()} title="Ver Convocatoria"><i className="fa-solid fa-arrow-up-right-from-square"/></a>}
+                        {grp.primary.bases&&<a href={grp.primary.bases} target="_blank" rel="noreferrer" className="btn-icon btn-icon-pdf" onClick={e=>e.stopPropagation()} title="Ver Bases (PDF)"><i className="fa-solid fa-file-pdf"/></a>}
+                      </div>
+                    </td>
+                    <td className="mob-right">
+                      <span className={`ns ${STEP_CSS[latestStep]||'ns-check'}`}>{STEP_SHORT[latestStep]||latestStep}</span>
+                      <span style={{fontSize:9,color:'var(--td)'}}>{grp.entries.length}</span>
+                      {grp.received>0&&<span className="ms ms-g" style={{fontSize:8}}>✓{grp.received}</span>}
+                      {grp.waiting>0&&<span className="ms ms-b" style={{fontSize:8}}><i className="fa-solid fa-hourglass-half"/>{grp.waiting}</span>}
+                      {grp.denied>0&&<span className="ms ms-r" style={{fontSize:8}}>✗{grp.denied}</span>}
+                      {grp.primary.amount&&grp.totalAmt===0&&<span style={{fontVariantNumeric:'tabular-nums',fontSize:9,color:'var(--td)'}}>{fmt(grp.primary.amount,grp.primary.currency||'USD')}</span>}
+                      {grp.totalAmt>0&&<span style={{fontVariantNumeric:'tabular-nums',fontWeight:700,color:'var(--g)',fontSize:9}}>{fmtByCur(grp.totalAmtByCur)}</span>}
+                    </td>
+                  </tr>
+                  {isExp&&(
+                    <tr><td colSpan={9} style={{padding:0}}>
+                      <div className="hist-panel" onClick={e=>e.stopPropagation()}>
+                        <div>
+                          <div style={{fontSize:10,fontWeight:700,textTransform:'uppercase',letterSpacing:'.4px',color:'var(--tf)',marginBottom:8}}>
+                            Application Timeline ({grp.entries.length})
+                          </div>
+                          {grp.entries.map((e,i)=><AppEntry key={e.id} e={e} isLast={i===grp.entries.length-1} onChangeStatus={changeStatus} onChangeField={changeField} onDelete={delEntry} onDuplicate={dupEntry}/>)}
+                        </div>
+                      </div>
+                    </td></tr>
+                  )}
+                  </React.Fragment>
+                );
+              })}
+            </tbody>
+          </table>
           </div>
+          )
         ):(
           <div style={{overflowX:'auto',WebkitOverflowScrolling:'touch'}}>
           <table className="flat-table">
