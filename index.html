@@ -1050,6 +1050,8 @@ function Thermo({period,deadline,reportDeadline}){
 
 // ── AppEntry: timeline entry for individual applications ──
 function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
+  const[editingAi,setEditingAi]=useState(false);
+  const[aiDraft,setAiDraft]=useState('');
   const yr=e.deadline?e.deadline.substring(0,4):'?';
   const dotCls=e.nextStep==='05 Received'?'received':e.nextStep==='04 Denied'?'denied':e.nextStep==='03 Waiting Results'?'waiting':'';
   const L=({children})=><span style={{fontSize:8,textTransform:'uppercase',letterSpacing:'.4px',color:'var(--tf)',display:'block',marginBottom:1}}>{children}</span>;
@@ -1111,7 +1113,30 @@ function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
           <div><L>Report Deadline</L><DField className="ef ef-date" type="date" value={e.reportDeadline||''} label="Report Deadline" onChange={v=>onChangeField(e.id,'reportDeadline',v)}/></div>
           <div><L>Web / Link</L><DField className="ef ef-sm" value={e.web||''} placeholder="https://..." label="Link" onChange={v=>onChangeField(e.id,'web',v)}/></div>
           <div><L>Bases (PDF)</L><DField className="ef ef-sm" value={e.bases||''} placeholder="https://...pdf" label="Bases PDF" onChange={v=>onChangeField(e.id,'bases',v)}/></div>
-          <div><L>AI Workspace</L><DField className="ef ef-sm" value={e.aiWorkspace||''} placeholder="https://..." label="AI Workspace" onChange={v=>onChangeField(e.id,'aiWorkspace',v)}/></div>
+          <div onClick={ev=>ev.stopPropagation()}>
+            <L>AI Workspace</L>
+            {editingAi?(
+              <div style={{display:'flex',gap:4,alignItems:'center'}}>
+                <input autoFocus className="ef ef-sm" style={{flex:1,background:'var(--s2)',border:'1px solid var(--bd)',color:'var(--t)',padding:'3px 6px',borderRadius:2,fontFamily:'var(--font-mono)',fontSize:10,outline:'none'}}
+                  value={aiDraft} placeholder="https://..."
+                  onChange={ev=>setAiDraft(ev.target.value)}
+                  onKeyDown={ev=>{if(ev.key==='Enter'){onChangeField(e.id,'aiWorkspace',aiDraft.trim());setEditingAi(false);}if(ev.key==='Escape'){setEditingAi(false);}}}
+                />
+                <button className="btn-icon btn-icon-ai" style={{flexShrink:0}} onClick={()=>{onChangeField(e.id,'aiWorkspace',aiDraft.trim());setEditingAi(false);}}><i className="fa-solid fa-check" style={{fontSize:9}}/></button>
+              </div>
+            ):e.aiWorkspace?(
+              <div style={{display:'flex',alignItems:'center',gap:4}}>
+                <a href={e.aiWorkspace} target="_blank" rel="noreferrer" className="btn-icon btn-icon-ai" style={{display:'inline-flex',alignItems:'center',gap:5,padding:'3px 8px',width:'auto',fontSize:10,fontWeight:600,textDecoration:'none',borderRadius:3}} onClick={ev=>ev.stopPropagation()}>
+                  <i className="fa-solid fa-robot" style={{fontSize:10}}/> AI Workspace
+                </a>
+                <button style={{background:'none',border:'none',cursor:'pointer',color:'var(--tf)',padding:2}} title="Edit URL" onClick={()=>{setAiDraft(e.aiWorkspace);setEditingAi(true);}}><i className="fa-solid fa-pencil" style={{fontSize:9}}/></button>
+              </div>
+            ):(
+              <button style={{background:'none',border:'none',cursor:'pointer',color:'var(--tf)',fontSize:10,padding:'2px 0',display:'flex',alignItems:'center',gap:4,fontFamily:'var(--font-mono)'}} onClick={()=>{setAiDraft('');setEditingAi(true);}}>
+                Add URL <i className="fa-solid fa-pencil" style={{fontSize:9}}/>
+              </button>
+            )}
+          </div>
           <div><L>Deadline Type</L><span style={{cursor:'pointer',display:'inline-block'}} onClick={ev=>{ev.stopPropagation();onChangeField(e.id,'deadlineType',e.deadlineType==='DDLNE!'?'Estimated':'DDLNE!');}}><span className={`fd-type ${e.deadlineType==='DDLNE!'?'hard':'est'}`}>{e.deadlineType==='DDLNE!'?'Hard Deadline':'Estimated'}</span></span></div>
           <div style={{gridColumn:'1/-1'}}><L>Notes</L><DField className="ef ef-note" value={e.notes||e.improvements||''} placeholder="Notes..." label="Notes" multiline={true} onChange={v=>onChangeField(e.id,'notes',v)}/></div>
         </div>
