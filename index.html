@@ -8,6 +8,7 @@
 <meta name="robots" content="noindex, nofollow">
 <title>Polen — Grant Tracker</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
 :root{
   --bg:#0e0d0a;--s1:#15130f;--s2:#1c1a14;--s3:#26221a;
@@ -668,6 +669,14 @@ body{font-family:var(--font-mono);background:var(--bg);color:var(--t);min-height
 .ef::placeholder{color:var(--tf);font-style:italic;}
 .ef-sm{font-size:10px;}
 .ef-date{width:90px;font-size:10px;color:var(--td);}
+/* FA icons sizing */
+i.fa-solid,i.fa-regular{font-size:12px;line-height:1;vertical-align:middle;}
+.btn-icon i.fa-solid{font-size:14px;}
+.theme-btn i.fa-solid{font-size:12px;}
+.tl-action i.fa-solid{font-size:11px;}
+.dfield-btn i.fa-solid{font-size:11px;}
+.doc-del i.fa-solid{font-size:11px;}
+.period-clear i.fa-solid{font-size:10px;}
 .ef-amt{width:70px;font-size:11px;font-variant-numeric:tabular-nums;}
 .cur-toggle{display:inline-flex;border:1px solid var(--bd);border-radius:3px;overflow:hidden;flex-shrink:0;height:22px;}
 .cur-btn{background:none;border:none;padding:0 6px;font-size:10px;font-weight:600;cursor:pointer;color:var(--td);font-family:var(--font-mono);transition:all .12s;line-height:1;}
@@ -866,13 +875,13 @@ const STEPS=['01 Apply on deadline','02 Check','03 Waiting Results','05 Received
 const STEP_SHORT={'00 Send Proposal':'Apply','01 Apply on deadline':'Apply','02 Check':'Check','03 Waiting Results':'Waiting','04 Denied':'Denied','05 Received':'Received','06 Not Applied':'Not Applied','07 Missed Deadline':'Missed','08 Not Eligible':'Not Eligible'};
 
 const DOC_TYPES=[
-  {value:'bases',     label:'Bases',                icon:'📋'},
-  {value:'contrato',  label:'Contrato / Convenio',  icon:'🤝'},
-  {value:'modelos',   label:'Modelos / Formularios',icon:'📝'},
-  {value:'factura',   label:'Factura / Justificación',icon:'🧾'},
-  {value:'resolucion',label:'Resolución',            icon:'✅'},
-  {value:'memoria',   label:'Memoria / Informe',     icon:'📊'},
-  {value:'otro',      label:'Otro',                  icon:'📁'},
+  {value:'bases',     label:'Bases',                icon:'fa-file-lines'},
+  {value:'contrato',  label:'Contrato / Convenio',  icon:'fa-handshake'},
+  {value:'modelos',   label:'Modelos / Formularios',icon:'fa-file-pen'},
+  {value:'factura',   label:'Factura / Justificación',icon:'fa-receipt'},
+  {value:'resolucion',label:'Resolución',            icon:'fa-circle-check'},
+  {value:'memoria',   label:'Memoria / Informe',     icon:'fa-chart-bar'},
+  {value:'otro',      label:'Otro',                  icon:'fa-folder-open'},
 ];
 
 async function uploadDoc(grantId, file){
@@ -894,7 +903,7 @@ function CopyBtn({text}){
     e.stopPropagation();
     navigator.clipboard.writeText(text).then(()=>{setCopied(true);setTimeout(()=>setCopied(false),1500);});
   };
-  return <button className={`copy-btn${copied?' copied':''}`} onClick={copy} title={copied?'Copied!':'Copy name'}>{copied?'✓':'⧉'}</button>;
+  return <button className={`copy-btn${copied?' copied':''}`} onClick={copy} title={copied?'Copied!':'Copy name'}><i className={`fa-solid ${copied?'fa-check':'fa-clone'}`}/></button>;
 }
 
 // Click-to-edit: shows formatted value, opens popover on click.
@@ -944,8 +953,8 @@ function DField({value,onChange,className,type,placeholder,style,label,multiline
             onKeyDown={e=>{if(e.key==='Enter')save();if(e.key==='Escape')cancel();}}/>
       }
       <span className="dfield-actions">
-        <button className="dfield-btn dfield-cancel" onClick={cancel}>✕</button>
-        <button className="dfield-btn dfield-ok" onClick={save}>✓</button>
+        <button className="dfield-btn dfield-cancel" onClick={cancel}><i className="fa-solid fa-xmark"/></button>
+        <button className="dfield-btn dfield-ok" onClick={save}><i className="fa-solid fa-check"/></button>
       </span>
     </span>
   );
@@ -1027,10 +1036,10 @@ function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
         <div className="tl-header" style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:3}}>
           <div style={{display:'flex',alignItems:'center',gap:6}}>
             <span style={{fontSize:14,fontWeight:800,color:'var(--acl)'}}>{yr}</span>
-            {e.web&&<a href={e.web} target="_blank" rel="noreferrer" className="btn-icon btn-icon-web" onClick={ev=>ev.stopPropagation()} title="Ver Convocatoria">🔗</a>}
-            {e.bases&&<a href={e.bases} target="_blank" rel="noreferrer" className="btn-icon btn-icon-pdf" onClick={ev=>ev.stopPropagation()} title="Ver Bases (PDF)">📄</a>}
-            <button className="tl-action" title="Duplicate" onClick={ev=>{ev.stopPropagation();onDuplicate(e.id);}}>⧉</button>
-            <button className="tl-action tl-del" title="Delete" onClick={ev=>{ev.stopPropagation();onDelete(e.id);}}>✕</button>
+            {e.web&&<a href={e.web} target="_blank" rel="noreferrer" className="btn-icon btn-icon-web" onClick={ev=>ev.stopPropagation()} title="Ver Convocatoria"><i className="fa-solid fa-arrow-up-right-from-square"/></a>}
+            {e.bases&&<a href={e.bases} target="_blank" rel="noreferrer" className="btn-icon btn-icon-pdf" onClick={ev=>ev.stopPropagation()} title="Ver Bases (PDF)"><i className="fa-solid fa-file-pdf"/></a>}
+            <button className="tl-action" title="Duplicate" onClick={ev=>{ev.stopPropagation();onDuplicate(e.id);}}><i className="fa-solid fa-clone"/></button>
+            <button className="tl-action tl-del" title="Delete" onClick={ev=>{ev.stopPropagation();onDelete(e.id);}}><i className="fa-solid fa-xmark"/></button>
           </div>
           <div className="tl-meta" style={{display:'flex',gap:5,alignItems:'center'}}>
             <StatusBadge entryId={e.id} currentStep={e.nextStep} onChangeStatus={onChangeStatus}/>
@@ -1050,8 +1059,8 @@ function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
               <input type="date" className="period-date" value={parsedPeriod.start} onChange={ev=>updatePeriod('start',ev.target.value)}/>
               <span className="period-sep">–</span>
               <input type="date" className="period-date" value={parsedPeriod.end} onChange={ev=>updatePeriod('end',ev.target.value)}/>
-              {e.deadline&&<button className="period-clear" title="Fill full year from deadline" onClick={ev=>{ev.stopPropagation();const yr=e.deadline.substring(0,4);const fmtD=v=>new Date(v+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});onChangeField(e.id,'eligiblePeriod',`${fmtD(yr+'-01-01')} – ${fmtD(yr+'-12-31')}`);}} style={{fontSize:11}}>↺</button>}
-              {(parsedPeriod.start||parsedPeriod.end)&&<button className="period-clear" title="Clear dates" onClick={ev=>{ev.stopPropagation();onChangeField(e.id,'eligiblePeriod','');}}>×</button>}
+              {e.deadline&&<button className="period-clear" title="Fill full year from deadline" onClick={ev=>{ev.stopPropagation();const yr=e.deadline.substring(0,4);const fmtD=v=>new Date(v+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});onChangeField(e.id,'eligiblePeriod',`${fmtD(yr+'-01-01')} – ${fmtD(yr+'-12-31')}`);}}><i className="fa-solid fa-rotate-left"/></button>}
+              {(parsedPeriod.start||parsedPeriod.end)&&<button className="period-clear" title="Clear dates" onClick={ev=>{ev.stopPropagation();onChangeField(e.id,'eligiblePeriod','');}}><i className="fa-solid fa-xmark"/></button>}
             </div>
           </div>
           <div><L>Project</L><DField className="ef" value={e.projectDates||''} placeholder="Project name" label="Project" onChange={v=>onChangeField(e.id,'projectDates',v)}/></div>
@@ -1098,7 +1107,7 @@ function DocsSection({e,onChangeField}){
           {DOC_TYPES.map(t=><option key={t.value} value={t.value}>{t.icon} {t.label}</option>)}
         </select>
         <button className="doc-upload-btn" disabled={uploading} onClick={ev=>{ev.stopPropagation();fileRef.current&&fileRef.current.click();}}>
-          {uploading?'Uploading…':'📎 Attach'}
+          {uploading?<><i className="fa-solid fa-spinner fa-spin"/> Uploading…</>:<><i className="fa-solid fa-paperclip"/> Attach</>}
         </button>
         <input ref={fileRef} type="file" style={{display:'none'}} onChange={ev=>{handleFile(ev.target.files[0]);}} onClick={ev=>ev.stopPropagation()}/>
       </div>
@@ -1109,10 +1118,10 @@ function DocsSection({e,onChangeField}){
             const ti=typeInfo(d.type);
             return(
               <div key={i} className="doc-item">
-                <span className="doc-badge">{ti.icon} {ti.label}</span>
+                <span className="doc-badge"><i className={`fa-solid ${ti.icon}`}/> {ti.label}</span>
                 <span className="doc-name" title={d.name}>{d.name}</span>
-                <a href={d.url} target="_blank" rel="noreferrer" className="doc-link" onClick={ev=>ev.stopPropagation()}>↗</a>
-                <button className="doc-del" title="Remove" onClick={ev=>{ev.stopPropagation();delDoc(i);}}>×</button>
+                <a href={d.url} target="_blank" rel="noreferrer" className="doc-link" onClick={ev=>ev.stopPropagation()}><i className="fa-solid fa-arrow-up-right-from-square"/></a>
+                <button className="doc-del" title="Remove" onClick={ev=>{ev.stopPropagation();delDoc(i);}}><i className="fa-solid fa-xmark"/></button>
               </div>
             );
           })}
@@ -1262,7 +1271,7 @@ function EditSheet({data,setData,search}){
               <td><textarea value={g.web||''} onChange={e=>upd(g.id,'web',e.target.value)} placeholder="https://..." rows={1} style={{fontSize:10}} onInput={e=>{e.target.style.height='auto';e.target.style.height=e.target.scrollHeight+'px';}}/></td>
               <td><textarea value={g.bases||''} onChange={e=>upd(g.id,'bases',e.target.value)} placeholder="https://...pdf" rows={1} style={{fontSize:10}} onInput={e=>{e.target.style.height='auto';e.target.style.height=e.target.scrollHeight+'px';}}/></td>
               <td><textarea value={g.notes||''} onChange={e=>upd(g.id,'notes',e.target.value)} placeholder="—" rows={1} onInput={e=>{e.target.style.height='auto';e.target.style.height=e.target.scrollHeight+'px';}}/></td>
-              <td className="cell-del"><button onClick={()=>del(g.id)} title="Delete">✕</button></td>
+              <td className="cell-del"><button onClick={()=>del(g.id)} title="Delete"><i className="fa-solid fa-xmark"/></button></td>
             </tr>
           );})}
         </tbody>
@@ -1341,9 +1350,9 @@ function SuggestionCard({s,i,onAccept,onReject}){
         }
       </div>
       <div className="sugg-actions">
-        {web&&<a href={web} target="_blank" rel="noreferrer" className="sugg-link-btn" onClick={e=>e.stopPropagation()}>↗ Link</a>}
-        <button className="btn btn-pri sugg-btn-accept" onClick={()=>onAccept(enriched)}>✓ Accept</button>
-        <button className="btn btn-sec sugg-btn-rej" onClick={()=>onReject(s.id)}>✕</button>
+        {web&&<a href={web} target="_blank" rel="noreferrer" className="sugg-link-btn" onClick={e=>e.stopPropagation()}><i className="fa-solid fa-arrow-up-right-from-square"/> Link</a>}
+        <button className="btn btn-pri sugg-btn-accept" onClick={()=>onAccept(enriched)}><i className="fa-solid fa-check"/> Accept</button>
+        <button className="btn btn-sec sugg-btn-rej" onClick={()=>onReject(s.id)}><i className="fa-solid fa-xmark"/></button>
       </div>
     </div>
   );
@@ -1571,17 +1580,17 @@ function App({initialGrants}){
         <span className="nav-brand">🌸 POLEN</span>
         <div style={{flex:1}}/>
         <div className="topbar-actions">
-          <button className={`theme-btn${editMode?' edit-active':''}`} title="Edit All" onClick={()=>{setEditMode(v=>!v);setActiveView(false);setCalendarView(false);setSuggView(false);}} style={editMode?{borderColor:'var(--y)',color:'var(--y)',background:'var(--ybg)'}:{}}>✏</button>
+          <button className={`theme-btn${editMode?' edit-active':''}`} title="Edit All" onClick={()=>{setEditMode(v=>!v);setActiveView(false);setCalendarView(false);setSuggView(false);}} style={editMode?{borderColor:'var(--y)',color:'var(--y)',background:'var(--ybg)'}:{}}><i className="fa-solid fa-pen"/></button>
           {editMode&&<>
-            <button className="theme-btn" title="Save" onClick={async()=>{const r=await saveToServer(data);setSaveMsg(r.msg);setTimeout(()=>setSaveMsg(null),2500);}} style={{borderColor:'var(--g)',color:'var(--g)',background:'var(--gbg)'}}>💾</button>
-            <button className="theme-btn" title="Export JSON" onClick={()=>exportJSON(data)} style={{borderColor:'var(--b)',color:'var(--b)'}}>⬇</button>
-            <label className="theme-btn" title="Import JSON" style={{borderColor:'var(--y)',color:'var(--y)',cursor:'pointer'}}>⬆<input type="file" accept=".json" style={{display:'none'}} onChange={e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(Array.isArray(d)){setData(d);setSaveMsg('Imported '+d.length);setTimeout(()=>setSaveMsg(null),2000);}}catch(err){alert('Invalid JSON');}};rd.readAsText(f);e.target.value='';}}/></label>
+            <button className="theme-btn" title="Save" onClick={async()=>{const r=await saveToServer(data);setSaveMsg(r.msg);setTimeout(()=>setSaveMsg(null),2500);}} style={{borderColor:'var(--g)',color:'var(--g)',background:'var(--gbg)'}}><i className="fa-solid fa-floppy-disk"/></button>
+            <button className="theme-btn" title="Export JSON" onClick={()=>exportJSON(data)} style={{borderColor:'var(--b)',color:'var(--b)'}}><i className="fa-solid fa-download"/></button>
+            <label className="theme-btn" title="Import JSON" style={{borderColor:'var(--y)',color:'var(--y)',cursor:'pointer'}}><i className="fa-solid fa-upload"/><input type="file" accept=".json" style={{display:'none'}} onChange={e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(Array.isArray(d)){setData(d);setSaveMsg('Imported '+d.length);setTimeout(()=>setSaveMsg(null),2000);}}catch(err){alert('Invalid JSON');}};rd.readAsText(f);e.target.value='';}}/></label>
             {saveMsg&&<span style={{fontSize:10,color:'var(--g)',fontWeight:700}}>{saveMsg}</span>}
           </>}
           <span style={{width:1,height:16,background:'var(--bd)',margin:'0 2px',flexShrink:0}}/>
-          <button className="theme-btn btn-reload" onClick={()=>window.location.reload()} title="Reload">🔄</button>
-          <button className="theme-btn btn-signout" onClick={doSignOut} title="Sign out">⎋</button>
-          <button className="theme-btn" title="Toggle theme" onClick={()=>{setIsDark(d=>{const n=!d;localStorage.setItem('polen-theme',n?'dark':'light');return n;})}}>{isDark?'☀️':'🌙'}</button>
+          <button className="theme-btn btn-reload" onClick={()=>window.location.reload()} title="Reload"><i className="fa-solid fa-rotate-right"/></button>
+          <button className="theme-btn btn-signout" onClick={doSignOut} title="Sign out"><i className="fa-solid fa-right-from-bracket"/></button>
+          <button className="theme-btn" title="Toggle theme" onClick={()=>{setIsDark(d=>{const n=!d;localStorage.setItem('polen-theme',n?'dark':'light');return n;})}}>{isDark?<i className="fa-solid fa-sun"/>:<i className="fa-solid fa-moon"/>}</button>
           <button className="btn btn-pri" onClick={()=>setShowAdd(true)}>+ Add</button>
         </div>
       </div>
@@ -1608,10 +1617,10 @@ function App({initialGrants}){
               <option value="04 Denied">Denied ({stats.denied})</option>
             </select>
           </div>
-          <button className={`chip ${activeView&&!editMode&&!calendarView&&!suggView?'on':''}`} onClick={()=>{setActiveView(!activeView);setEditMode(false);setCalendarView(false);setSuggView(false);setExpRow(null);}} style={activeView?{background:'var(--gbg)',color:'var(--g)'}:{}}>✦ Active ({stats.active})</button>
-          <button className={`chip ${calendarView&&!editMode&&!suggView?'on':''}`} onClick={()=>{setCalendarView(!calendarView);setEditMode(false);setActiveView(false);setSuggView(false);setExpRow(null);}} style={calendarView?{background:'var(--obg)',color:'var(--o)'}:{}}>📅 Upcoming{calendarData.reduce((s,m)=>s+m.grants.length,0)>0&&<span style={{marginLeft:5,background:'var(--o)',color:'#fff',borderRadius:10,padding:'0 6px',fontSize:10,fontWeight:800}}>{calendarData.reduce((s,m)=>s+m.grants.length,0)}</span>}</button>
+          <button className={`chip ${activeView&&!editMode&&!calendarView&&!suggView?'on':''}`} onClick={()=>{setActiveView(!activeView);setEditMode(false);setCalendarView(false);setSuggView(false);setExpRow(null);}} style={activeView?{background:'var(--gbg)',color:'var(--g)'}:{}}><i className="fa-solid fa-bolt"/> Active ({stats.active})</button>
+          <button className={`chip ${calendarView&&!editMode&&!suggView?'on':''}`} onClick={()=>{setCalendarView(!calendarView);setEditMode(false);setActiveView(false);setSuggView(false);setExpRow(null);}} style={calendarView?{background:'var(--obg)',color:'var(--o)'}:{}}><i className="fa-solid fa-calendar-days"/> Upcoming{calendarData.reduce((s,m)=>s+m.grants.length,0)>0&&<span style={{marginLeft:5,background:'var(--o)',color:'#fff',borderRadius:10,padding:'0 6px',fontSize:10,fontWeight:800}}>{calendarData.reduce((s,m)=>s+m.grants.length,0)}</span>}</button>
           <button className={`chip ${suggView?'on':''}`} onClick={()=>{setSuggView(v=>!v);setEditMode(false);setActiveView(false);setCalendarView(false);setExpRow(null);}} style={suggView?{background:'var(--bbg)',color:'var(--b)'}:{}}>
-            🤖 IA{suggestions.length>0&&<span style={{marginLeft:5,background:'var(--r)',color:'#fff',borderRadius:10,padding:'0 6px',fontSize:10,fontWeight:800}}>{suggestions.length}</span>}
+            <i className="fa-solid fa-robot"/> IA{suggestions.length>0&&<span style={{marginLeft:5,background:'var(--r)',color:'#fff',borderRadius:10,padding:'0 6px',fontSize:10,fontWeight:800}}>{suggestions.length}</span>}
           </button>
         </div>
         <span style={{fontSize:11,color:'var(--tf)',marginLeft:'auto',display:'flex',alignItems:'center',gap:8,flexWrap:'wrap',justifyContent:'flex-end'}}>
@@ -1778,7 +1787,7 @@ function App({initialGrants}){
                     <td className="desk-only">
                       <div style={{display:'flex',gap:3}}>
                         {grp.received>0&&<span className="ms ms-g">✓{grp.received}</span>}
-                        {grp.waiting>0&&<span className="ms ms-b">⏳{grp.waiting}</span>}
+                        {grp.waiting>0&&<span className="ms ms-b"><i className="fa-solid fa-hourglass-half"/>{grp.waiting}</span>}
                         {grp.denied>0&&<span className="ms ms-r">✗{grp.denied}</span>}
                       </div>
                     </td>
@@ -1795,7 +1804,7 @@ function App({initialGrants}){
                       <span className={`ns ${STEP_CSS[latestStep]||'ns-check'}`}>{STEP_SHORT[latestStep]||latestStep}</span>
                       <span style={{fontSize:9,color:'var(--td)'}}>{grp.entries.length}</span>
                       {grp.received>0&&<span className="ms ms-g" style={{fontSize:8}}>✓{grp.received}</span>}
-                      {grp.waiting>0&&<span className="ms ms-b" style={{fontSize:8}}>⏳{grp.waiting}</span>}
+                      {grp.waiting>0&&<span className="ms ms-b" style={{fontSize:8}}><i className="fa-solid fa-hourglass-half"/>{grp.waiting}</span>}
                       {grp.denied>0&&<span className="ms ms-r" style={{fontSize:8}}>✗{grp.denied}</span>}
                       {grp.primary.amount&&grp.totalAmt===0&&<span style={{fontVariantNumeric:'tabular-nums',fontSize:9,color:'var(--td)'}}>{fmt(grp.primary.amount,grp.primary.currency||'USD')}</span>}
                       {grp.totalAmt>0&&<span style={{fontVariantNumeric:'tabular-nums',fontWeight:700,color:'var(--g)',fontSize:9}}>{fmtByCur(grp.totalAmtByCur)}</span>}
