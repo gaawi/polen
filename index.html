@@ -718,6 +718,10 @@ html.light .period-date{color-scheme:light;}
 .period-clear:hover{background:var(--rbg);color:var(--r);}
 /* Documents */
 .docs-section{margin-top:8px;border-top:1px solid var(--s3);padding-top:8px;}
+.docs-dropzone{border:1px dashed var(--bd);border-radius:6px;padding:6px 8px;transition:all .15s;}
+.docs-dropzone.drag-over{border-color:var(--ac);background:var(--acbg);}
+.docs-drag-hint{font-size:9px;color:var(--tf);text-align:center;margin-top:4px;pointer-events:none;}
+@media(max-width:768px){.docs-drag-hint{display:none;}}
 .docs-attach-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
 .doc-type-sel{background:var(--s2);border:1px solid var(--bd);color:var(--t);border-radius:3px;padding:3px 6px;font-size:10px;font-family:var(--font-mono);outline:none;cursor:pointer;}
 .doc-upload-btn{background:var(--s2);border:1px solid var(--bd);color:var(--td);border-radius:3px;padding:3px 8px;font-size:10px;font-family:var(--font-mono);cursor:pointer;transition:all .15s;white-space:nowrap;}
@@ -1094,36 +1098,50 @@ function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
 function DocsSection({e,onChangeField}){
   const[docType,setDocType]=useState('bases');
   const[uploading,setUploading]=useState(false);
+  const[progress,setProgress]=useState('');
   const[err,setErr]=useState('');
+  const[dragging,setDragging]=useState(false);
   const fileRef=useRef(null);
   const docs=e.documents||[];
 
-  const handleFile=async(file)=>{
-    if(!file)return;
+  const handleFiles=async(files)=>{
+    if(!files||!files.length)return;
     setErr('');setUploading(true);
-    try{
-      const url=await uploadDoc(e.id,file);
-      const doc={name:file.name,url,type:docType,uploadedAt:new Date().toISOString()};
-      onChangeField(e.id,'documents',[...docs,doc]);
-    }catch(ex){setErr('Error: '+ex.message);}
-    setUploading(false);
+    const arr=Array.from(files);
+    const results=[];
+    for(let i=0;i<arr.length;i++){
+      setProgress(`${i+1}/${arr.length}`);
+      try{
+        const url=await uploadDoc(e.id,arr[i]);
+        results.push({name:arr[i].name,url,type:docType,uploadedAt:new Date().toISOString()});
+      }catch(ex){setErr(`Error uploading ${arr[i].name}: ${ex.message}`);}
+    }
+    if(results.length)onChangeField(e.id,'documents',[...docs,...results]);
+    setUploading(false);setProgress('');
     if(fileRef.current)fileRef.current.value='';
   };
 
-  const delDoc=(i)=>onChangeField(e.id,'documents',docs.filter((_,j)=>j!==i));
+  const onDrop=ev=>{ev.preventDefault();ev.stopPropagation();setDragging(false);handleFiles(ev.dataTransfer.files);};
+  const onDragOver=ev=>{ev.preventDefault();ev.stopPropagation();setDragging(true);};
+  const onDragLeave=ev=>{ev.preventDefault();setDragging(false);};
 
+  const delDoc=(i)=>onChangeField(e.id,'documents',docs.filter((_,j)=>j!==i));
   const typeInfo=(t)=>DOC_TYPES.find(d=>d.value===t)||DOC_TYPES[DOC_TYPES.length-1];
 
   return(
     <div className="docs-section">
-      <div className="docs-attach-row">
-        <select className="doc-type-sel" value={docType} onChange={ev=>setDocType(ev.target.value)} onClick={ev=>ev.stopPropagation()}>
-          {DOC_TYPES.map(t=><option key={t.value} value={t.value}>{t.label}</option>)}
-        </select>
-        <button className="doc-upload-btn" disabled={uploading} onClick={ev=>{ev.stopPropagation();fileRef.current&&fileRef.current.click();}}>
-          {uploading?<><i className="fa-solid fa-spinner fa-spin"/> Uploading…</>:<><i className="fa-solid fa-paperclip"/> Attach</>}
-        </button>
-        <input ref={fileRef} type="file" style={{display:'none'}} onChange={ev=>{handleFile(ev.target.files[0]);}} onClick={ev=>ev.stopPropagation()}/>
+      <div className={`docs-dropzone${dragging?' drag-over':''}`}
+        onDrop={onDrop} onDragOver={onDragOver} onDragLeave={onDragLeave} onClick={ev=>ev.stopPropagation()}>
+        <div className="docs-attach-row">
+          <select className="doc-type-sel" value={docType} onChange={ev=>setDocType(ev.target.value)} onClick={ev=>ev.stopPropagation()}>
+            {DOC_TYPES.map(t=><option key={t.value} value={t.value}>{t.label}</option>)}
+          </select>
+          <button className="doc-upload-btn" disabled={uploading} onClick={ev=>{ev.stopPropagation();fileRef.current&&fileRef.current.click();}}>
+            {uploading?<><i className="fa-solid fa-spinner fa-spin"/> {progress}</>:<><i className="fa-solid fa-paperclip"/> Attach</>}
+          </button>
+          <input ref={fileRef} type="file" multiple style={{display:'none'}} onChange={ev=>handleFiles(ev.target.files)} onClick={ev=>ev.stopPropagation()}/>
+        </div>
+        <div className="docs-drag-hint">Drop files here</div>
       </div>
       {err&&<div className="doc-err">{err}</div>}
       {docs.length>0&&(
