@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="robots" content="noindex, nofollow">
 <title>Polen — Grant Tracker</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='5' fill='%23d39400'/><circle cx='16' cy='6' r='2.8' fill='%23d39400'/><circle cx='24.7' cy='11' r='2.8' fill='%23d39400'/><circle cx='24.7' cy='21' r='2.8' fill='%23d39400'/><circle cx='16' cy='26' r='2.8' fill='%23d39400'/><circle cx='7.3' cy='21' r='2.8' fill='%23d39400'/><circle cx='7.3' cy='11' r='2.8' fill='%23d39400'/></svg>">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
@@ -45,7 +45,7 @@ body{font-family:var(--font-mono);background:var(--bg);color:var(--t);min-height
 
 /* ── Shared nav ── */
 .topbar{display:flex;align-items:center;gap:4px;padding:0 12px;background:var(--s1);border-bottom:1px solid var(--bd);flex-shrink:0;height:44px;position:sticky;top:0;z-index:20;}
-.nav-brand{font-size:13px;font-weight:800;color:var(--ac);letter-spacing:.06em;padding:0 10px 0 0;margin-right:4px;border-right:1px solid var(--bd);flex-shrink:0;white-space:nowrap;}
+.nav-brand{font-size:13px;font-weight:800;color:var(--ac);letter-spacing:.06em;padding:0 10px 0 0;margin-right:4px;border-right:1px solid var(--bd);flex-shrink:0;white-space:nowrap;display:flex;align-items:center;gap:7px;}
 .nav-link{background:none;border:none;color:var(--td);font-size:11px;font-weight:600;padding:5px 10px;border-radius:3px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;transition:all .15s;font-family:var(--font-mono);white-space:nowrap;}
 .nav-link:hover{color:var(--t);background:var(--s3);}
 .nav-link.active{color:var(--ac);}
@@ -754,7 +754,7 @@ html.light .period-date{color-scheme:light;}
 #login-overlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;}
 .login-box{background:var(--s1);border:1px solid var(--bd);border-radius:3px;padding:28px 24px;width:320px;max-width:92vw;}
 .login-logo{display:flex;align-items:center;gap:10px;margin-bottom:20px;}
-.login-logo-icon{width:34px;height:34px;background:var(--ac);border-radius:2px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.login-logo-icon{display:none;}
 .login-logo-text{font-size:20px;font-weight:800;color:var(--t);font-family:var(--font-mono);}
 .login-logo-sub{font-size:10px;color:var(--td);font-weight:400;text-transform:uppercase;letter-spacing:.1em;}
 .login-box p{font-size:12px;color:var(--td);margin-bottom:20px;}
@@ -777,7 +777,15 @@ html.light .period-date{color-scheme:light;}
 <div id="login-overlay" style="display:flex">
   <div class="login-box">
     <div class="login-logo">
-      <div class="login-logo-icon">🌸</div>
+      <svg width="42" height="42" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+        <circle cx="16" cy="16" r="5" fill="#d39400"/>
+        <circle cx="16" cy="5.5" r="2.8" fill="#d39400"/>
+        <circle cx="24.7" cy="10.75" r="2.8" fill="#d39400"/>
+        <circle cx="24.7" cy="21.25" r="2.8" fill="#d39400"/>
+        <circle cx="16" cy="26.5" r="2.8" fill="#d39400"/>
+        <circle cx="7.3" cy="21.25" r="2.8" fill="#d39400"/>
+        <circle cx="7.3" cy="10.75" r="2.8" fill="#d39400"/>
+      </svg>
       <div>
         <div class="login-logo-text">Polen</div>
         <div class="login-logo-sub">Grant Tracker</div>
@@ -1177,6 +1185,19 @@ function DocsSection({e,onChangeField}){
         </div>
       )}
     </div>
+  );
+}
+
+// ── LOGO ──
+function PolenLogo({size=28}){
+  const c='#d39400';
+  const r=size/2, cr=size*0.156, sr=size*0.0875;
+  const pts=Array.from({length:6},(_,i)=>{const a=(i*60-90)*Math.PI/180;return[r+Math.cos(a)*cr*1.92,r+Math.sin(a)*cr*1.92];});
+  return(
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} xmlns="http://www.w3.org/2000/svg" style={{flexShrink:0}}>
+      <circle cx={r} cy={r} r={cr} fill={c}/>
+      {pts.map(([x,y],i)=><circle key={i} cx={x} cy={y} r={sr} fill={c}/>)}
+    </svg>
   );
 }
 
@@ -1650,7 +1671,7 @@ function App({initialGrants}){
   return(
     <div className="app">
       <div className="topbar">
-        <span className="nav-brand">POLEN</span>
+        <span className="nav-brand"><PolenLogo size={22}/> POLEN</span>
         <div style={{flex:1}}/>
         <div className="topbar-actions">
           <button className={`theme-btn${editMode?' edit-active':''}`} title="Edit All" onClick={()=>{setEditMode(v=>!v);setActiveView(false);setCalendarView(false);setSuggView(false);}} style={editMode?{borderColor:'var(--y)',color:'var(--y)',background:'var(--ybg)'}:{}}><i className="fa-solid fa-pen"/></button>
