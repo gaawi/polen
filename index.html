@@ -730,6 +730,7 @@ html.light .period-date{color-scheme:light;}
 .doc-list{display:flex;flex-direction:column;gap:4px;margin-top:6px;}
 .doc-item{display:flex;align-items:center;gap:6px;padding:4px 7px;background:var(--s2);border-radius:3px;font-size:10px;}
 .doc-badge{font-size:9px;font-weight:700;padding:1px 5px;border-radius:2px;background:var(--s3);color:var(--td);white-space:nowrap;flex-shrink:0;}
+.doc-type-inline{font-size:9px;font-weight:700;padding:1px 3px;border-radius:2px;background:var(--s3);color:var(--td);border:none;outline:none;cursor:pointer;flex-shrink:0;font-family:inherit;}
 .doc-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--td);}
 .doc-link{color:var(--b);text-decoration:none;flex-shrink:0;font-size:11px;}
 .doc-link:hover{text-decoration:underline;}
@@ -885,13 +886,14 @@ const STEPS=['01 Apply on deadline','02 Check','03 Waiting Results','05 Received
 const STEP_SHORT={'00 Send Proposal':'Apply','01 Apply on deadline':'Apply','02 Check':'Check','03 Waiting Results':'Waiting','04 Denied':'Denied','05 Received':'Received','06 Not Applied':'Not Applied','07 Missed Deadline':'Missed','08 Not Eligible':'Not Eligible'};
 
 const DOC_TYPES=[
-  {value:'bases',     label:'Bases',                icon:'fa-file-lines'},
-  {value:'contrato',  label:'Contrato / Convenio',  icon:'fa-handshake'},
-  {value:'modelos',   label:'Modelos / Formularios',icon:'fa-file-pen'},
-  {value:'factura',   label:'Factura / Justificación',icon:'fa-receipt'},
-  {value:'resolucion',label:'Resolución',            icon:'fa-circle-check'},
-  {value:'memoria',   label:'Memoria / Informe',     icon:'fa-chart-bar'},
-  {value:'otro',      label:'Otro',                  icon:'fa-folder-open'},
+  {value:'application', label:'Application',        icon:'fa-file-pen'},
+  {value:'guidelines',  label:'Guidelines',         icon:'fa-file-lines'},
+  {value:'contract',    label:'Contract',           icon:'fa-handshake'},
+  {value:'resolution',  label:'Resolution / Award', icon:'fa-circle-check'},
+  {value:'invoice',     label:'Invoice / Receipt',  icon:'fa-receipt'},
+  {value:'report',      label:'Report / Memory',    icon:'fa-chart-bar'},
+  {value:'template',    label:'Template / Form',    icon:'fa-file-circle-plus'},
+  {value:'other',       label:'Other',              icon:'fa-folder-open'},
 ];
 
 async function uploadDoc(grantId, file){
@@ -1096,7 +1098,7 @@ function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
 }
 
 function DocsSection({e,onChangeField}){
-  const[docType,setDocType]=useState('bases');
+  const[docType,setDocType]=useState('application');
   const[uploading,setUploading]=useState(false);
   const[progress,setProgress]=useState('');
   const[err,setErr]=useState('');
@@ -1150,7 +1152,10 @@ function DocsSection({e,onChangeField}){
             const ti=typeInfo(d.type);
             return(
               <div key={i} className="doc-item">
-                <span className="doc-badge"><i className={`fa-solid ${ti.icon}`}/> {ti.label}</span>
+                <i className={`fa-solid ${ti.icon}`} style={{color:'var(--acl)',flexShrink:0,fontSize:11}}/>
+                <select className="doc-type-inline" value={d.type||'other'} onClick={ev=>ev.stopPropagation()} onChange={ev=>{ev.stopPropagation();const updated=[...docs];updated[i]={...updated[i],type:ev.target.value};onChangeField(e.id,'documents',updated);}}>
+                  {DOC_TYPES.map(t=><option key={t.value} value={t.value}>{t.label}</option>)}
+                </select>
                 <span className="doc-name" title={d.name}>{d.name}</span>
                 <a href={d.url} target="_blank" rel="noreferrer" className="doc-link" onClick={ev=>ev.stopPropagation()}><i className="fa-solid fa-arrow-up-right-from-square"/></a>
                 <button className="doc-del" title="Remove" onClick={ev=>{ev.stopPropagation();delDoc(i);}}><i className="fa-solid fa-xmark"/></button>
