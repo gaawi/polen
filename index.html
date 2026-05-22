@@ -7,6 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="robots" content="noindex, nofollow">
 <title>Polen — Grant Tracker</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
@@ -1697,11 +1698,20 @@ function App({initialGrants}){
         </div>
         <span style={{fontSize:11,color:'var(--tf)',marginLeft:'auto',display:'flex',alignItems:'center',gap:8,flexWrap:'wrap',justifyContent:'flex-end'}}>
           {editMode?`${data.length} entries`:suggView?`${suggestions.length} sugerencias IA pendientes`:calendarView?`${calendarData.reduce((s,m)=>s+m.grants.length,0)} programs · ${calendarData.length} seasons`:activeView?`${activeGroups.length} programs · ${activeGrants.length} active grants`:(()=>{
-            const reqByCur={};programGroups.forEach(g=>{if(g.primary.amount){const c=g.primary.currency||'USD';reqByCur[c]=(reqByCur[c]||0)+g.primary.amount;}});
+            const curYr=new Date().getFullYear().toString();
+            const reqByCur={};
+            if(statusFilter==='03 Waiting Results'){
+              programGroups.forEach(g=>{
+                const e=g.entries.find(e=>e.deadline&&e.deadline.startsWith(curYr))||g.primary;
+                if(e.amount){const c=e.currency||'USD';reqByCur[c]=(reqByCur[c]||0)+e.amount;}
+              });
+            } else {
+              programGroups.forEach(g=>{if(g.primary.amount){const c=g.primary.currency||'USD';reqByCur[c]=(reqByCur[c]||0)+g.primary.amount;}});
+            }
             const wonByCur={};programGroups.forEach(g=>Object.entries(g.totalAmtByCur).forEach(([c,v])=>{wonByCur[c]=(wonByCur[c]||0)+v;}));
             const reqStr=fmtByCur(reqByCur)!=='—'?fmtByCur(reqByCur):'';
             const wonStr=fmtByCur(wonByCur)!=='—'?fmtByCur(wonByCur):'';
-            return <>{`${programGroups.length} programs · ${programGroups.reduce((s,g)=>s+g.entries.length,0)} grants`}{reqStr&&<span style={{borderLeft:'1px solid var(--bd)',paddingLeft:8}}>req <strong style={{color:'var(--td)'}}>{reqStr}</strong></span>}{wonStr&&<span>· won <strong style={{color:'var(--g)'}}>{wonStr}</strong></span>}</>;
+            return <>{`${programGroups.length} programs · ${programGroups.reduce((s,g)=>s+g.entries.length,0)} grants`}{reqStr&&<span style={{borderLeft:'1px solid var(--bd)',paddingLeft:8}}>{statusFilter==='03 Waiting Results'?`${curYr} req`:' req'} <strong style={{color:'var(--td)'}}>{reqStr}</strong></span>}{wonStr&&statusFilter!=='03 Waiting Results'&&<span>· won <strong style={{color:'var(--g)'}}>{wonStr}</strong></span>}</>;
           })()}
           {lastSaved&&<span className="save-indicator"><span className={`dot ${saveStatus}`}/>{saveStatus==='ok'?'Saved':saveStatus==='saving'?'Saving...':'Error'} · {lastSaved.toLocaleTimeString()}</span>}
         </span>
@@ -1802,7 +1812,7 @@ function App({initialGrants}){
               <th style={{width:60}}>Apps</th>
               <th style={{width:80}}>Results</th>
               <th style={{width:80}}>Requested</th>
-              <th style={{width:80}}>Won</th>
+              {statusFilter!=='03 Waiting Results'&&<th style={{width:80}}>Won</th>}
               <th style={{width:120}}></th>
             </tr></thead>
             <tbody>
@@ -1858,7 +1868,7 @@ function App({initialGrants}){
                       </div>
                     </td>
                     <td className="desk-only" style={{fontVariantNumeric:'tabular-nums',fontSize:11,color:'var(--td)'}}>{grp.primary.amount?fmt(grp.primary.amount,grp.primary.currency||'USD'):''}</td>
-                    <td className="desk-only" style={{fontVariantNumeric:'tabular-nums',fontWeight:700,color:'var(--g)',fontSize:11}}>{grp.totalAmt>0?fmtByCur(grp.totalAmtByCur):''}</td>
+                    {statusFilter!=='03 Waiting Results'&&<td className="desk-only" style={{fontVariantNumeric:'tabular-nums',fontWeight:700,color:'var(--g)',fontSize:11}}>{grp.totalAmt>0?fmtByCur(grp.totalAmtByCur):''}</td>}
                     <td className="desk-only" style={{textAlign:'center'}}>
                       <div style={{display:'flex',gap:5,justifyContent:'center'}}>
                         {grp.primary.web&&<a href={grp.primary.web} target="_blank" rel="noreferrer" className="btn-icon btn-icon-web" onClick={e=>e.stopPropagation()} title="Ver Convocatoria"><i className="fa-solid fa-arrow-up-right-from-square"/></a>}
@@ -1872,8 +1882,8 @@ function App({initialGrants}){
                       {grp.received>0&&<span className="ms ms-g" style={{fontSize:8}}>✓{grp.received}</span>}
                       {grp.waiting>0&&<span className="ms ms-b" style={{fontSize:8}}><i className="fa-solid fa-hourglass-half"/>{grp.waiting}</span>}
                       {grp.denied>0&&<span className="ms ms-r" style={{fontSize:8}}>✗{grp.denied}</span>}
-                      {grp.primary.amount&&grp.totalAmt===0&&<span style={{fontVariantNumeric:'tabular-nums',fontSize:9,color:'var(--td)'}}>{fmt(grp.primary.amount,grp.primary.currency||'USD')}</span>}
-                      {grp.totalAmt>0&&<span style={{fontVariantNumeric:'tabular-nums',fontWeight:700,color:'var(--g)',fontSize:9}}>{fmtByCur(grp.totalAmtByCur)}</span>}
+                      {grp.primary.amount&&(grp.totalAmt===0||statusFilter==='03 Waiting Results')&&<span style={{fontVariantNumeric:'tabular-nums',fontSize:9,color:'var(--td)'}}>{fmt(grp.primary.amount,grp.primary.currency||'USD')}</span>}
+                      {grp.totalAmt>0&&statusFilter!=='03 Waiting Results'&&<span style={{fontVariantNumeric:'tabular-nums',fontWeight:700,color:'var(--g)',fontSize:9}}>{fmtByCur(grp.totalAmtByCur)}</span>}
                     </td>
                   </tr>
                   {isExp&&(
