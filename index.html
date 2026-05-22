@@ -940,7 +940,8 @@ function DField({value,onChange,className,type,placeholder,style,label,multiline
   const isEmpty=!disp;
   const isAmt=className&&className.includes('ef-amt');
   const isDate=type==='date';
-  const isNote=multiline||(className&&(className.includes('ef-note')||className.includes('ef-sm')));
+  const isUrl=String(value||'').match(/^https?:\/\//);
+  const isNote=!isUrl&&(multiline||(className&&(className.includes('ef-note')||className.includes('ef-sm'))));
 
   if(editing)return(
     <span className="dfield-wrap" onClick={e=>e.stopPropagation()}>
@@ -1106,7 +1107,7 @@ function DocsSection({e,onChangeField}){
     <div className="docs-section">
       <div className="docs-attach-row">
         <select className="doc-type-sel" value={docType} onChange={ev=>setDocType(ev.target.value)} onClick={ev=>ev.stopPropagation()}>
-          {DOC_TYPES.map(t=><option key={t.value} value={t.value}>{t.icon} {t.label}</option>)}
+          {DOC_TYPES.map(t=><option key={t.value} value={t.value}>{t.label}</option>)}
         </select>
         <button className="doc-upload-btn" disabled={uploading} onClick={ev=>{ev.stopPropagation();fileRef.current&&fileRef.current.click();}}>
           {uploading?<><i className="fa-solid fa-spinner fa-spin"/> Uploading…</>:<><i className="fa-solid fa-paperclip"/> Attach</>}
