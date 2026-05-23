@@ -268,6 +268,16 @@ html.light .ec-card{background:#fff;border-color:rgba(0,0,0,.07);box-shadow:0 1p
 .ec-year{font-size:18px;font-weight:800;color:var(--acl);line-height:1;margin-bottom:5px;display:flex;align-items:center;gap:6px;}
 .ec-name{font-size:20px;font-weight:800;color:var(--t);line-height:1.2;margin-bottom:3px;}
 .ec-grantname{font-size:12px;color:var(--td);line-height:1.4;margin-top:2px;}
+.ec-project{margin-top:6px;font-size:13px;font-weight:600;color:var(--t);}
+.ec-project span.cte .cte-val{font-size:13px;font-weight:600;color:var(--t);}
+.ec-project span.cte .cte-empty{font-size:12px;color:var(--tf);font-weight:400;}
+/* small link pill buttons */
+.ec-link-btn{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;text-decoration:none;cursor:pointer;border:1px solid var(--bd);background:var(--s2);color:var(--td);transition:all .15s;}
+.ec-link-btn:hover{border-color:var(--b);color:var(--b);}
+.ec-link-pdf:hover{border-color:var(--r);color:var(--r);}
+.ec-link-ai{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid rgba(124,58,237,.3);background:rgba(124,58,237,.06);color:#7c3aed;cursor:pointer;}
+html.dark .ec-link-ai{background:rgba(124,58,237,.15);color:#a78bfa;border-color:rgba(167,139,250,.3);}
+.ec-link-add{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;border:1px dashed var(--bd);background:none;color:var(--tf);cursor:pointer;font-family:inherit;}
 .ec-amounts{text-align:right;flex-shrink:0;}
 .ec-amt-block{margin-bottom:8px;}
 .ec-amt-lbl{font-size:10px;color:var(--tf);display:block;margin-bottom:2px;}
@@ -1191,6 +1201,9 @@ function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
             </div>
             {e.foundation&&<div className="ec-name">{e.foundation}</div>}
             {e.grant&&<div className="ec-grantname">{e.grant}</div>}
+            <div className="ec-project">
+              <DField value={e.projectDates||''} placeholder="+ Add project" label="Project" onChange={v=>onChangeField(e.id,'projectDates',v)}/>
+            </div>
           </div>
           <div className="ec-amounts">
             <div className="ec-amt-block">
@@ -1239,41 +1252,52 @@ function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
             {e.eligiblePeriod&&<Thermo period={e.eligiblePeriod} deadline={e.deadline} reportDeadline={e.reportDeadline}/>}
           </div>
 
-          {/* Project | Web */}
-          <div className="ec-row-2">
-            <div className="ec-r2">
-              <i className="fa-solid fa-user ec-ico"/>
-              <div style={{flex:1,minWidth:0}}>
-                <div className="ec-lbl" style={{width:'auto',marginBottom:2}}>Project</div>
-                <div className="ec-val"><DField value={e.projectDates||''} placeholder="Project name" label="Project" onChange={v=>onChangeField(e.id,'projectDates',v)}/></div>
-              </div>
-            </div>
-            <div className="ec-r2">
-              <i className="fa-solid fa-globe ec-ico"/>
-              <div style={{flex:1,minWidth:0}}>
-                <div className="ec-lbl" style={{width:'auto',marginBottom:2}}>Web</div>
-                <div className="ec-val"><DField value={e.web||''} placeholder="https://..." label="Web" onChange={v=>onChangeField(e.id,'web',v)}/></div>
-              </div>
+          {/* Links row: Web · Base · AI */}
+          <div className="ec-row" style={{gap:6,flexWrap:'wrap',alignItems:'center'}}>
+            <i className="fa-solid fa-link ec-ico"/>
+            <span className="ec-lbl">Links</span>
+            <div className="ec-val" style={{display:'flex',gap:6,flexWrap:'wrap',alignItems:'center'}}>
+              {e.web?(
+                <a href={e.web} target="_blank" rel="noreferrer" className="ec-link-btn" onClick={ev=>ev.stopPropagation()}>
+                  <i className="fa-solid fa-globe"/> Web
+                </a>
+              ):(
+                <DField value={e.web||''} placeholder="+ Web" label="Web" onChange={v=>onChangeField(e.id,'web',v)}/>
+              )}
+              {e.bases?(
+                <a href={e.bases} target="_blank" rel="noreferrer" className="ec-link-btn ec-link-pdf" onClick={ev=>ev.stopPropagation()}>
+                  <i className="fa-solid fa-file-pdf"/> Base
+                </a>
+              ):(
+                <DField value={e.bases||''} placeholder="+ Base PDF" label="Bases PDF" onChange={v=>onChangeField(e.id,'bases',v)}/>
+              )}
+              {e.aiWorkspace?(
+                <div className="ec-link-btn ec-link-ai" onClick={ev=>ev.stopPropagation()}>
+                  {e.aiProfile&&!isMobile?(
+                    <button style={{all:'unset',cursor:'pointer',display:'flex',alignItems:'center',gap:4}} onClick={()=>{const cmd=`open -na "Google Chrome" --args --profile-directory="${e.aiProfile}" "${e.aiWorkspace}"`;navigator.clipboard.writeText(cmd).then(()=>{setAiCopied(true);setTimeout(()=>setAiCopied(false),2000);})}}>
+                      <i className={`fa-solid ${aiCopied?'fa-check':'fa-robot'}`}/> {aiCopied?'Copied!':'AI'}
+                    </button>
+                  ):(
+                    <a href={isMobile&&e.aiChromeIos?e.aiWorkspace.replace(/^https:\/\//,'googlechromes://').replace(/^http:\/\//,'googlechrome://'):e.aiWorkspace} target="_blank" rel="noreferrer" style={{all:'unset',cursor:'pointer',display:'flex',alignItems:'center',gap:4}}>
+                      <i className="fa-solid fa-robot"/> AI
+                    </a>
+                  )}
+                  <button style={{all:'unset',cursor:'pointer',opacity:.5,marginLeft:2}} onClick={()=>{setAiDraft(e.aiWorkspace);setAiProfileDraft(e.aiProfile||'');setEditingAi(true);}}><i className="fa-solid fa-pencil" style={{fontSize:9}}/></button>
+                </div>
+              ):(
+                <button className="ec-link-add" onClick={ev=>{ev.stopPropagation();setAiDraft('');setAiProfileDraft('');setEditingAi(true);}}>
+                  <i className="fa-solid fa-robot"/> + AI
+                </button>
+              )}
             </div>
           </div>
-
-          {/* AI Workspace | Base PDF */}
-          <div className="ec-row-2">
-            <div className="ec-r2" onClick={ev=>ev.stopPropagation()}>
+          {editingAi&&(
+            <div className="ec-row" style={{borderBottom:'1px solid var(--bd)'}} onClick={ev=>ev.stopPropagation()}>
               <i className="fa-solid fa-robot ec-ico" style={{color:'#7c3aed'}}/>
-              <div style={{flex:1,minWidth:0}}>
-                <div className="ec-lbl" style={{width:'auto',marginBottom:2}}>AI Workspace</div>
-                <AiUI/>
-              </div>
+              <span className="ec-lbl">AI setup</span>
+              <AiUI/>
             </div>
-            <div className="ec-r2">
-              <i className="fa-solid fa-file-lines ec-ico"/>
-              <div style={{flex:1,minWidth:0}}>
-                <div className="ec-lbl" style={{width:'auto',marginBottom:2}}>Base (PDF)</div>
-                <div className="ec-val"><DField value={e.bases||''} placeholder="https://..." label="Bases PDF" onChange={v=>onChangeField(e.id,'bases',v)}/></div>
-              </div>
-            </div>
-          </div>
+          )}
 
           {/* Report deadline (only if set) */}
           {e.reportDeadline&&(
