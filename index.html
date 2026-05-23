@@ -255,6 +255,61 @@ body{font-family:var(--font-mono);background:var(--bg);color:var(--t);min-height
 .tl-action:hover{background:var(--s3);color:var(--td);}
 .tl-del:hover{color:var(--r);background:var(--rbg);}
 
+/* ═══ Entry Card — premium redesign ═══ */
+.ec-card{background:var(--s1);border-radius:14px;padding:18px 16px 14px;margin-bottom:8px;border:1px solid var(--bd);}
+html.light .ec-card{background:#fff;border-color:rgba(0,0,0,.07);box-shadow:0 1px 10px rgba(0,0,0,.06);}
+.ec-toprow{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.ec-actions{display:flex;align-items:center;gap:6px;}
+.ec-action{background:none;border:none;cursor:pointer;font-size:12px;color:var(--tf);padding:4px 5px;border-radius:6px;opacity:.5;transition:all .15s;line-height:1;}
+.ec-action:hover{opacity:1;background:var(--s3);color:var(--td);}
+.ec-action.del:hover{color:var(--r);background:var(--rbg);}
+/* hero */
+.ec-hero{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:start;margin-bottom:14px;}
+.ec-year{font-size:18px;font-weight:800;color:var(--acl);line-height:1;margin-bottom:5px;display:flex;align-items:center;gap:6px;}
+.ec-name{font-size:20px;font-weight:800;color:var(--t);line-height:1.2;margin-bottom:3px;}
+.ec-grantname{font-size:12px;color:var(--td);line-height:1.4;margin-top:2px;}
+.ec-amounts{text-align:right;flex-shrink:0;}
+.ec-amt-block{margin-bottom:8px;}
+.ec-amt-lbl{font-size:10px;color:var(--tf);display:block;margin-bottom:2px;}
+.ec-amt-block span.cte{display:block;}
+.ec-amt-block span.cte .cte-val{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--t);line-height:1;}
+.ec-amt-block.won span.cte .cte-val{color:var(--g);}
+.ec-amt-block span.cte .cte-empty{font-size:16px;font-weight:700;color:var(--tf);}
+.ec-amt-block span.cte .cte-icon{font-size:9px;opacity:.3;}
+/* divider */
+.ec-divider{height:1px;background:var(--bd);margin:0 0 0;}
+/* info rows */
+.ec-info{display:flex;flex-direction:column;}
+.ec-row{display:flex;align-items:flex-start;gap:10px;padding:11px 0;border-bottom:1px solid var(--bd);}
+.ec-row:last-child{border-bottom:none;}
+.ec-ico{color:var(--tf);font-size:13px;width:18px;flex-shrink:0;margin-top:2px;text-align:center;}
+.ec-lbl{font-size:11px;color:var(--td);font-weight:500;width:82px;flex-shrink:0;padding-top:2px;}
+.ec-val{flex:1;min-width:0;font-size:13px;color:var(--t);}
+.ec-val span.cte .cte-val{font-size:13px;color:var(--t);font-weight:500;}
+.ec-val span.cte .cte-empty{font-size:12px;color:var(--tf);}
+.ec-val span.cte .cte-icon{opacity:.2;font-size:9px;}
+.ec-val span.cte:hover .cte-icon{opacity:.5;}
+/* 2-col rows */
+.ec-row-2{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--bd);}
+.ec-r2{display:flex;align-items:flex-start;gap:10px;padding:11px 0;}
+.ec-r2:first-child{padding-right:10px;border-right:1px solid var(--bd);}
+.ec-r2:last-child{padding-left:10px;}
+/* notes collapsible */
+.ec-notes-body{font-size:12px;line-height:1.5;color:var(--td);}
+.ec-notes-body.clamp{max-height:52px;overflow:hidden;-webkit-mask-image:linear-gradient(to bottom,black 28px,transparent);mask-image:linear-gradient(to bottom,black 28px,transparent);}
+.ec-notes-body span.cte .cte-val{font-size:12px;color:var(--td);white-space:pre-wrap;line-height:1.5;}
+.ec-more{font-size:11px;color:var(--b);background:none;border:none;cursor:pointer;padding:5px 0 0;display:flex;align-items:center;gap:3px;font-family:inherit;}
+/* attachments row */
+.ec-attach{display:flex;align-items:center;gap:10px;padding:11px 0;cursor:pointer;}
+.ec-attach-arrow{margin-left:auto;color:var(--tf);font-size:11px;transition:transform .2s;}
+.ec-attach.open .ec-attach-arrow{transform:rotate(90deg);}
+/* CTA row */
+.ec-cta{display:flex;gap:8px;margin-top:14px;}
+.ec-cta-primary{flex:1;padding:12px;background:var(--ac);color:#000;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;text-decoration:none;transition:opacity .15s;}
+.ec-cta-primary:hover{opacity:.88;}
+.ec-cta-sec{padding:12px 14px;background:var(--s2);color:var(--t);border:1px solid var(--bd);border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:inherit;}
+.ec-cta-more{padding:12px 13px;background:var(--s2);color:var(--t);border:1px solid var(--bd);border-radius:10px;cursor:pointer;font-size:14px;display:flex;align-items:center;}
+
 /* Modal */
 .modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(4px);}
 .modal{background:var(--s1);border:1px solid var(--bd);border-radius:4px;padding:24px;max-width:520px;width:92%;max-height:85vh;overflow-y:auto;}
@@ -542,30 +597,20 @@ html.dark .btn-icon-ai{background:#2e1065;color:#a78bfa;}
   .tl-entry{padding-left:18px;margin-bottom:0;}
   .tl-dot{left:2px;top:8px;width:9px;height:9px;}
   .tl-line{left:5px;top:18px;width:2px;}
-  .tl-card{
-    padding:10px 12px;margin-bottom:8px;
-    border-radius:12px;border:none;
-    background:var(--s1);
-    box-shadow:0 1px 4px rgba(0,0,0,.1);
-    overflow:hidden;
-  }
-  /* Row 1: year+links | actions — always single line */
-  .tl-header-top{margin-bottom:6px;}
-  /* Row 2: status + amounts wrap onto next line if needed */
-  .tl-meta{margin-bottom:6px;flex-wrap:wrap;gap:4px;}
+  .tl-card{padding:10px 12px;margin-bottom:8px;border-radius:12px;border:none;background:var(--s1);box-shadow:0 1px 4px rgba(0,0,0,.1);overflow:hidden;}
+  /* ec-card mobile */
+  .ec-card{padding:14px 13px 12px;border-radius:14px;}
+  .ec-name{font-size:18px;}
+  .ec-amt-block span.cte .cte-val{font-size:19px;}
+  .ec-lbl{width:72px;}
+  .ec-row-2{grid-template-columns:1fr 1fr;}
+  .ec-actions .ec-action{opacity:.7;}
   /* btn-icon: transparent bg on mobile */
   .btn-icon{background:transparent!important;border:none!important;width:20px!important;height:20px!important;}
   .btn-icon i{font-size:13px!important;}
-  /* action buttons always visible */
-  .tl-action{opacity:.6!important;}
-  /* grid: 2 cols, compact */
-  .tl-grid{grid-template-columns:1fr 1fr!important;gap:8px 12px!important;font-size:11px!important;margin-top:4px;}
-  /* period inputs: compact, don't overflow */
+  /* period inputs: compact */
   .period-inputs{gap:3px!important;flex-wrap:nowrap;}
   .period-date{font-size:11px!important;padding:4px 5px!important;min-width:0;flex:1;}
-  /* text fields: truncate long values */
-  .tl-grid .cte-val{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:140px;display:inline-block;}
-  .tl-grid .cte-val.wrap{white-space:normal;max-width:none;}
   /* Thermo */
   .thermo-bar{height:7px;border-radius:5px;}
   .thermo-mk{height:13px;width:3px;top:-3px;}
@@ -1056,6 +1101,8 @@ function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
   const[aiDraft,setAiDraft]=useState('');
   const[aiProfileDraft,setAiProfileDraft]=useState('');
   const[aiCopied,setAiCopied]=useState(false);
+  const[showNotes,setShowNotes]=useState(false);
+  const[showDocs,setShowDocs]=useState(false);
   const isMobile=typeof window!=='undefined'&&(window.matchMedia('(max-width:768px)').matches||/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
   const yr=e.deadline?e.deadline.substring(0,4):'?';
   const dotCls=e.nextStep==='05 Received'?'received':e.nextStep==='04 Denied'?'denied':e.nextStep==='03 Waiting Results'?'waiting':'';
@@ -1073,106 +1120,210 @@ function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
     if(which==='start')s=fmt(val); else en=fmt(val);
     onChangeField(e.id,'eligiblePeriod',s&&en?`${s} – ${en}`:s||en);
   };
+  const sym=e.currency==='EUR'?'€':'$';
+  const docs=e.documents||[];
+  const hasNotes=!!(e.notes||e.improvements);
+  const isApply=e.nextStep==='01 Apply on deadline'||e.nextStep==='00 Send Proposal';
+  const AiUI=()=>editingAi?(
+    <div style={{display:'flex',flexDirection:'column',gap:4}} onClick={ev=>ev.stopPropagation()}>
+      <input autoFocus style={{background:'var(--s2)',border:'1px solid var(--bd)',color:'var(--t)',padding:'4px 8px',borderRadius:6,fontFamily:'var(--font-mono)',fontSize:11,outline:'none'}}
+        value={aiDraft} placeholder="https://..."
+        onChange={ev=>setAiDraft(ev.target.value)}
+        onKeyDown={ev=>{if(ev.key==='Enter'){onChangeField(e.id,'aiWorkspace',aiDraft.trim());onChangeField(e.id,'aiProfile',aiProfileDraft.trim());setEditingAi(false);}if(ev.key==='Escape')setEditingAi(false);}}/>
+      <input style={{background:'var(--s2)',border:'1px solid var(--bd)',color:'var(--t)',padding:'4px 8px',borderRadius:6,fontFamily:'var(--font-mono)',fontSize:11,outline:'none'}}
+        value={aiProfileDraft} placeholder="Chrome profile, e.g. Profile 10"
+        onChange={ev=>setAiProfileDraft(ev.target.value)}
+        onKeyDown={ev=>{if(ev.key==='Enter'){onChangeField(e.id,'aiWorkspace',aiDraft.trim());onChangeField(e.id,'aiProfile',aiProfileDraft.trim());setEditingAi(false);}if(ev.key==='Escape')setEditingAi(false);}}/>
+      <label style={{display:'flex',alignItems:'center',gap:5,fontSize:11,color:'var(--tf)',cursor:'pointer'}}>
+        <input type="checkbox" checked={!!e.aiChromeIos} onChange={ev=>onChangeField(e.id,'aiChromeIos',ev.target.checked)}/> Open in Chrome iOS
+      </label>
+      <div style={{display:'flex',gap:6}}>
+        <button style={{padding:'5px 12px',background:'var(--ac)',color:'#000',border:'none',borderRadius:6,fontSize:11,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}} onClick={()=>{onChangeField(e.id,'aiWorkspace',aiDraft.trim());onChangeField(e.id,'aiProfile',aiProfileDraft.trim());setEditingAi(false);}}>Save</button>
+        <button style={{padding:'5px 10px',background:'var(--s3)',color:'var(--td)',border:'none',borderRadius:6,fontSize:11,cursor:'pointer',fontFamily:'inherit'}} onClick={()=>setEditingAi(false)}>Cancel</button>
+      </div>
+    </div>
+  ):e.aiWorkspace?(
+    <div style={{display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}}>
+      {e.aiProfile&&!isMobile?(
+        <button style={{background:'none',border:'none',cursor:'pointer',padding:0,display:'flex',alignItems:'center',gap:5,font:'inherit'}}
+          onClick={()=>{const cmd=`open -na "Google Chrome" --args --profile-directory="${e.aiProfile}" "${e.aiWorkspace}"`;navigator.clipboard.writeText(cmd).then(()=>{setAiCopied(true);setTimeout(()=>setAiCopied(false),2000);});}}>
+          <span style={{fontSize:13,fontWeight:500,color:aiCopied?'var(--g)':'var(--b)'}}>{aiCopied?'Copied!':'Open workspace'}</span>
+          <i className={`fa-solid ${aiCopied?'fa-check':'fa-chevron-right'}`} style={{fontSize:10,color:'var(--td)'}}/>
+        </button>
+      ):(
+        <a href={isMobile&&e.aiChromeIos?e.aiWorkspace.replace(/^https:\/\//,'googlechromes://').replace(/^http:\/\//,'googlechrome://'):e.aiWorkspace}
+          target="_blank" rel="noreferrer" style={{fontSize:13,fontWeight:500,color:'var(--b)',textDecoration:'none',display:'flex',alignItems:'center',gap:4}} onClick={ev=>ev.stopPropagation()}>
+          Open workspace <i className="fa-solid fa-chevron-right" style={{fontSize:10,color:'var(--td)'}}/>
+        </a>
+      )}
+      <button style={{background:'none',border:'none',cursor:'pointer',color:'var(--tf)',padding:0}} onClick={()=>{setAiDraft(e.aiWorkspace);setAiProfileDraft(e.aiProfile||'');setEditingAi(true);}}><i className="fa-solid fa-pencil" style={{fontSize:10}}/></button>
+    </div>
+  ):(
+    <button style={{background:'none',border:'none',cursor:'pointer',color:'var(--tf)',fontSize:12,padding:0,display:'flex',alignItems:'center',gap:5,fontFamily:'inherit'}} onClick={()=>{setAiDraft('');setAiProfileDraft('');setEditingAi(true);}}>
+      Add URL <i className="fa-solid fa-pencil" style={{fontSize:10}}/>
+    </button>
+  );
   return(
     <div className="tl-entry">
       <div className={`tl-dot ${dotCls}`}/>
       {!isLast&&<div className="tl-line"/>}
-      <div className="tl-card">
-        {/* Row 1: year + links | actions */}
-        <div className="tl-header-top">
-          <div style={{display:'flex',alignItems:'center',gap:6}}>
-            <span style={{fontSize:14,fontWeight:800,color:'var(--acl)',whiteSpace:'nowrap'}}>{yr}</span>
-            {e.web&&<a href={e.web} target="_blank" rel="noreferrer" className="btn-icon btn-icon-web" onClick={ev=>ev.stopPropagation()} title="Ver Convocatoria"><i className="fa-solid fa-arrow-up-right-from-square"/></a>}
-            {e.bases&&<a href={e.bases} target="_blank" rel="noreferrer" className="btn-icon btn-icon-pdf" onClick={ev=>ev.stopPropagation()} title="Ver Bases (PDF)"><i className="fa-solid fa-file-pdf"/></a>}
-            {e.aiWorkspace&&(e.aiProfile&&!isMobile?(
-              <button className="btn-icon btn-icon-ai" title={`Copy command to open in Chrome ${e.aiProfile}`} onClick={ev=>{ev.stopPropagation();const cmd=`open -na "Google Chrome" --args --profile-directory="${e.aiProfile}" "${e.aiWorkspace}"`;navigator.clipboard.writeText(cmd).then(()=>{setAiCopied(true);setTimeout(()=>setAiCopied(false),2000);});}}><i className={`fa-solid ${aiCopied?'fa-check':'fa-robot'}`}/></button>
-            ):(
-              <a href={isMobile&&e.aiChromeIos?e.aiWorkspace.replace(/^https:\/\//,'googlechromes://').replace(/^http:\/\//,'googlechrome://'):e.aiWorkspace} target="_blank" rel="noreferrer" className="btn-icon btn-icon-ai" onClick={ev=>ev.stopPropagation()} title="AI Workspace"><i className="fa-solid fa-robot"/></a>
-            ))}
-          </div>
-          <div style={{display:'flex',alignItems:'center',gap:4}}>
-            <button className="tl-action" title="Duplicate" onClick={ev=>{ev.stopPropagation();onDuplicate(e.id);}}><i className="fa-solid fa-clone"/></button>
-            <button className="tl-action tl-del" title="Delete" onClick={ev=>{ev.stopPropagation();onDelete(e.id);}}><i className="fa-solid fa-xmark"/></button>
-          </div>
-        </div>
-        {/* Row 2: status + amounts + currency */}
-        <div className="tl-meta">
+      <div className="ec-card">
+
+        {/* ── Top row: status | currency + actions ── */}
+        <div className="ec-toprow">
           <StatusBadge entryId={e.id} currentStep={e.nextStep} onChangeStatus={onChangeStatus}/>
-          <DField className="ef ef-amt" type="number" value={e.amount||''} placeholder={`Req ${e.currency==='EUR'?'€':'$'}`} label="Amount Requested" onChange={v=>onChangeField(e.id,'amount',v)}/>
-          <DField className="ef ef-amt" type="number" value={e.amountReceived||''} placeholder={`Recv ${e.currency==='EUR'?'€':'$'}`} label="Amount Received" style={{fontSize:10}} onChange={v=>onChangeField(e.id,'amountReceived',v)}/>
-          <div className="cur-toggle">
-            <button className={`cur-btn${(e.currency||'USD')==='USD'?' on':''}`} onClick={ev=>{ev.stopPropagation();onChangeField(e.id,'currency','USD');}}>$</button>
-            <button className={`cur-btn${e.currency==='EUR'?' on':''}`} onClick={ev=>{ev.stopPropagation();onChangeField(e.id,'currency','EUR');}}>€</button>
+          <div className="ec-actions">
+            <div className="cur-toggle">
+              <button className={`cur-btn${(e.currency||'USD')==='USD'?' on':''}`} onClick={ev=>{ev.stopPropagation();onChangeField(e.id,'currency','USD');}}>$</button>
+              <button className={`cur-btn${e.currency==='EUR'?' on':''}`} onClick={ev=>{ev.stopPropagation();onChangeField(e.id,'currency','EUR');}}>€</button>
+            </div>
+            <button className="ec-action" title="Duplicate" onClick={ev=>{ev.stopPropagation();onDuplicate(e.id);}}><i className="fa-solid fa-clone"/></button>
+            <button className="ec-action del" title="Delete" onClick={ev=>{ev.stopPropagation();onDelete(e.id);}}><i className="fa-solid fa-xmark"/></button>
           </div>
         </div>
-        {/* Fields grid */}
-        <div className="tl-grid" style={{marginTop:2}}>
-          <div><L>Deadline</L><DField className="ef ef-date" type="date" value={e.deadline||''} label="Deadline" onChange={v=>onChangeField(e.id,'deadline',v)}/></div>
-          <div style={{gridColumn:'1/-1'}}>
-            <L>Grant Period</L>
-            <div className="period-inputs">
-              <input type="date" className="period-date" value={parsedPeriod.start} onChange={ev=>updatePeriod('start',ev.target.value)}/>
-              <span className="period-sep">–</span>
-              <input type="date" className="period-date" value={parsedPeriod.end} onChange={ev=>updatePeriod('end',ev.target.value)}/>
-              {e.deadline&&<button className="period-clear" title="Fill full year from deadline" onClick={ev=>{ev.stopPropagation();const yr=e.deadline.substring(0,4);const fmtD=v=>new Date(v+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});onChangeField(e.id,'eligiblePeriod',`${fmtD(yr+'-01-01')} – ${fmtD(yr+'-12-31')}`);}}><i className="fa-solid fa-rotate-left"/></button>}
-              {(parsedPeriod.start||parsedPeriod.end)&&<button className="period-clear" title="Clear dates" onClick={ev=>{ev.stopPropagation();onChangeField(e.id,'eligiblePeriod','');}}><i className="fa-solid fa-xmark"/></button>}
+
+        {/* ── Hero: identity | amounts ── */}
+        <div className="ec-hero">
+          <div>
+            <div className="ec-year">{yr}
+              {e.web&&<a href={e.web} target="_blank" rel="noreferrer" className="btn-icon btn-icon-web" onClick={ev=>ev.stopPropagation()} title="Web"><i className="fa-solid fa-arrow-up-right-from-square"/></a>}
+              {e.bases&&<a href={e.bases} target="_blank" rel="noreferrer" className="btn-icon btn-icon-pdf" onClick={ev=>ev.stopPropagation()} title="Bases PDF"><i className="fa-solid fa-file-pdf"/></a>}
+            </div>
+            {e.foundation&&<div className="ec-name">{e.foundation}</div>}
+            {e.grant&&<div className="ec-grantname">{e.grant}</div>}
+          </div>
+          <div className="ec-amounts">
+            <div className="ec-amt-block">
+              <span className="ec-amt-lbl">Requested</span>
+              <DField type="number" value={e.amount||''} placeholder={sym+'0'} label="Amount Requested" onChange={v=>onChangeField(e.id,'amount',v)}/>
+            </div>
+            <div className="ec-amt-block won">
+              <span className="ec-amt-lbl">Awarded</span>
+              <DField type="number" value={e.amountReceived||''} placeholder={sym+'0'} label="Amount Received" onChange={v=>onChangeField(e.id,'amountReceived',v)}/>
             </div>
           </div>
-          <div><L>Project</L><DField className="ef" value={e.projectDates||''} placeholder="Project name" label="Project" onChange={v=>onChangeField(e.id,'projectDates',v)}/></div>
-          <div><L>Report Deadline</L><DField className="ef ef-date" type="date" value={e.reportDeadline||''} label="Report Deadline" onChange={v=>onChangeField(e.id,'reportDeadline',v)}/></div>
-          <div><L>Web / Link</L><DField className="ef ef-sm" value={e.web||''} placeholder="https://..." label="Link" onChange={v=>onChangeField(e.id,'web',v)}/></div>
-          <div><L>Bases (PDF)</L><DField className="ef ef-sm" value={e.bases||''} placeholder="https://...pdf" label="Bases PDF" onChange={v=>onChangeField(e.id,'bases',v)}/></div>
-          <div onClick={ev=>ev.stopPropagation()}>
-            <L>AI Workspace{e.aiProfile&&!isMobile&&<span style={{textTransform:'none',letterSpacing:0,color:'var(--acl)',marginLeft:4}}>· {e.aiProfile}</span>}</L>
-            {editingAi?(
-              <div style={{display:'flex',flexDirection:'column',gap:3}}>
-                <input autoFocus className="ef ef-sm" style={{background:'var(--s2)',border:'1px solid var(--bd)',color:'var(--t)',padding:'3px 6px',borderRadius:2,fontFamily:'var(--font-mono)',fontSize:10,outline:'none'}}
-                  value={aiDraft} placeholder="https://..."
-                  onChange={ev=>setAiDraft(ev.target.value)}
-                  onKeyDown={ev=>{if(ev.key==='Enter'){onChangeField(e.id,'aiWorkspace',aiDraft.trim());onChangeField(e.id,'aiProfile',aiProfileDraft.trim());setEditingAi(false);}if(ev.key==='Escape'){setEditingAi(false);}}}
-                />
-                <div style={{display:'flex',gap:3,alignItems:'center'}}>
-                  <input className="ef ef-sm" style={{flex:1,background:'var(--s2)',border:'1px solid var(--bd)',color:'var(--t)',padding:'3px 6px',borderRadius:2,fontFamily:'var(--font-mono)',fontSize:10,outline:'none'}}
-                    value={aiProfileDraft} placeholder="Chrome profile (e.g. Profile 10) — desktop only"
-                    onChange={ev=>setAiProfileDraft(ev.target.value)}
-                    onKeyDown={ev=>{if(ev.key==='Enter'){onChangeField(e.id,'aiWorkspace',aiDraft.trim());onChangeField(e.id,'aiProfile',aiProfileDraft.trim());setEditingAi(false);}if(ev.key==='Escape'){setEditingAi(false);}}}
-                  />
-                  <button className="btn-icon btn-icon-ai" style={{flexShrink:0}} onClick={()=>{onChangeField(e.id,'aiWorkspace',aiDraft.trim());onChangeField(e.id,'aiProfile',aiProfileDraft.trim());setEditingAi(false);}}><i className="fa-solid fa-check" style={{fontSize:9}}/></button>
-                </div>
-                <label style={{display:'flex',alignItems:'center',gap:5,fontSize:10,color:'var(--tf)',cursor:'pointer',userSelect:'none'}}>
-                  <input type="checkbox" checked={!!e.aiChromeIos} onChange={ev=>onChangeField(e.id,'aiChromeIos',ev.target.checked)}/>
-                  Open in Chrome iOS (iPhone)
-                </label>
-              </div>
-            ):e.aiWorkspace?(
-              <div style={{display:'flex',alignItems:'center',gap:4,flexWrap:'wrap'}}>
-                {e.aiProfile&&!isMobile?(
-                  <button className="btn-icon btn-icon-ai" style={{display:'inline-flex',alignItems:'center',gap:5,padding:'3px 8px',width:'auto',fontSize:10,fontWeight:600,borderRadius:3,border:'none',cursor:'pointer'}}
-                    title={`Copy: open -na "Google Chrome" --args --profile-directory="${e.aiProfile}" "${e.aiWorkspace}"`}
-                    onClick={()=>{
-                      const cmd=`open -na "Google Chrome" --args --profile-directory="${e.aiProfile}" "${e.aiWorkspace}"`;
-                      navigator.clipboard.writeText(cmd).then(()=>{setAiCopied(true);setTimeout(()=>setAiCopied(false),2000);});
-                    }}>
-                    <i className={`fa-solid ${aiCopied?'fa-check':'fa-robot'}`} style={{fontSize:10}}/> {aiCopied?'Copied! Paste in Terminal':'AI Workspace'}
-                  </button>
-                ):(
-                  <a href={isMobile&&e.aiChromeIos?e.aiWorkspace.replace(/^https:\/\//,'googlechromes://').replace(/^http:\/\//,'googlechrome://'):e.aiWorkspace} target="_blank" rel="noreferrer" className="btn-icon btn-icon-ai" style={{display:'inline-flex',alignItems:'center',gap:5,padding:'3px 8px',width:'auto',fontSize:10,fontWeight:600,textDecoration:'none',borderRadius:3}} onClick={ev=>ev.stopPropagation()}>
-                    <i className="fa-solid fa-robot" style={{fontSize:10}}/> AI Workspace
-                  </a>
-                )}
-                <button style={{background:'none',border:'none',cursor:'pointer',color:'var(--tf)',padding:2}} title="Edit URL / Profile" onClick={()=>{setAiDraft(e.aiWorkspace);setAiProfileDraft(e.aiProfile||'');setEditingAi(true);}}><i className="fa-solid fa-pencil" style={{fontSize:9}}/></button>
-              </div>
-            ):(
-              <button style={{background:'none',border:'none',cursor:'pointer',color:'var(--tf)',fontSize:10,padding:'2px 0',display:'flex',alignItems:'center',gap:4,fontFamily:'var(--font-mono)'}} onClick={()=>{setAiDraft('');setAiProfileDraft('');setEditingAi(true);}}>
-                Add URL <i className="fa-solid fa-pencil" style={{fontSize:9}}/>
-              </button>
-            )}
-          </div>
-          <div><L>Deadline Type</L><span style={{cursor:'pointer',display:'inline-block'}} onClick={ev=>{ev.stopPropagation();onChangeField(e.id,'deadlineType',e.deadlineType==='DDLNE!'?'Estimated':'DDLNE!');}}><span className={`fd-type ${e.deadlineType==='DDLNE!'?'hard':'est'}`}>{e.deadlineType==='DDLNE!'?'Hard Deadline':'Estimated'}</span></span></div>
-          <div style={{gridColumn:'1/-1'}}><L>Notes</L><DField className="ef ef-note" value={e.notes||e.improvements||''} placeholder="Notes..." label="Notes" multiline={true} onChange={v=>onChangeField(e.id,'notes',v)}/></div>
         </div>
-        {e.eligiblePeriod&&<Thermo period={e.eligiblePeriod} deadline={e.deadline} reportDeadline={e.reportDeadline}/>}
-        <DocsSection e={e} onChangeField={onChangeField}/>
+
+        <div className="ec-divider"/>
+
+        {/* ── Info rows ── */}
+        <div className="ec-info">
+
+          {/* Deadline */}
+          <div className="ec-row">
+            <i className="fa-regular fa-calendar ec-ico"/>
+            <span className="ec-lbl">Deadline</span>
+            <div className="ec-val" style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
+              <DField type="date" value={e.deadline||''} label="Deadline" onChange={v=>onChangeField(e.id,'deadline',v)}/>
+              <span style={{cursor:'pointer'}} onClick={ev=>{ev.stopPropagation();onChangeField(e.id,'deadlineType',e.deadlineType==='DDLNE!'?'Estimated':'DDLNE!');}}>
+                <span className={`fd-type ${e.deadlineType==='DDLNE!'?'hard':'est'}`}>{e.deadlineType==='DDLNE!'?'Hard deadline':'Estimated'}</span>
+              </span>
+            </div>
+          </div>
+
+          {/* Grant Period */}
+          <div className="ec-row" style={{flexDirection:'column',gap:8,alignItems:'stretch'}}>
+            <div style={{display:'flex',alignItems:'flex-start',gap:10}}>
+              <i className="fa-regular fa-calendar-days ec-ico" style={{marginTop:2}}/>
+              <span className="ec-lbl" style={{paddingTop:2}}>Grant period</span>
+              <div className="ec-val">
+                <div className="period-inputs">
+                  <input type="date" className="period-date" value={parsedPeriod.start} onChange={ev=>updatePeriod('start',ev.target.value)}/>
+                  <span className="period-sep">–</span>
+                  <input type="date" className="period-date" value={parsedPeriod.end} onChange={ev=>updatePeriod('end',ev.target.value)}/>
+                  {e.deadline&&<button className="period-clear" title="Fill year" onClick={ev=>{ev.stopPropagation();const yr=e.deadline.substring(0,4);const fmtD=v=>new Date(v+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});onChangeField(e.id,'eligiblePeriod',`${fmtD(yr+'-01-01')} – ${fmtD(yr+'-12-31')}`);}}><i className="fa-solid fa-rotate-left"/></button>}
+                  {(parsedPeriod.start||parsedPeriod.end)&&<button className="period-clear" onClick={ev=>{ev.stopPropagation();onChangeField(e.id,'eligiblePeriod','');}}><i className="fa-solid fa-xmark"/></button>}
+                </div>
+              </div>
+            </div>
+            {e.eligiblePeriod&&<Thermo period={e.eligiblePeriod} deadline={e.deadline} reportDeadline={e.reportDeadline}/>}
+          </div>
+
+          {/* Project | Web */}
+          <div className="ec-row-2">
+            <div className="ec-r2">
+              <i className="fa-solid fa-user ec-ico"/>
+              <div style={{flex:1,minWidth:0}}>
+                <div className="ec-lbl" style={{width:'auto',marginBottom:2}}>Project</div>
+                <div className="ec-val"><DField value={e.projectDates||''} placeholder="Project name" label="Project" onChange={v=>onChangeField(e.id,'projectDates',v)}/></div>
+              </div>
+            </div>
+            <div className="ec-r2">
+              <i className="fa-solid fa-globe ec-ico"/>
+              <div style={{flex:1,minWidth:0}}>
+                <div className="ec-lbl" style={{width:'auto',marginBottom:2}}>Web</div>
+                <div className="ec-val"><DField value={e.web||''} placeholder="https://..." label="Web" onChange={v=>onChangeField(e.id,'web',v)}/></div>
+              </div>
+            </div>
+          </div>
+
+          {/* AI Workspace | Base PDF */}
+          <div className="ec-row-2">
+            <div className="ec-r2" onClick={ev=>ev.stopPropagation()}>
+              <i className="fa-solid fa-robot ec-ico" style={{color:'#7c3aed'}}/>
+              <div style={{flex:1,minWidth:0}}>
+                <div className="ec-lbl" style={{width:'auto',marginBottom:2}}>AI Workspace</div>
+                <AiUI/>
+              </div>
+            </div>
+            <div className="ec-r2">
+              <i className="fa-solid fa-file-lines ec-ico"/>
+              <div style={{flex:1,minWidth:0}}>
+                <div className="ec-lbl" style={{width:'auto',marginBottom:2}}>Base (PDF)</div>
+                <div className="ec-val"><DField value={e.bases||''} placeholder="https://..." label="Bases PDF" onChange={v=>onChangeField(e.id,'bases',v)}/></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Report deadline (only if set) */}
+          {e.reportDeadline&&(
+            <div className="ec-row">
+              <i className="fa-solid fa-flag ec-ico"/>
+              <span className="ec-lbl">Report</span>
+              <div className="ec-val"><DField type="date" value={e.reportDeadline||''} label="Report Deadline" onChange={v=>onChangeField(e.id,'reportDeadline',v)}/></div>
+            </div>
+          )}
+
+          {/* Notes */}
+          <div className="ec-row" style={{alignItems:'flex-start'}}>
+            <i className="fa-solid fa-note-sticky ec-ico"/>
+            <span className="ec-lbl">Notes</span>
+            <div style={{flex:1,minWidth:0}}>
+              <div className={`ec-notes-body${hasNotes&&!showNotes?' clamp':''}`}>
+                <DField className="ef ef-note" multiline value={e.notes||e.improvements||''} placeholder="Add notes..." label="Notes" onChange={v=>onChangeField(e.id,'notes',v)}/>
+              </div>
+              {hasNotes&&<button className="ec-more" onClick={ev=>{ev.stopPropagation();setShowNotes(v=>!v);}}>
+                <i className={`fa-solid ${showNotes?'fa-chevron-up':'fa-chevron-down'}`} style={{fontSize:9}}/> {showNotes?'Show less':'Show more'}
+              </button>}
+            </div>
+          </div>
+
+        </div>
+
+        {/* ── Attachments ── */}
+        <div className={`ec-attach${showDocs?' open':''}`} onClick={ev=>{ev.stopPropagation();setShowDocs(v=>!v);}}>
+          <i className="fa-solid fa-paperclip ec-ico"/>
+          <span style={{fontSize:13,fontWeight:500,color:'var(--td)'}}>Attachments</span>
+          {docs.length>0&&<span style={{fontSize:12,color:'var(--tf)',marginLeft:4}}>{docs.length} file{docs.length>1?'s':''} attached</span>}
+          <i className="fa-solid fa-chevron-right ec-attach-arrow"/>
+        </div>
+        {showDocs&&<DocsSection e={e} onChangeField={onChangeField}/>}
+
+        {/* ── CTA row ── */}
+        <div className="ec-cta">
+          {isApply&&e.web?(
+            <a href={e.web} target="_blank" rel="noreferrer" className="ec-cta-primary" onClick={ev=>ev.stopPropagation()}>
+              Start application <i className="fa-solid fa-arrow-right"/>
+            </a>
+          ):<div style={{flex:1}}/>}
+          <button className="ec-cta-sec" onClick={ev=>ev.stopPropagation()} title="Fields are tap-to-edit">
+            <i className="fa-solid fa-pencil"/> Edit
+          </button>
+          <button className="ec-cta-more" onClick={ev=>ev.stopPropagation()}>
+            <i className="fa-solid fa-ellipsis"/>
+          </button>
+        </div>
+
       </div>
     </div>
   );
