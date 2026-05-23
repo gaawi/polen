@@ -999,7 +999,7 @@ function CopyBtn({text}){
 }
 
 // Click-to-edit: shows formatted value, opens popover on click.
-function DField({value,onChange,className,type,placeholder,style,label,multiline}){
+function DField({value,onChange,className,type,placeholder,style,label,multiline,sym}){
   const[editing,setEditing]=useState(false);
   const[local,setLocal]=useState(value||'');
   const inputRef=useRef(null);
@@ -1023,7 +1023,7 @@ function DField({value,onChange,className,type,placeholder,style,label,multiline
   const display=()=>{
     if(!value&&value!==0)return null;
     if(type==='date'&&value){try{const[y,m,dd]=value.split('-').map(Number);const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return`${months[m-1]} ${dd}, ${y}`;}catch(e){return value;}}
-    if(type==='number'&&value!=null)return typeof value==='number'?'$'+value.toLocaleString():value;
+    if(type==='number'&&value!=null)return typeof value==='number'?(sym||'$')+value.toLocaleString():value;
     const s=String(value);
     if(s.match(/^https?:\/\//)){try{return new URL(s).hostname.replace(/^www\./,'');}catch(e){return s;}}
     return s;
@@ -1134,45 +1134,7 @@ function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
   const docs=e.documents||[];
   const hasNotes=!!(e.notes||e.improvements);
   const isApply=e.nextStep==='01 Apply on deadline'||e.nextStep==='00 Send Proposal';
-  const AiUI=()=>editingAi?(
-    <div style={{display:'flex',flexDirection:'column',gap:4}} onClick={ev=>ev.stopPropagation()}>
-      <input autoFocus style={{background:'var(--s2)',border:'1px solid var(--bd)',color:'var(--t)',padding:'4px 8px',borderRadius:6,fontFamily:'var(--font-mono)',fontSize:11,outline:'none'}}
-        value={aiDraft} placeholder="https://..."
-        onChange={ev=>setAiDraft(ev.target.value)}
-        onKeyDown={ev=>{if(ev.key==='Enter'){onChangeField(e.id,'aiWorkspace',aiDraft.trim());onChangeField(e.id,'aiProfile',aiProfileDraft.trim());setEditingAi(false);}if(ev.key==='Escape')setEditingAi(false);}}/>
-      <input style={{background:'var(--s2)',border:'1px solid var(--bd)',color:'var(--t)',padding:'4px 8px',borderRadius:6,fontFamily:'var(--font-mono)',fontSize:11,outline:'none'}}
-        value={aiProfileDraft} placeholder="Chrome profile, e.g. Profile 10"
-        onChange={ev=>setAiProfileDraft(ev.target.value)}
-        onKeyDown={ev=>{if(ev.key==='Enter'){onChangeField(e.id,'aiWorkspace',aiDraft.trim());onChangeField(e.id,'aiProfile',aiProfileDraft.trim());setEditingAi(false);}if(ev.key==='Escape')setEditingAi(false);}}/>
-      <label style={{display:'flex',alignItems:'center',gap:5,fontSize:11,color:'var(--tf)',cursor:'pointer'}}>
-        <input type="checkbox" checked={!!e.aiChromeIos} onChange={ev=>onChangeField(e.id,'aiChromeIos',ev.target.checked)}/> Open in Chrome iOS
-      </label>
-      <div style={{display:'flex',gap:6}}>
-        <button style={{padding:'5px 12px',background:'var(--ac)',color:'#000',border:'none',borderRadius:6,fontSize:11,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}} onClick={()=>{onChangeField(e.id,'aiWorkspace',aiDraft.trim());onChangeField(e.id,'aiProfile',aiProfileDraft.trim());setEditingAi(false);}}>Save</button>
-        <button style={{padding:'5px 10px',background:'var(--s3)',color:'var(--td)',border:'none',borderRadius:6,fontSize:11,cursor:'pointer',fontFamily:'inherit'}} onClick={()=>setEditingAi(false)}>Cancel</button>
-      </div>
-    </div>
-  ):e.aiWorkspace?(
-    <div style={{display:'flex',alignItems:'center',gap:6,flexWrap:'wrap'}}>
-      {e.aiProfile&&!isMobile?(
-        <button style={{background:'none',border:'none',cursor:'pointer',padding:0,display:'flex',alignItems:'center',gap:5,font:'inherit'}}
-          onClick={()=>{const cmd=`open -na "Google Chrome" --args --profile-directory="${e.aiProfile}" "${e.aiWorkspace}"`;navigator.clipboard.writeText(cmd).then(()=>{setAiCopied(true);setTimeout(()=>setAiCopied(false),2000);});}}>
-          <span style={{fontSize:13,fontWeight:500,color:aiCopied?'var(--g)':'var(--b)'}}>{aiCopied?'Copied!':'Open workspace'}</span>
-          <i className={`fa-solid ${aiCopied?'fa-check':'fa-chevron-right'}`} style={{fontSize:10,color:'var(--td)'}}/>
-        </button>
-      ):(
-        <a href={isMobile&&e.aiChromeIos?e.aiWorkspace.replace(/^https:\/\//,'googlechromes://').replace(/^http:\/\//,'googlechrome://'):e.aiWorkspace}
-          target="_blank" rel="noreferrer" style={{fontSize:13,fontWeight:500,color:'var(--b)',textDecoration:'none',display:'flex',alignItems:'center',gap:4}} onClick={ev=>ev.stopPropagation()}>
-          Open workspace <i className="fa-solid fa-chevron-right" style={{fontSize:10,color:'var(--td)'}}/>
-        </a>
-      )}
-      <button style={{background:'none',border:'none',cursor:'pointer',color:'var(--tf)',padding:0}} onClick={()=>{setAiDraft(e.aiWorkspace);setAiProfileDraft(e.aiProfile||'');setEditingAi(true);}}><i className="fa-solid fa-pencil" style={{fontSize:10}}/></button>
-    </div>
-  ):(
-    <button style={{background:'none',border:'none',cursor:'pointer',color:'var(--tf)',fontSize:12,padding:0,display:'flex',alignItems:'center',gap:5,fontFamily:'inherit'}} onClick={()=>{setAiDraft('');setAiProfileDraft('');setEditingAi(true);}}>
-      Add URL <i className="fa-solid fa-pencil" style={{fontSize:10}}/>
-    </button>
-  );
+  const saveAi=()=>{onChangeField(e.id,'aiWorkspace',aiDraft.trim());onChangeField(e.id,'aiProfile',aiProfileDraft.trim());setEditingAi(false);};
   return(
     <div className="tl-entry">
       <div className={`tl-dot ${dotCls}`}/>
@@ -1195,9 +1157,9 @@ function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
         {/* ── Hero: identity | amounts ── */}
         <div className="ec-hero">
           <div>
-            <div className="ec-year">{yr}
-              {e.web&&<a href={e.web} target="_blank" rel="noreferrer" className="btn-icon btn-icon-web" onClick={ev=>ev.stopPropagation()} title="Web"><i className="fa-solid fa-arrow-up-right-from-square"/></a>}
-              {e.bases&&<a href={e.bases} target="_blank" rel="noreferrer" className="btn-icon btn-icon-pdf" onClick={ev=>ev.stopPropagation()} title="Bases PDF"><i className="fa-solid fa-file-pdf"/></a>}
+            <div className="ec-year">
+              {yr}
+              {e.deadline&&<span style={{fontSize:11,fontWeight:500,color:'var(--tf)',marginLeft:8,fontVariantNumeric:'tabular-nums'}}>{fmtDateShort(e.deadline)}</span>}
             </div>
             {e.foundation&&<div className="ec-name">{e.foundation}</div>}
             {e.grant&&<div className="ec-grantname">{e.grant}</div>}
@@ -1208,11 +1170,11 @@ function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
           <div className="ec-amounts">
             <div className="ec-amt-block">
               <span className="ec-amt-lbl">Requested</span>
-              <DField type="number" value={e.amount||''} placeholder={sym+'0'} label="Amount Requested" onChange={v=>onChangeField(e.id,'amount',v)}/>
+              <DField type="number" sym={sym} value={e.amount||''} placeholder={sym+'0'} label="Amount Requested" onChange={v=>onChangeField(e.id,'amount',v)}/>
             </div>
             <div className="ec-amt-block won">
               <span className="ec-amt-lbl">Awarded</span>
-              <DField type="number" value={e.amountReceived||''} placeholder={sym+'0'} label="Amount Received" onChange={v=>onChangeField(e.id,'amountReceived',v)}/>
+              <DField type="number" sym={sym} value={e.amountReceived||''} placeholder={sym+'0'} label="Amount Received" onChange={v=>onChangeField(e.id,'amountReceived',v)}/>
             </div>
           </div>
         </div>
@@ -1253,7 +1215,7 @@ function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
           </div>
 
           {/* Links row: Web · Base · AI */}
-          <div className="ec-row" style={{gap:6,flexWrap:'wrap',alignItems:'center'}}>
+          <div className="ec-row ec-links-row">
             <i className="fa-solid fa-link ec-ico"/>
             <span className="ec-lbl">Links</span>
             <div className="ec-val" style={{display:'flex',gap:6,flexWrap:'wrap',alignItems:'center'}}>
@@ -1262,14 +1224,18 @@ function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
                   <i className="fa-solid fa-globe"/> Web
                 </a>
               ):(
-                <DField value={e.web||''} placeholder="+ Web" label="Web" onChange={v=>onChangeField(e.id,'web',v)}/>
+                <button className="ec-link-add" onClick={ev=>{ev.stopPropagation();const u=prompt('Web URL:');if(u&&u.trim())onChangeField(e.id,'web',u.trim());}}>
+                  <i className="fa-solid fa-plus"/> Web
+                </button>
               )}
               {e.bases?(
                 <a href={e.bases} target="_blank" rel="noreferrer" className="ec-link-btn ec-link-pdf" onClick={ev=>ev.stopPropagation()}>
                   <i className="fa-solid fa-file-pdf"/> Base
                 </a>
               ):(
-                <DField value={e.bases||''} placeholder="+ Base PDF" label="Bases PDF" onChange={v=>onChangeField(e.id,'bases',v)}/>
+                <button className="ec-link-add" onClick={ev=>{ev.stopPropagation();const u=prompt('Base PDF URL:');if(u&&u.trim())onChangeField(e.id,'bases',u.trim());}}>
+                  <i className="fa-solid fa-plus"/> Base
+                </button>
               )}
               {e.aiWorkspace?(
                 <div className="ec-link-btn ec-link-ai" onClick={ev=>ev.stopPropagation()}>
@@ -1295,7 +1261,23 @@ function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
             <div className="ec-row" style={{borderBottom:'1px solid var(--bd)'}} onClick={ev=>ev.stopPropagation()}>
               <i className="fa-solid fa-robot ec-ico" style={{color:'#7c3aed'}}/>
               <span className="ec-lbl">AI setup</span>
-              <AiUI/>
+              <div style={{display:'flex',flexDirection:'column',gap:4,flex:1}}>
+                <input autoFocus style={{background:'var(--s2)',border:'1px solid var(--bd)',color:'var(--t)',padding:'4px 8px',borderRadius:6,fontFamily:'var(--font-mono)',fontSize:11,outline:'none'}}
+                  value={aiDraft} placeholder="https://..."
+                  onChange={ev=>setAiDraft(ev.target.value)}
+                  onKeyDown={ev=>{if(ev.key==='Enter')saveAi();if(ev.key==='Escape')setEditingAi(false);}}/>
+                <input style={{background:'var(--s2)',border:'1px solid var(--bd)',color:'var(--t)',padding:'4px 8px',borderRadius:6,fontFamily:'var(--font-mono)',fontSize:11,outline:'none'}}
+                  value={aiProfileDraft} placeholder="Chrome profile, e.g. Profile 10"
+                  onChange={ev=>setAiProfileDraft(ev.target.value)}
+                  onKeyDown={ev=>{if(ev.key==='Enter')saveAi();if(ev.key==='Escape')setEditingAi(false);}}/>
+                <label style={{display:'flex',alignItems:'center',gap:5,fontSize:11,color:'var(--tf)',cursor:'pointer'}}>
+                  <input type="checkbox" checked={!!e.aiChromeIos} onChange={ev=>onChangeField(e.id,'aiChromeIos',ev.target.checked)}/> Open in Chrome iOS
+                </label>
+                <div style={{display:'flex',gap:6}}>
+                  <button style={{padding:'5px 12px',background:'var(--ac)',color:'#000',border:'none',borderRadius:6,fontSize:11,fontWeight:700,cursor:'pointer',fontFamily:'inherit'}} onClick={saveAi}>Save</button>
+                  <button style={{padding:'5px 10px',background:'var(--s3)',color:'var(--td)',border:'none',borderRadius:6,fontSize:11,cursor:'pointer',fontFamily:'inherit'}} onClick={()=>setEditingAi(false)}>Cancel</button>
+                </div>
+              </div>
             </div>
           )}
 
@@ -1309,18 +1291,25 @@ function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
           )}
 
           {/* Notes */}
-          <div className="ec-row" style={{alignItems:'flex-start'}}>
-            <i className="fa-solid fa-note-sticky ec-ico"/>
-            <span className="ec-lbl">Notes</span>
-            <div style={{flex:1,minWidth:0}}>
-              <div className={`ec-notes-body${hasNotes&&!showNotes?' clamp':''}`}>
-                <DField className="ef ef-note" multiline value={e.notes||e.improvements||''} placeholder="Add notes..." label="Notes" onChange={v=>onChangeField(e.id,'notes',v)}/>
+          {hasNotes?(
+            <div className="ec-row" style={{alignItems:'flex-start'}}>
+              <i className="fa-solid fa-note-sticky ec-ico"/>
+              <span className="ec-lbl">Notes</span>
+              <div style={{flex:1,minWidth:0}}>
+                <div className={`ec-notes-body${!showNotes?' clamp':''}`}>
+                  <DField className="ef ef-note" multiline value={e.notes||e.improvements||''} placeholder="Add notes..." label="Notes" onChange={v=>onChangeField(e.id,'notes',v)}/>
+                </div>
+                <button className="ec-more" onClick={ev=>{ev.stopPropagation();setShowNotes(v=>!v);}}>
+                  <i className={`fa-solid ${showNotes?'fa-chevron-up':'fa-chevron-down'}`} style={{fontSize:9}}/> {showNotes?'Show less':'Show more'}
+                </button>
               </div>
-              {hasNotes&&<button className="ec-more" onClick={ev=>{ev.stopPropagation();setShowNotes(v=>!v);}}>
-                <i className={`fa-solid ${showNotes?'fa-chevron-up':'fa-chevron-down'}`} style={{fontSize:9}}/> {showNotes?'Show less':'Show more'}
-              </button>}
             </div>
-          </div>
+          ):(
+            <div className="ec-row" style={{cursor:'pointer'}} onClick={ev=>{ev.stopPropagation();}}>
+              <i className="fa-regular fa-note-sticky ec-ico" style={{opacity:.4}}/>
+              <DField className="ef ef-note" multiline value="" placeholder="+ Add notes" label="Notes" onChange={v=>onChangeField(e.id,'notes',v)}/>
+            </div>
+          )}
 
         </div>
 
@@ -1334,19 +1323,13 @@ function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
         {showDocs&&<DocsSection e={e} onChangeField={onChangeField}/>}
 
         {/* ── CTA row ── */}
-        <div className="ec-cta">
-          {isApply&&e.web?(
+        {(isApply&&e.web)&&(
+          <div className="ec-cta">
             <a href={e.web} target="_blank" rel="noreferrer" className="ec-cta-primary" onClick={ev=>ev.stopPropagation()}>
               Start application <i className="fa-solid fa-arrow-right"/>
             </a>
-          ):<div style={{flex:1}}/>}
-          <button className="ec-cta-sec" onClick={ev=>ev.stopPropagation()} title="Fields are tap-to-edit">
-            <i className="fa-solid fa-pencil"/> Edit
-          </button>
-          <button className="ec-cta-more" onClick={ev=>ev.stopPropagation()}>
-            <i className="fa-solid fa-ellipsis"/>
-          </button>
-        </div>
+          </div>
+        )}
 
       </div>
     </div>
