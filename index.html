@@ -503,19 +503,20 @@ html.dark .btn-icon-ai{background:#2e1065;color:#a78bfa;}
 .mcal-today-btn:hover{border-color:var(--ac);color:var(--t);}
 .mcal-sticky-hdrs{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:2px solid var(--bd);background:var(--s2);position:sticky;top:0;z-index:20;}
 .mcal-day-hdr{padding:6px 4px;text-align:center;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--tf);}
-/* Single continuous week grid — no per-month sections, no repeated days */
-.mcal-week-row{display:grid;grid-template-columns:repeat(7,1fr);}
-.mcal-cell{min-height:90px;padding:5px 4px 4px;border-right:1px solid var(--bd);border-bottom:1px solid var(--bd);background:var(--s1);position:relative;overflow:hidden;}
+/* Two-layer week row: days layer (numbers+borders) + chips layer (wider chips spanning 2 cols) */
+.mcal-week-row{display:flex;flex-direction:column;}
+.mcal-days-layer{display:grid;grid-template-columns:repeat(7,1fr);}
+.mcal-cell{min-height:38px;padding:5px 4px 4px;border-right:1px solid var(--bd);background:var(--s1);position:relative;overflow:hidden;}
 .mcal-cell:nth-child(7n){border-right:none;}
 .mcal-cell.weekend{background:color-mix(in srgb,var(--s1) 80%,var(--s3));}
 html.light .mcal-cell.weekend{background:#fafafa;}
 /* Month tag inside day-1 cell — small, non-intrusive */
 .mcal-mo-tag{font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--tf);line-height:1;margin-bottom:2px;display:block;}
 .mcal-mo-tag.cur-mo{color:var(--acl);}
-.mcal-dn{font-size:12px;font-weight:700;color:var(--td);display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;margin-bottom:3px;line-height:1;}
+.mcal-dn{font-size:12px;font-weight:700;color:var(--td);display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;line-height:1;}
 .mcal-cell.today .mcal-dn{background:var(--ac);color:#000;}
-.mcal-chips{display:flex;flex-direction:column;gap:3px;}
-.mcal-chip{font-size:10px;font-weight:600;padding:3px 5px 3px 5px;border-radius:4px;cursor:pointer;line-height:1.3;border-left-width:3px;border-left-style:solid;transition:opacity .1s;width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;box-sizing:border-box;}
+.mcal-chips-layer{display:grid;grid-template-columns:repeat(7,1fr);grid-auto-flow:row;gap:2px;padding:3px 2px 5px;border-bottom:1px solid var(--bd);}
+.mcal-chip{font-size:10px;font-weight:600;padding:3px 5px 3px 5px;border-radius:4px;cursor:pointer;line-height:1.3;border-left-width:3px;border-left-style:solid;transition:opacity .1s;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;box-sizing:border-box;}
 .mcal-chip:hover{opacity:.75;}
 .mcal-chip-txt{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .mcal-chip-amber{background:var(--acbg);border-color:var(--ac);color:var(--acl);}
@@ -523,14 +524,14 @@ html.light .mcal-cell.weekend{background:#fafafa;}
 .mcal-chip-green{background:var(--gbg);border-color:var(--g);color:var(--g);}
 .mcal-chip-red{background:var(--rbg);border-color:var(--r);color:var(--r);}
 .mcal-chip-gray{background:var(--s3);border-color:var(--bd2);color:var(--td);}
-.mcal-chip-more{background:var(--s3);border-color:transparent;color:var(--tf);font-size:9px;padding:1px 5px;border-left-width:0;width:auto;}
+.mcal-chip-more{background:var(--s3);border-color:transparent;color:var(--tf);font-size:9px;padding:1px 5px;border-left-width:0;}
 @media(max-width:768px){
   .mcal-toolbar{padding:8px 10px 6px;}
   .mcal-title{font-size:15px;}
-  .mcal-cell{min-height:80px;padding:4px 3px;}
+  .mcal-cell{min-height:32px;padding:4px 3px;}
   .mcal-chip{font-size:9px;padding:2px 3px 2px 4px;border-left-width:2px;}
-  .mcal-chip-more{font-size:8px;width:auto;}
-  .mcal-dn{font-size:10px;width:19px;height:19px;margin-bottom:2px;}
+  .mcal-chip-more{font-size:8px;}
+  .mcal-dn{font-size:10px;width:19px;height:19px;}
   .mcal-mo-tag{font-size:7px;}
   .mcal-day-hdr{font-size:8px;padding:5px 2px;letter-spacing:0;}
 }
@@ -1749,33 +1750,41 @@ function MonthCalendar({data,onClickGrant}){
       <div className="mcal-scroll">
         {weeks.map((week,wi)=>{
           const isTodayWeek=week.some(d=>d.getTime()===today.getTime());
+          const MAX=4;
+          const weekChips=[];
+          week.forEach((d,di)=>{
+            const grants=byDate[fmtKey(d)]||[];
+            grants.slice(0,MAX).forEach(g=>weekChips.push({di,g}));
+            if(grants.length>MAX)weekChips.push({di,g:null,extra:grants.length-MAX});
+          });
           return(
             <div key={wi} className="mcal-week-row" ref={isTodayWeek?todayRef:null}>
-              {week.map((d,di)=>{
-                const grants=byDate[fmtKey(d)]||[];
-                const isToday=d.getTime()===today.getTime();
-                const isWeekend=d.getDay()===0||d.getDay()===6;
-                const isFirst=d.getDate()===1;
-                const MAX=4;
-                const shown=grants.slice(0,MAX);
-                const extra=grants.length-MAX;
-                return(
-                  <div key={di} className={`mcal-cell${isWeekend?' weekend':''}${isToday?' today':''}`}>
-                    {isFirst&&<div className={`mcal-mo-tag${d.getMonth()===today.getMonth()&&d.getFullYear()===today.getFullYear()?' cur-mo':''}`}>{MO3[d.getMonth()]}{d.getMonth()===0?` ${d.getFullYear()}`:''}</div>}
-                    <span className="mcal-dn">{d.getDate()}</span>
-                    <div className="mcal-chips">
-                      {shown.map((g,gi)=>(
-                        <div key={gi} className={`mcal-chip ${chipCls(g.nextStep)}`}
-                          title={[g.foundation,g.grant,g.projectDates].filter(Boolean).join(' · ')}
-                          onClick={()=>onClickGrant(g)}>
-                          <span className="mcal-chip-txt">{g.foundation||g.grant||'—'}</span>
-                        </div>
-                      ))}
-                      {extra>0&&<div className="mcal-chip mcal-chip-more">+{extra}</div>}
+              <div className="mcal-days-layer">
+                {week.map((d,di)=>{
+                  const isToday=d.getTime()===today.getTime();
+                  const isWeekend=d.getDay()===0||d.getDay()===6;
+                  const isFirst=d.getDate()===1;
+                  return(
+                    <div key={di} className={`mcal-cell${isWeekend?' weekend':''}${isToday?' today':''}`}>
+                      {isFirst&&<div className={`mcal-mo-tag${d.getMonth()===today.getMonth()&&d.getFullYear()===today.getFullYear()?' cur-mo':''}`}>{MO3[d.getMonth()]}{d.getMonth()===0?` ${d.getFullYear()}`:''}</div>}
+                      <span className="mcal-dn">{d.getDate()}</span>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
+              <div className="mcal-chips-layer">
+                {weekChips.map(({di,g,extra},i)=>(
+                  g===null
+                    ?<div key={i} className="mcal-chip mcal-chip-more"
+                       style={{gridColumnStart:di+1,gridColumnEnd:Math.min(di+3,8)}}>+{extra}</div>
+                    :<div key={i} className={`mcal-chip ${chipCls(g.nextStep)}`}
+                       style={{gridColumnStart:di+1,gridColumnEnd:Math.min(di+3,8)}}
+                       title={[g.foundation,g.grant,g.projectDates].filter(Boolean).join(' · ')}
+                       onClick={()=>onClickGrant(g)}>
+                       <span className="mcal-chip-txt">{g.foundation||g.grant||'—'}</span>
+                     </div>
+                ))}
+              </div>
             </div>
           );
         })}
