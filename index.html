@@ -515,8 +515,8 @@ html.light .mcal-cell.weekend{background:#fafafa;}
 .mcal-dn{font-size:14px;font-weight:900;color:#fff;display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;line-height:1;flex-shrink:0;}
 html.light .mcal-dn{color:#000;}
 .mcal-cell.today .mcal-dn{background:var(--ac);color:#000;}
-/* Chips sit just 2px below the day numbers row */
-.mcal-chips-layer{display:grid;grid-template-columns:repeat(7,1fr);grid-auto-flow:row;gap:2px;padding:1px 2px 4px;border-bottom:1px solid var(--bd);}
+/* Chips layer — column separators via gradient matching day-cell borders */
+.mcal-chips-layer{display:grid;grid-template-columns:repeat(7,1fr);grid-auto-flow:row;gap:2px;padding:1px 2px 4px;border-bottom:1px solid var(--bd);background-image:repeating-linear-gradient(to right,transparent,transparent calc(100% / 7 - 1px),var(--bd) calc(100% / 7 - 1px),var(--bd) calc(100% / 7));}
 /* Chip is flex so warning icon + text sit on one line */
 .mcal-chip{font-size:10px;font-weight:600;padding:3px 5px 3px 5px;border-radius:4px;cursor:pointer;line-height:1.3;border-left-width:3px;border-left-style:solid;transition:opacity .1s;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;box-sizing:border-box;display:flex;align-items:center;gap:3px;}
 .mcal-chip:hover{opacity:.75;}
