@@ -497,9 +497,7 @@ html.dark .btn-icon-ai{background:#2e1065;color:#a78bfa;}
 
 /* ═══ Month Calendar View ═══ */
 .mcal-wrap{display:flex;flex-direction:column;}
-.mcal-toolbar{display:flex;align-items:center;gap:10px;padding:10px 16px 8px;border-bottom:1px solid var(--bd);}
-.mcal-title{font-size:18px;font-weight:800;color:var(--t);}
-.mcal-today-btn{background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:4px 12px;font-size:11px;font-weight:600;cursor:pointer;color:var(--td);font-family:inherit;transition:border-color .12s;margin-left:auto;}
+.mcal-today-btn{background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:3px 10px;font-size:10px;font-weight:700;cursor:pointer;color:var(--td);font-family:inherit;transition:border-color .12s,color .12s;white-space:nowrap;}
 .mcal-today-btn:hover{border-color:var(--ac);color:var(--t);}
 .mcal-sticky-hdrs{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:2px solid var(--bd);background:var(--s2);position:sticky;top:0;z-index:20;}
 .mcal-day-hdr{padding:6px 4px;text-align:center;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--tf);}
@@ -513,7 +511,7 @@ html.dark .btn-icon-ai{background:#2e1065;color:#a78bfa;}
 html.light .mcal-cell.weekend{background:#fafafa;}
 .mcal-mo-tag{font-size:7px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--tf);line-height:1;flex-shrink:0;}
 .mcal-mo-tag.cur-mo{color:var(--acl);}
-.mcal-dn{font-size:12px;font-weight:700;color:var(--td);display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;line-height:1;flex-shrink:0;}
+.mcal-dn{font-size:13px;font-weight:900;color:var(--t);display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;line-height:1;flex-shrink:0;}
 .mcal-cell.today .mcal-dn{background:var(--ac);color:#000;}
 /* Chips sit just 2px below the day numbers row */
 .mcal-chips-layer{display:grid;grid-template-columns:repeat(7,1fr);grid-auto-flow:row;gap:2px;padding:1px 2px 4px;border-bottom:1px solid var(--bd);}
@@ -533,13 +531,11 @@ html.light .mcal-cell.weekend{background:#fafafa;}
 .mcal-chip-urgent{animation:chip-pulse 2.2s ease-out infinite;}
 .mcal-chip-warn-ico{font-size:8px;flex-shrink:0;opacity:.9;}
 @media(max-width:768px){
-  .mcal-toolbar{padding:8px 10px 6px;}
-  .mcal-title{font-size:15px;}
   .mcal-cell{min-height:30px;padding:3px;}
   .mcal-chip{font-size:9px;padding:2px 3px 2px 4px;border-left-width:2px;gap:2px;}
   .mcal-chip-more{font-size:8px;}
   .mcal-chip-warn-ico{font-size:7px;}
-  .mcal-dn{font-size:10px;width:18px;height:18px;}
+  .mcal-dn{font-size:11px;width:18px;height:18px;}
   .mcal-mo-tag{font-size:6px;}
   .mcal-day-hdr{font-size:8px;padding:5px 2px;letter-spacing:0;}
 }
@@ -1703,8 +1699,7 @@ function SuggestionCard({s,i,onAccept,onReject}){
   );
 }
 // ── Month Calendar View ──
-function MonthCalendar({data,onClickGrant}){
-  const todayRef=useRef(null);
+function MonthCalendar({data,onClickGrant,todayRef}){
   const today=useMemo(()=>{const d=new Date();d.setHours(0,0,0,0);return d;},[]);
   const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
   const MO3=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -1744,15 +1739,10 @@ function MonthCalendar({data,onClickGrant}){
     return'mcal-chip-gray';
   };
 
-  const scrollToToday=()=>todayRef.current?.scrollIntoView({behavior:'smooth',block:'start'});
-  useEffect(()=>{todayRef.current?.scrollIntoView({behavior:'instant',block:'start'});},[]);
+  useEffect(()=>{todayRef?.current?.scrollIntoView({behavior:'instant',block:'start'});},[]);
 
   return(
     <div className="mcal-wrap">
-      <div className="mcal-toolbar">
-        <span className="mcal-title">Calendar</span>
-        <button className="mcal-today-btn" onClick={scrollToToday}>Today</button>
-      </div>
       <div className="mcal-sticky-hdrs">
         {DAYS_HDR.map(d=><div key={d} className="mcal-day-hdr">{d}</div>)}
       </div>
@@ -1843,6 +1833,7 @@ function App({initialGrants}){
   const[calendarView,setCalendarView]=useState(false); // "Upcoming/Calendar" view
   const[monthView,setMonthView]=useState(false); // Google-calendar style month view
   const[calModalId,setCalModalId]=useState(null); // month calendar event modal
+  const calTodayRef=useRef(null);
   const[isDark,setIsDark]=useState(()=>localStorage.getItem('polen-theme')==='dark');
   const[suggestions,setSuggestions]=useState([]);
   const[showSuggestions,setShowSuggestions]=useState(false);
@@ -2080,6 +2071,9 @@ function App({initialGrants}){
         <span className="nav-brand"><PolenLogo size={22}/> POLEN</span>
         <div style={{flex:1}}/>
         <div className="topbar-actions">
+          <button className={`theme-btn${monthView?' edit-active':''}`} title="Month calendar" onClick={()=>{setMonthView(v=>!v);setEditMode(false);setActiveView(false);setCalendarView(false);setSuggView(false);setExpRow(null);}} style={monthView?{borderColor:'var(--b)',color:'var(--b)',background:'var(--bbg)'}:{}}><i className="fa-solid fa-calendar-days"/></button>
+          {monthView&&<button className="mcal-today-btn" onClick={()=>calTodayRef.current?.scrollIntoView({behavior:'smooth',block:'start'})}>Today</button>}
+          <span style={{width:1,height:16,background:'var(--bd)',margin:'0 2px',flexShrink:0}}/>
           <button className={`theme-btn${editMode?' edit-active':''}`} title="Edit All" onClick={()=>{setEditMode(v=>!v);setActiveView(false);setCalendarView(false);setSuggView(false);setMonthView(false);}} style={editMode?{borderColor:'var(--y)',color:'var(--y)',background:'var(--ybg)'}:{}}><i className="fa-solid fa-pen"/></button>
           {editMode&&<>
             <button className="theme-btn" title="Save" onClick={async()=>{const r=await saveToServer(data);setSaveMsg(r.msg);setTimeout(()=>setSaveMsg(null),2500);}} style={{borderColor:'var(--g)',color:'var(--g)',background:'var(--gbg)'}}><i className="fa-solid fa-floppy-disk"/></button>
@@ -2118,14 +2112,13 @@ function App({initialGrants}){
             </select>
           </div>
           <button className={`chip ${activeView&&!editMode&&!calendarView&&!monthView&&!suggView?'on':''}`} onClick={()=>{setActiveView(!activeView);setEditMode(false);setCalendarView(false);setMonthView(false);setSuggView(false);setExpRow(null);}} style={activeView?{background:'var(--gbg)',color:'var(--g)'}:{}}><i className="fa-solid fa-bolt"/> Active ({stats.active})</button>
-          <button className={`chip ${monthView&&!editMode?'on':''}`} onClick={()=>{setMonthView(v=>!v);setEditMode(false);setActiveView(false);setCalendarView(false);setSuggView(false);setExpRow(null);}} style={monthView?{background:'var(--bbg)',color:'var(--b)'}:{}}><i className="fa-solid fa-calendar"/> Month</button>
           <button className={`chip ${calendarView&&!editMode&&!monthView&&!suggView?'on':''}`} onClick={()=>{setCalendarView(!calendarView);setEditMode(false);setActiveView(false);setMonthView(false);setSuggView(false);setExpRow(null);}} style={calendarView?{background:'var(--obg)',color:'var(--o)'}:{}}><i className="fa-solid fa-calendar-days"/> Upcoming{calendarData.reduce((s,m)=>s+m.grants.length,0)>0&&<span style={{marginLeft:5,background:'var(--o)',color:'#fff',borderRadius:10,padding:'0 6px',fontSize:10,fontWeight:800}}>{calendarData.reduce((s,m)=>s+m.grants.length,0)}</span>}</button>
           <button className={`chip ${suggView?'on':''}`} onClick={()=>{setSuggView(v=>!v);setEditMode(false);setActiveView(false);setCalendarView(false);setMonthView(false);setExpRow(null);}} style={suggView?{background:'var(--bbg)',color:'var(--b)'}:{}}>
             <i className="fa-solid fa-robot"/> IA{suggestions.length>0&&<span style={{marginLeft:5,background:'var(--r)',color:'#fff',borderRadius:10,padding:'0 6px',fontSize:10,fontWeight:800}}>{suggestions.length}</span>}
           </button>
         </div>
         <span style={{fontSize:11,color:'var(--tf)',marginLeft:'auto',display:'flex',alignItems:'center',gap:8,flexWrap:'wrap',justifyContent:'flex-end'}}>
-          {editMode?`${data.length} entries`:suggView?`${suggestions.length} sugerencias IA pendientes`:monthView?'Month calendar':calendarView?`${calendarData.reduce((s,m)=>s+m.grants.length,0)} programs · ${calendarData.length} seasons`:activeView?`${activeGroups.length} programs · ${activeGrants.length} active grants`:(()=>{
+          {editMode?`${data.length} entries`:suggView?`${suggestions.length} sugerencias IA pendientes`:monthView?'':calendarView?`${calendarData.reduce((s,m)=>s+m.grants.length,0)} programs · ${calendarData.length} seasons`:activeView?`${activeGroups.length} programs · ${activeGrants.length} active grants`:(()=>{
             const curYr=new Date().getFullYear().toString();
             const reqByCur={};
             if(statusFilter==='03 Waiting Results'){
@@ -2151,7 +2144,7 @@ function App({initialGrants}){
         ):suggView?(
           <SuggestionsView suggestions={suggestions} onAccept={s=>acceptSuggestion(s,add,setSuggestions)} onReject={id=>rejectSuggestion(id,setSuggestions)}/>
         ):monthView?(
-          <MonthCalendar data={data} onClickGrant={g=>setCalModalId(g.id)}/>
+          <MonthCalendar data={data} onClickGrant={g=>setCalModalId(g.id)} todayRef={calTodayRef}/>
         ):calendarView?(
           <div className="cal-view">
             {calendarData.length===0?(
