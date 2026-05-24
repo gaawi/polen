@@ -153,11 +153,11 @@ body{font-family:var(--font-mono);background:var(--bg);color:var(--t);min-height
 .sem-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
 .sem-dot.received{background:var(--g);}
 .sem-dot.denied{background:var(--r);}
-.sem-dot.waiting{background:var(--b);}
+.sem-dot.waiting{background:var(--y);}
 .sem-dot.apply{background:transparent;border:2px solid var(--r);}
 .sem-dot.notapplied{background:var(--gr);opacity:.4;}
 .sem-dot.check{background:var(--y);opacity:.6;}
-.sem-dot.missed{background:var(--o);}
+.sem-dot.missed{background:var(--r);}
 .sem-dot.notelig{background:var(--gr);opacity:.5;}
 .sem-lbl{font-size:6px;color:var(--tf);font-weight:600;}
 
@@ -243,7 +243,7 @@ body{font-family:var(--font-mono);background:var(--bg);color:var(--t);min-height
 .tl-dot{position:absolute;left:4px;top:4px;width:10px;height:10px;border-radius:50%;border:2px solid var(--bd);background:var(--s1);}
 .tl-dot.received{border-color:var(--g);background:var(--g);}
 .tl-dot.denied{border-color:var(--r);background:var(--r);}
-.tl-dot.waiting{border-color:var(--b);}
+.tl-dot.waiting{border-color:var(--y);}
 .tl-line{position:absolute;left:8px;top:16px;bottom:-2px;width:2px;background:var(--bd);border-radius:1px;}
 .tl-card{background:var(--s2);border:1px solid var(--bd);border-radius:3px;padding:8px 12px;margin-bottom:8px;}
 .tl-header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;}
@@ -2298,7 +2298,7 @@ function App({initialGrants}){
                     <td className="desk-only">
                       <div style={{display:'flex',gap:3}}>
                         {grp.received>0&&<span className="ms ms-g">✓{grp.received}</span>}
-                        {grp.waiting>0&&<span className="ms ms-b"><i className="fa-solid fa-hourglass-half"/>{grp.waiting}</span>}
+                        {grp.waiting>0&&<span className="ms ms-y"><i className="fa-solid fa-hourglass-half"/>{grp.waiting}</span>}
                         {grp.denied>0&&<span className="ms ms-r">✗{grp.denied}</span>}
                       </div>
                     </td>
@@ -2315,7 +2315,7 @@ function App({initialGrants}){
                       <span className={`ns ${STEP_CSS[latestStep]||'ns-check'}`}>{STEP_SHORT[latestStep]||latestStep}</span>
                       <span style={{fontSize:9,color:'var(--td)'}}>{grp.entries.length}</span>
                       {grp.received>0&&<span className="ms ms-g" style={{fontSize:8}}>✓{grp.received}</span>}
-                      {grp.waiting>0&&<span className="ms ms-b" style={{fontSize:8}}><i className="fa-solid fa-hourglass-half"/>{grp.waiting}</span>}
+                      {grp.waiting>0&&<span className="ms ms-y" style={{fontSize:8}}><i className="fa-solid fa-hourglass-half"/>{grp.waiting}</span>}
                       {grp.denied>0&&<span className="ms ms-r" style={{fontSize:8}}>✗{grp.denied}</span>}
                       {grp.primary.amount&&(grp.totalAmt===0||statusFilter==='03 Waiting Results')&&<span style={{fontVariantNumeric:'tabular-nums',fontSize:9,color:'var(--td)'}}>{fmt(grp.primary.amount,grp.primary.currency||'USD')}</span>}
                       {grp.totalAmt>0&&statusFilter!=='03 Waiting Results'&&<span style={{fontVariantNumeric:'tabular-nums',fontWeight:700,color:'var(--g)',fontSize:9}}>{fmtByCur(grp.totalAmtByCur)}</span>}
