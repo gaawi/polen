@@ -310,9 +310,16 @@ html.dark .ec-link-ai{background:rgba(124,58,237,.15);color:#a78bfa;border-color
 .ec-notes-body span.cte .cte-val{font-size:12px;color:var(--td);white-space:pre-wrap;line-height:1.5;}
 .ec-more{font-size:11px;color:var(--b);background:none;border:none;cursor:pointer;padding:5px 0 0;display:flex;align-items:center;gap:3px;font-family:inherit;}
 /* attachments row */
-.ec-attach{display:flex;align-items:center;gap:10px;padding:11px 0;cursor:pointer;}
-.ec-attach-arrow{margin-left:auto;color:var(--tf);font-size:11px;transition:transform .2s;}
-.ec-attach.open .ec-attach-arrow{transform:rotate(90deg);}
+.ec-docs-row{transition:background .12s,border-radius .12s;}
+.ec-docs-drag{background:var(--acbg);border-radius:8px;}
+.doc-pill{display:inline-flex;align-items:center;gap:0;padding:0;border-radius:20px;font-size:11px;font-weight:600;border:1px solid var(--bd);background:var(--s2);color:var(--td);max-width:180px;overflow:hidden;}
+.doc-pill-type-btn{position:relative;display:inline-flex;align-items:center;justify-content:center;padding:4px 6px 4px 8px;color:var(--acl);cursor:pointer;flex-shrink:0;}
+.doc-pill-type-sel{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;font-size:11px;}
+.doc-pill-link{display:inline-flex;align-items:center;flex:1;min-width:0;padding:4px 0;text-decoration:none;color:inherit;}
+.doc-pill-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.doc-pill-del{background:none;border:none;border-left:1px solid var(--bd);color:var(--tf);cursor:pointer;padding:4px 7px;font-size:9px;line-height:1;flex-shrink:0;transition:color .1s;}
+.doc-pill-del:hover{color:var(--r);}
+.doc-attach-ctrl{display:inline-flex;align-items:center;gap:4px;}
 /* CTA row */
 .ec-cta{display:flex;gap:8px;margin-top:14px;}
 .ec-cta-primary{flex:1;padding:12px;background:var(--ac);color:#000;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;text-decoration:none;transition:opacity .15s;}
@@ -750,7 +757,6 @@ i.fa-solid,i.fa-regular{font-size:12px;line-height:1;vertical-align:middle;}
 .theme-btn i.fa-solid{font-size:12px;}
 .tl-action i.fa-solid{font-size:11px;}
 .dfield-btn i.fa-solid{font-size:11px;}
-.doc-del i.fa-solid{font-size:11px;}
 .period-clear i.fa-solid{font-size:10px;}
 .ef-amt{width:70px;font-size:11px;font-variant-numeric:tabular-nums;}
 .cur-toggle{display:inline-flex;border:1px solid var(--bd);border-radius:3px;overflow:hidden;flex-shrink:0;height:22px;}
@@ -786,26 +792,7 @@ html.light .period-date{color-scheme:light;}
 .period-clear{flex-shrink:0;width:22px;height:22px;border-radius:50%;border:none;background:var(--s3);color:var(--tf);font-size:13px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;padding:0;font-family:var(--font-mono);}
 .period-clear:hover{background:var(--rbg);color:var(--r);}
 /* Documents */
-.docs-section{margin-top:8px;border-top:1px solid var(--s3);padding-top:8px;}
-.docs-dropzone{border:1px dashed var(--bd);border-radius:6px;padding:6px 8px;transition:all .15s;}
-.docs-dropzone.drag-over{border-color:var(--ac);background:var(--acbg);}
-.docs-drag-hint{font-size:9px;color:var(--tf);text-align:center;margin-top:4px;pointer-events:none;}
-@media(max-width:768px){.docs-drag-hint{display:none;}}
-.docs-attach-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
 .doc-type-sel{background:var(--s2);border:1px solid var(--bd);color:var(--t);border-radius:3px;padding:3px 6px;font-size:10px;font-family:var(--font-mono);outline:none;cursor:pointer;}
-.doc-upload-btn{background:var(--s2);border:1px solid var(--bd);color:var(--td);border-radius:3px;padding:3px 8px;font-size:10px;font-family:var(--font-mono);cursor:pointer;transition:all .15s;white-space:nowrap;}
-.doc-upload-btn:hover{border-color:var(--ac);color:var(--t);}
-.doc-upload-btn:disabled{opacity:.5;cursor:not-allowed;}
-.doc-list{display:flex;flex-direction:column;gap:4px;margin-top:6px;}
-.doc-item{display:flex;align-items:center;gap:6px;padding:4px 7px;background:var(--s2);border-radius:3px;font-size:10px;}
-.doc-badge{font-size:9px;font-weight:700;padding:1px 5px;border-radius:2px;background:var(--s3);color:var(--td);white-space:nowrap;flex-shrink:0;}
-.doc-type-inline{font-size:9px;font-weight:700;padding:1px 3px;border-radius:2px;background:var(--s3);color:var(--td);border:none;outline:none;cursor:pointer;flex-shrink:0;font-family:inherit;}
-.doc-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--td);}
-.doc-link{color:var(--b);text-decoration:none;flex-shrink:0;font-size:11px;}
-.doc-link:hover{text-decoration:underline;}
-.doc-del{background:none;border:none;color:var(--tf);cursor:pointer;padding:0 2px;font-size:12px;line-height:1;flex-shrink:0;}
-.doc-del:hover{color:var(--r);}
-.doc-err{font-size:10px;color:var(--r);margin-top:4px;}
 
 /* ── Login overlay ── */
 #login-overlay{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;}
@@ -1112,7 +1099,6 @@ function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
   const[aiProfileDraft,setAiProfileDraft]=useState('');
   const[aiCopied,setAiCopied]=useState(false);
   const[showNotes,setShowNotes]=useState(false);
-  const[showDocs,setShowDocs]=useState(false);
   const isMobile=typeof window!=='undefined'&&(window.matchMedia('(max-width:768px)').matches||/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
   const yr=e.deadline?e.deadline.substring(0,4):'?';
   const dotCls=e.nextStep==='05 Received'?'received':e.nextStep==='04 Denied'?'denied':e.nextStep==='03 Waiting Results'?'waiting':'';
@@ -1131,7 +1117,6 @@ function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
     onChangeField(e.id,'eligiblePeriod',s&&en?`${s} – ${en}`:s||en);
   };
   const sym=e.currency==='EUR'?'€':'$';
-  const docs=e.documents||[];
   const hasNotes=!!(e.notes||e.improvements);
   const isApply=e.nextStep==='01 Apply on deadline'||e.nextStep==='00 Send Proposal';
   const saveAi=()=>{onChangeField(e.id,'aiWorkspace',aiDraft.trim());onChangeField(e.id,'aiProfile',aiProfileDraft.trim());setEditingAi(false);};
@@ -1313,14 +1298,8 @@ function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
 
         </div>
 
-        {/* ── Attachments ── */}
-        <div className={`ec-attach${showDocs?' open':''}`} onClick={ev=>{ev.stopPropagation();setShowDocs(v=>!v);}}>
-          <i className="fa-solid fa-paperclip ec-ico"/>
-          <span style={{fontSize:13,fontWeight:500,color:'var(--td)'}}>Attachments</span>
-          {docs.length>0&&<span style={{fontSize:12,color:'var(--tf)',marginLeft:4}}>{docs.length} file{docs.length>1?'s':''} attached</span>}
-          <i className="fa-solid fa-chevron-right ec-attach-arrow"/>
-        </div>
-        {showDocs&&<DocsSection e={e} onChangeField={onChangeField}/>}
+        {/* ── Attachments (always visible) ── */}
+        <DocsSection e={e} onChangeField={onChangeField}/>
 
         {/* ── CTA row ── */}
         {(isApply&&e.web)&&(
@@ -1365,44 +1344,49 @@ function DocsSection({e,onChangeField}){
   const onDrop=ev=>{ev.preventDefault();ev.stopPropagation();setDragging(false);handleFiles(ev.dataTransfer.files);};
   const onDragOver=ev=>{ev.preventDefault();ev.stopPropagation();setDragging(true);};
   const onDragLeave=ev=>{ev.preventDefault();setDragging(false);};
-
   const delDoc=(i)=>onChangeField(e.id,'documents',docs.filter((_,j)=>j!==i));
   const typeInfo=(t)=>DOC_TYPES.find(d=>d.value===t)||DOC_TYPES[DOC_TYPES.length-1];
+  const openDoc=(d,ev)=>{
+    ev.preventDefault();ev.stopPropagation();
+    const isHtml=d.name&&d.name.toLowerCase().endsWith('.html');
+    if(!isHtml){window.open(d.url,'_blank');return;}
+    fetch(d.url).then(r=>r.text()).then(html=>{const b=new Blob([html],{type:'text/html'});const u=URL.createObjectURL(b);window.open(u,'_blank');setTimeout(()=>URL.revokeObjectURL(u),60000);}).catch(()=>window.open(d.url,'_blank'));
+  };
 
   return(
-    <div className="docs-section">
-      <div className={`docs-dropzone${dragging?' drag-over':''}`}
-        onDrop={onDrop} onDragOver={onDragOver} onDragLeave={onDragLeave} onClick={ev=>ev.stopPropagation()}>
-        <div className="docs-attach-row">
+    <div className={`ec-row ec-docs-row${dragging?' ec-docs-drag':''}`}
+      onDrop={onDrop} onDragOver={onDragOver} onDragLeave={ev=>{ev.preventDefault();setDragging(false);}}>
+      <i className="fa-solid fa-paperclip ec-ico"/>
+      <span className="ec-lbl">Docs</span>
+      <div className="ec-val" style={{display:'flex',gap:6,flexWrap:'wrap',alignItems:'center'}}>
+        {docs.map((d,i)=>{
+          const ti=typeInfo(d.type);
+          return(
+            <div key={i} className="doc-pill">
+              <label className="doc-pill-type-btn" title={`Change type (${ti.label})`}>
+                <i className={`fa-solid ${ti.icon}`}/>
+                <select className="doc-pill-type-sel" value={d.type||'other'} onClick={ev=>ev.stopPropagation()} onChange={ev=>{ev.stopPropagation();const updated=[...docs];updated[i]={...updated[i],type:ev.target.value};onChangeField(e.id,'documents',updated);}}>
+                  {DOC_TYPES.map(t=><option key={t.value} value={t.value}>{t.label}</option>)}
+                </select>
+              </label>
+              <a className="doc-pill-link" href={d.url} target="_blank" rel="noreferrer" title={d.name} onClick={ev=>openDoc(d,ev)}>
+                <span className="doc-pill-name">{d.name}</span>
+              </a>
+              <button className="doc-pill-del" title="Remove" onClick={ev=>{ev.stopPropagation();delDoc(i);}}><i className="fa-solid fa-xmark"/></button>
+            </div>
+          );
+        })}
+        <div className="doc-attach-ctrl" onClick={ev=>ev.stopPropagation()}>
           <select className="doc-type-sel" value={docType} onChange={ev=>setDocType(ev.target.value)} onClick={ev=>ev.stopPropagation()}>
             {DOC_TYPES.map(t=><option key={t.value} value={t.value}>{t.label}</option>)}
           </select>
-          <button className="doc-upload-btn" disabled={uploading} onClick={ev=>{ev.stopPropagation();fileRef.current&&fileRef.current.click();}}>
+          <button className="ec-link-add" disabled={uploading} onClick={ev=>{ev.stopPropagation();fileRef.current&&fileRef.current.click();}}>
             {uploading?<><i className="fa-solid fa-spinner fa-spin"/> {progress}</>:<><i className="fa-solid fa-paperclip"/> Attach</>}
           </button>
           <input ref={fileRef} type="file" multiple style={{display:'none'}} onChange={ev=>handleFiles(ev.target.files)} onClick={ev=>ev.stopPropagation()}/>
         </div>
-        <div className="docs-drag-hint">Drop files here</div>
+        {err&&<div style={{fontSize:10,color:'var(--r)',width:'100%',marginTop:2}}>{err}</div>}
       </div>
-      {err&&<div className="doc-err">{err}</div>}
-      {docs.length>0&&(
-        <div className="doc-list">
-          {docs.map((d,i)=>{
-            const ti=typeInfo(d.type);
-            return(
-              <div key={i} className="doc-item">
-                <i className={`fa-solid ${ti.icon}`} style={{color:'var(--acl)',flexShrink:0,fontSize:11}}/>
-                <select className="doc-type-inline" value={d.type||'other'} onClick={ev=>ev.stopPropagation()} onChange={ev=>{ev.stopPropagation();const updated=[...docs];updated[i]={...updated[i],type:ev.target.value};onChangeField(e.id,'documents',updated);}}>
-                  {DOC_TYPES.map(t=><option key={t.value} value={t.value}>{t.label}</option>)}
-                </select>
-                <span className="doc-name" title={d.name}>{d.name}</span>
-                <a href={d.url} target="_blank" rel="noreferrer" className="doc-link" onClick={ev=>{ev.stopPropagation();const isHtml=d.name&&d.name.toLowerCase().endsWith('.html');if(!isHtml)return;ev.preventDefault();fetch(d.url).then(r=>r.text()).then(html=>{const b=new Blob([html],{type:'text/html'});const u=URL.createObjectURL(b);window.open(u,'_blank');setTimeout(()=>URL.revokeObjectURL(u),60000);}).catch(()=>window.open(d.url,'_blank'));}}><i className="fa-solid fa-arrow-up-right-from-square"/></a>
-                <button className="doc-del" title="Remove" onClick={ev=>{ev.stopPropagation();delDoc(i);}}><i className="fa-solid fa-xmark"/></button>
-              </div>
-            );
-          })}
-        </div>
-      )}
     </div>
   );
 }
