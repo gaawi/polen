@@ -199,7 +199,14 @@ body{font-family:var(--font-mono);background:var(--bg);color:var(--t);min-height
 .ns-notelig{background:var(--grbg);color:var(--gr);border-left-color:var(--gr);}
 
 /* LEVEL 3: History panel */
-.hist-panel{background:var(--bg);padding:12px 20px 12px 40px;border-top:1px solid var(--bd);}
+.hist-panel{background:var(--bg);padding:8px 20px 8px 40px;border-top:1px solid var(--bd);}
+.entry-mini-row{display:flex;align-items:center;gap:8px;padding:8px 10px;cursor:pointer;border-radius:4px;transition:background .1s;border-bottom:1px solid var(--bd);}
+.entry-mini-row:last-child{border-bottom:none;}
+.entry-mini-row:hover{background:var(--s2);}
+.entry-mini-row .emr-year{font-size:10px;font-weight:700;color:var(--td);flex-shrink:0;min-width:32px;}
+.entry-mini-row .emr-dates{font-size:10px;color:var(--tf);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.entry-mini-row .emr-amt{font-size:10px;color:var(--td);font-variant-numeric:tabular-nums;flex-shrink:0;}
+.entry-mini-row .emr-chevron{font-size:8px;color:var(--tf);flex-shrink:0;}
 .hist-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px 16px;margin-bottom:10px;}
 .hf{display:flex;flex-direction:column;}
 .hf .hl{font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--tf);margin-bottom:1px;}
@@ -2177,10 +2184,14 @@ function App({initialGrants}){
                   {se.isNext&&<span className="cal-season-tag" style={{background:'var(--ybg)',color:'var(--y)'}}>Next</span>}
                 </div>
                 {se.grants.map((g,gi)=>{
-                  const goToTimeline=()=>{const k=(g.foundation||'').trim()+'|||'+(g.grant||'').trim();setCalendarView(false);setStatusFilter('all');setSearch('');setExpRow(k);};
                   const MSHORT=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                  const openEntry=()=>{
+                    const match=data.filter(d=>(d.foundation||'').trim()===g.foundation&&(d.grant||'').trim()===g.grant)
+                      .sort((a,b)=>(b.deadline||'').localeCompare(a.deadline||''))[0];
+                    if(match)setCalModalId(match.id);
+                  };
                   return(
-                  <div key={gi} className="cal-grant" onClick={goToTimeline}>
+                  <div key={gi} className="cal-grant" onClick={openEntry}>
                     <div className="cg-top">
                       <div>
                         <div className="cg-foundation">{g.foundation}</div>
@@ -2234,7 +2245,15 @@ function App({initialGrants}){
                   {grp.primary.projectDates&&<span className="active-2col-proj">{grp.primary.projectDates}</span>}
                   <span className="active-2col-count">{grp.entries.length} app{grp.entries.length>1?'s':''}</span>
                 </div>
-                {grp.entries.map((e,i)=><AppEntry key={e.id} e={e} isLast={i===grp.entries.length-1} onChangeStatus={changeStatus} onChangeField={changeField} onDelete={delEntry} onDuplicate={dupEntry}/>)}
+                {grp.entries.slice().sort((a,b)=>(b.deadline||'').localeCompare(a.deadline||'')).map(e=>(
+                  <div key={e.id} className="entry-mini-row" onClick={()=>setCalModalId(e.id)}>
+                    <span className="emr-year">{e.deadline?e.deadline.substring(0,4):'—'}</span>
+                    <span className={`ns ${STEP_CSS[e.nextStep]||'ns-check'}`}>{STEP_SHORT[e.nextStep]||e.nextStep}</span>
+                    <span className="emr-dates">{e.projectDates||fmtDate(e.deadline)||''}</span>
+                    {(e.amountReceived||e.amount)&&<span className="emr-amt">{fmt(e.amountReceived||e.amount,e.currency||'USD')}</span>}
+                    <i className="fa-solid fa-chevron-right emr-chevron"/>
+                  </div>
+                ))}
               </div>
             ))}
           </div>
@@ -2328,13 +2347,18 @@ function App({initialGrants}){
                   {isExp&&(
                     <tr><td colSpan={10} style={{padding:0}}>
                       <div className="hist-panel" onClick={e=>e.stopPropagation()}>
-                        {/* Application Timeline */}
-                        <div>
-                          <div style={{fontSize:10,fontWeight:700,textTransform:'uppercase',letterSpacing:'.4px',color:'var(--tf)',marginBottom:8}}>
-                            Application Timeline ({grp.entries.length})
-                          </div>
-                          {grp.entries.map((e,i)=><AppEntry key={e.id} e={e} isLast={i===grp.entries.length-1} onChangeStatus={changeStatus} onChangeField={changeField} onDelete={delEntry} onDuplicate={dupEntry}/>)}
+                        <div style={{fontSize:9,fontWeight:700,textTransform:'uppercase',letterSpacing:'.4px',color:'var(--tf)',marginBottom:6}}>
+                          {grp.entries.length} Application{grp.entries.length>1?'s':''}
                         </div>
+                        {grp.entries.slice().sort((a,b)=>(b.deadline||'').localeCompare(a.deadline||'')).map(e=>(
+                          <div key={e.id} className="entry-mini-row" onClick={()=>setCalModalId(e.id)}>
+                            <span className="emr-year">{e.deadline?e.deadline.substring(0,4):'—'}</span>
+                            <span className={`ns ${STEP_CSS[e.nextStep]||'ns-check'}`}>{STEP_SHORT[e.nextStep]||e.nextStep}</span>
+                            <span className="emr-dates">{e.projectDates||fmtDate(e.deadline)||''}</span>
+                            {(e.amountReceived||e.amount)&&<span className="emr-amt">{fmt(e.amountReceived||e.amount,e.currency||'USD')}</span>}
+                            <i className="fa-solid fa-chevron-right emr-chevron"/>
+                          </div>
+                        ))}
                       </div>
                     </td></tr>
                   )}
