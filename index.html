@@ -488,15 +488,15 @@ html.dark .btn-icon-ai{background:#2e1065;color:#a78bfa;}
 .mcal-today-btn:hover{border-color:var(--ac);color:var(--t);}
 .mcal-grid{display:grid;grid-template-columns:repeat(7,1fr);border-top:1px solid var(--bd);border-left:1px solid var(--bd);border-radius:8px;overflow:hidden;}
 .mcal-day-hdr{background:var(--s2);padding:7px 10px;text-align:center;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--tf);border-right:1px solid var(--bd);border-bottom:1px solid var(--bd);}
-.mcal-cell{min-height:110px;padding:7px 8px 6px;border-right:1px solid var(--bd);border-bottom:1px solid var(--bd);background:var(--s1);vertical-align:top;transition:background .1s;}
+.mcal-cell{min-height:110px;padding:7px 8px 6px;border-right:1px solid var(--bd);border-bottom:1px solid var(--bd);background:var(--s1);vertical-align:top;transition:background .1s;overflow:hidden;}
 .mcal-cell.other-mo{background:var(--s2);}
 .mcal-cell.weekend{background:color-mix(in srgb,var(--s1) 85%,var(--s2));}
 html.light .mcal-cell.weekend{background:#fafafa;}
 .mcal-cell.other-mo .mcal-dn{color:var(--tf);opacity:.4;}
-.mcal-dn{font-size:12px;font-weight:700;color:var(--td);display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;margin-bottom:4px;line-height:1;}
+.mcal-dn{font-size:12px;font-weight:700;color:var(--td);display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;margin-bottom:4px;line-height:1;flex-shrink:0;}
 .mcal-cell.today .mcal-dn{background:var(--ac);color:#000;}
 .mcal-chips{display:flex;flex-direction:column;gap:2px;}
-.mcal-chip{font-size:10px;font-weight:600;padding:2px 6px 2px 5px;border-radius:4px;cursor:pointer;overflow:hidden;line-height:1.4;border-left-width:3px;border-left-style:solid;transition:opacity .1s;}
+.mcal-chip{font-size:10px;font-weight:600;padding:2px 6px 2px 5px;border-radius:4px;cursor:pointer;overflow:hidden;line-height:1.4;border-left-width:3px;border-left-style:solid;transition:opacity .1s;min-width:0;}
 .mcal-chip:hover{opacity:.75;}
 .mcal-chip-txt{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .mcal-chip-amber{background:var(--acbg);border-color:var(--ac);color:var(--acl);}
@@ -504,13 +504,22 @@ html.light .mcal-cell.weekend{background:#fafafa;}
 .mcal-chip-green{background:var(--gbg);border-color:var(--g);color:var(--g);}
 .mcal-chip-red{background:var(--rbg);border-color:var(--r);color:var(--r);}
 .mcal-chip-gray{background:var(--s3);border-color:var(--bd2);color:var(--td);}
+.mcal-chip-more{background:var(--s3);border-color:transparent;color:var(--tf);font-size:9px;padding:1px 5px;border-left-width:0;}
 @media(max-width:768px){
-  .mcal-wrap{padding:10px 8px;}
-  .mcal-title{font-size:16px;min-width:150px;}
-  .mcal-cell{min-height:60px;padding:4px 3px;}
-  .mcal-chip{font-size:8px;padding:1px 4px 1px 3px;}
-  .mcal-dn{font-size:11px;width:20px;height:20px;}
-  .mcal-day-hdr{font-size:9px;padding:5px 2px;text-align:center;}
+  .mcal-wrap{padding:8px 6px;}
+  .mcal-title{font-size:15px;min-width:130px;}
+  .mcal-cell{min-height:52px;padding:3px 2px;overflow:hidden;}
+  .mcal-chips{flex-direction:row;flex-wrap:wrap;gap:3px;margin-top:2px;}
+  .mcal-chip{width:9px;height:9px;border-radius:50%;padding:0;border-left-width:0;border:none;flex-shrink:0;min-width:0;}
+  .mcal-chip-amber{background:var(--ac);}
+  .mcal-chip-blue{background:var(--b);}
+  .mcal-chip-green{background:var(--g);}
+  .mcal-chip-red{background:var(--r);}
+  .mcal-chip-gray{background:var(--bd2);}
+  .mcal-chip-more{background:none;color:var(--tf);font-size:8px;width:auto;height:auto;border-radius:0;padding:0;}
+  .mcal-chip-txt{display:none;}
+  .mcal-dn{font-size:10px;width:18px;height:18px;margin-bottom:1px;}
+  .mcal-day-hdr{font-size:8px;padding:4px 2px;letter-spacing:0;}
 }
 
 /* ══════════════════════════════════════════════════
@@ -1729,17 +1738,21 @@ function MonthCalendar({data,onGoToGrant}){
           const isToday=d.getTime()===today.getTime();
           const isCurMo=d.getMonth()===mo;
           const isWeekend=d.getDay()===0||d.getDay()===6;
+          const MAX=3;
+          const shown=grants.slice(0,MAX);
+          const extra=grants.length-MAX;
           return(
             <div key={i} className={`mcal-cell${isCurMo?'':' other-mo'}${isWeekend?' weekend':''}${isToday?' today':''}`}>
               <span className="mcal-dn">{d.getDate()}</span>
               <div className="mcal-chips">
-                {grants.map((g,gi)=>(
+                {shown.map((g,gi)=>(
                   <div key={gi} className={`mcal-chip ${chipCls(g.nextStep)}`}
                     title={[g.foundation,g.grant,g.projectDates].filter(Boolean).join(' · ')}
                     onClick={()=>onGoToGrant(g)}>
                     <span className="mcal-chip-txt">{g.foundation||g.grant||'—'}</span>
                   </div>
                 ))}
+                {extra>0&&<div className="mcal-chip mcal-chip-more" title={grants.slice(MAX).map(g=>g.foundation||g.grant).join(', ')}>+{extra}</div>}
               </div>
             </div>
           );
