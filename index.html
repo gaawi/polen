@@ -514,7 +514,9 @@ html.light .mcal-cell.weekend{background:#fafafa;}
 .mcal-mo-tag.cur-mo{color:var(--acl);}
 .mcal-dn{font-size:14px;font-weight:900;color:#fff;display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;line-height:1;flex-shrink:0;}
 html.light .mcal-dn{color:#000;}
-.mcal-cell.today .mcal-dn{background:var(--ac);color:#000;}
+.mcal-cell.today{background:var(--acbg);flex-direction:column;align-items:flex-start;justify-content:center;gap:1px;border-right:1px solid var(--bd);}
+.mcal-cell.today .mcal-dn{color:var(--ac);}
+.mcal-today-lbl{font-size:6px;font-weight:800;text-transform:uppercase;color:var(--acl);letter-spacing:.4px;line-height:1;padding-left:2px;}
 /* Chips layer — column separators via gradient matching day-cell borders */
 .mcal-chips-layer{display:grid;grid-template-columns:repeat(7,1fr);grid-auto-flow:row;gap:2px;padding:1px 2px 4px;border-bottom:1px solid var(--bd);background-image:repeating-linear-gradient(to right,transparent,transparent calc(100% / 7 - 1px),var(--bd) calc(100% / 7 - 1px),var(--bd) calc(100% / 7));}
 /* Chip is flex so warning icon + text sit on one line */
@@ -1776,6 +1778,7 @@ function MonthCalendar({data,onClickGrant,todayRef}){
                     <div key={di} className={`mcal-cell${isWeekend?' weekend':''}${isToday?' today':''}`}>
                       {isFirst&&<div className={`mcal-mo-tag${d.getMonth()===today.getMonth()&&d.getFullYear()===today.getFullYear()?' cur-mo':''}`}>{MO3[d.getMonth()]}{d.getMonth()===0?` ${d.getFullYear()}`:''}</div>}
                       <span className="mcal-dn">{d.getDate()}</span>
+                      {isToday&&<span className="mcal-today-lbl">today</span>}
                     </div>
                   );
                 })}
