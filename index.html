@@ -1720,7 +1720,7 @@ function MonthCalendar({data,onClickGrant,todayRef}){
   // Build a single continuous list of weeks (no per-month grids → no repeated days)
   const weeks=useMemo(()=>{
     // Start: Monday of the week that contains (today - 4 months)
-    const rangeStart=new Date(today.getFullYear(),today.getMonth()-4,1);
+    const rangeStart=new Date(2001,0,1);
     const dow=(rangeStart.getDay()+6)%7;
     const cursor=new Date(rangeStart);
     cursor.setDate(cursor.getDate()-dow);
