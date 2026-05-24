@@ -496,21 +496,26 @@ html.dark .btn-icon-ai{background:#2e1065;color:#a78bfa;}
 .cal-empty-icon{font-size:32px;margin-bottom:8px;}
 
 /* ═══ Month Calendar View ═══ */
-.mcal-wrap{padding:16px 20px;max-width:1200px;margin:0 auto;}
-.mcal-header{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
-.mcal-title{font-size:20px;font-weight:800;min-width:200px;color:var(--t);}
-.mcal-nav{background:var(--s2);border:1px solid var(--bd);border-radius:6px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t);font-size:12px;transition:border-color .12s;}
-.mcal-nav:hover{border-color:var(--ac);}
-.mcal-today-btn{background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:4px 12px;font-size:11px;font-weight:600;cursor:pointer;color:var(--td);font-family:inherit;transition:border-color .12s;}
+.mcal-wrap{display:flex;flex-direction:column;}
+.mcal-toolbar{display:flex;align-items:center;gap:10px;padding:10px 16px 8px;border-bottom:1px solid var(--bd);}
+.mcal-title{font-size:18px;font-weight:800;color:var(--t);}
+.mcal-today-btn{background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:4px 12px;font-size:11px;font-weight:600;cursor:pointer;color:var(--td);font-family:inherit;transition:border-color .12s;margin-left:auto;}
 .mcal-today-btn:hover{border-color:var(--ac);color:var(--t);}
-.mcal-grid{display:grid;grid-template-columns:repeat(7,1fr);border-top:1px solid var(--bd);border-left:1px solid var(--bd);border-radius:8px;overflow:hidden;}
-.mcal-day-hdr{background:var(--s2);padding:7px 10px;text-align:center;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--tf);border-right:1px solid var(--bd);border-bottom:1px solid var(--bd);}
-.mcal-cell{min-height:110px;padding:7px 8px 6px;border-right:1px solid var(--bd);border-bottom:1px solid var(--bd);background:var(--s1);vertical-align:top;transition:background .1s;overflow:hidden;}
+.mcal-sticky-hdrs{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:2px solid var(--bd);background:var(--s2);position:sticky;top:0;z-index:20;}
+.mcal-day-hdr{padding:6px 4px;text-align:center;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--tf);}
+.mcal-scroll{}
+.mcal-month-section{border-bottom:1px solid var(--bd);}
+.mcal-month-label{padding:10px 12px 6px;font-size:13px;font-weight:800;color:var(--t);letter-spacing:-.01em;}
+.mcal-month-label.current{color:var(--acl);}
+.mcal-month-yr{font-weight:400;color:var(--tf);}
+.mcal-month-grid{display:grid;grid-template-columns:repeat(7,1fr);border-top:1px solid var(--bd);}
+.mcal-cell{min-height:90px;padding:6px 6px 4px;border-right:1px solid var(--bd);border-bottom:1px solid var(--bd);background:var(--s1);overflow:hidden;}
+.mcal-cell:nth-child(7n){border-right:none;}
 .mcal-cell.other-mo{background:var(--s2);}
-.mcal-cell.weekend{background:color-mix(in srgb,var(--s1) 85%,var(--s2));}
-html.light .mcal-cell.weekend{background:#fafafa;}
-.mcal-cell.other-mo .mcal-dn{color:var(--tf);opacity:.4;}
-.mcal-dn{font-size:12px;font-weight:700;color:var(--td);display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;margin-bottom:4px;line-height:1;flex-shrink:0;}
+.mcal-cell.other-mo .mcal-dn{opacity:.3;}
+.mcal-cell.weekend:not(.other-mo){background:color-mix(in srgb,var(--s1) 80%,var(--s3));}
+html.light .mcal-cell.weekend:not(.other-mo){background:#fafafa;}
+.mcal-dn{font-size:12px;font-weight:700;color:var(--td);display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;margin-bottom:3px;line-height:1;}
 .mcal-cell.today .mcal-dn{background:var(--ac);color:#000;}
 .mcal-chips{display:flex;flex-direction:column;gap:2px;}
 .mcal-chip{font-size:10px;font-weight:600;padding:2px 6px 2px 5px;border-radius:4px;cursor:pointer;overflow:hidden;line-height:1.4;border-left-width:3px;border-left-style:solid;transition:opacity .1s;min-width:0;}
@@ -523,20 +528,14 @@ html.light .mcal-cell.weekend{background:#fafafa;}
 .mcal-chip-gray{background:var(--s3);border-color:var(--bd2);color:var(--td);}
 .mcal-chip-more{background:var(--s3);border-color:transparent;color:var(--tf);font-size:9px;padding:1px 5px;border-left-width:0;}
 @media(max-width:768px){
-  .mcal-wrap{padding:8px 6px;}
-  .mcal-title{font-size:15px;min-width:130px;}
-  .mcal-cell{min-height:52px;padding:3px 2px;overflow:hidden;}
-  .mcal-chips{flex-direction:row;flex-wrap:wrap;gap:3px;margin-top:2px;}
-  .mcal-chip{width:9px;height:9px;border-radius:50%;padding:0;border-left-width:0;border:none;flex-shrink:0;min-width:0;}
-  .mcal-chip-amber{background:var(--ac);}
-  .mcal-chip-blue{background:var(--b);}
-  .mcal-chip-green{background:var(--g);}
-  .mcal-chip-red{background:var(--r);}
-  .mcal-chip-gray{background:var(--bd2);}
-  .mcal-chip-more{background:none;color:var(--tf);font-size:8px;width:auto;height:auto;border-radius:0;padding:0;}
-  .mcal-chip-txt{display:none;}
-  .mcal-dn{font-size:10px;width:18px;height:18px;margin-bottom:1px;}
-  .mcal-day-hdr{font-size:8px;padding:4px 2px;letter-spacing:0;}
+  .mcal-toolbar{padding:8px 10px 6px;}
+  .mcal-title{font-size:15px;}
+  .mcal-cell{min-height:64px;padding:4px 2px;overflow:hidden;}
+  .mcal-chip{font-size:8px;padding:1px 3px 1px 3px;border-left-width:2px;line-height:1.3;}
+  .mcal-chip-more{font-size:7px;padding:1px 3px;border-left-width:0;}
+  .mcal-dn{font-size:10px;width:18px;height:18px;margin-bottom:2px;}
+  .mcal-day-hdr{font-size:8px;padding:5px 2px;letter-spacing:0;}
+  .mcal-month-label{padding:7px 8px 4px;font-size:12px;}
 }
 
 /* ══════════════════════════════════════════════════
@@ -1699,34 +1698,28 @@ function SuggestionCard({s,i,onAccept,onReject}){
 }
 // ── Month Calendar View ──
 function MonthCalendar({data,onClickGrant}){
+  const todayRef=useRef(null);
   const todayRaw=new Date();todayRaw.setHours(0,0,0,0);
   const today=todayRaw;
-  const[cur,setCur]=useState(new Date(today.getFullYear(),today.getMonth(),1));
-  const yr=cur.getFullYear(),mo=cur.getMonth();
   const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
   const DAYS_HDR=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 
-  const startDow=(new Date(yr,mo,1).getDay()+6)%7; // Mon=0
-  const totalCells=42;
-  const cells=Array.from({length:totalCells},(_,i)=>new Date(yr,mo,1-startDow+i));
-
-  // Remove last row if all other-month
-  const rows=[];
-  for(let i=0;i<42;i+=7)rows.push(cells.slice(i,i+7));
-  while(rows.length>4&&rows[rows.length-1].every(d=>d.getMonth()!==mo))rows.pop();
-
-  const fmtKey=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  // Show 4 months past + 20 months ahead
+  const months=useMemo(()=>{
+    const arr=[];
+    for(let i=-4;i<20;i++){
+      arr.push(new Date(today.getFullYear(),today.getMonth()+i,1));
+    }
+    return arr;
+  },[]);
 
   const byDate=useMemo(()=>{
     const m={};
-    data.forEach(g=>{
-      if(!g.deadline)return;
-      const k=g.deadline;
-      if(!m[k])m[k]=[];
-      m[k].push(g);
-    });
+    data.forEach(g=>{if(!g.deadline)return;if(!m[g.deadline])m[g.deadline]=[];m[g.deadline].push(g);});
     return m;
   },[data]);
+
+  const fmtKey=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 
   const chipCls=s=>{
     if(s==='05 Received')return'mcal-chip-green';
@@ -1736,40 +1729,59 @@ function MonthCalendar({data,onClickGrant}){
     return'mcal-chip-gray';
   };
 
-  const hasAny=Object.keys(byDate).some(k=>{const[y,m]=k.split('-').map(Number);return y===yr&&m-1===mo;});
+  const scrollToToday=()=>todayRef.current?.scrollIntoView({behavior:'smooth',block:'start'});
+
+  useEffect(()=>{todayRef.current?.scrollIntoView({behavior:'instant',block:'start'});},[]);
 
   return(
     <div className="mcal-wrap">
-      <div className="mcal-header">
-        <button className="mcal-nav" onClick={()=>setCur(new Date(yr,mo-1,1))}><i className="fa-solid fa-chevron-left"/></button>
-        <span className="mcal-title">{MONTHS[mo]} {yr}</span>
-        <button className="mcal-nav" onClick={()=>setCur(new Date(yr,mo+1,1))}><i className="fa-solid fa-chevron-right"/></button>
-        <button className="mcal-today-btn" onClick={()=>setCur(new Date(today.getFullYear(),today.getMonth(),1))}>Today</button>
-        {!hasAny&&<span style={{fontSize:11,color:'var(--tf)',marginLeft:8}}>No deadlines this month</span>}
+      <div className="mcal-toolbar">
+        <span className="mcal-title">Calendar</span>
+        <button className="mcal-today-btn" onClick={scrollToToday}>Today</button>
       </div>
-      <div className="mcal-grid">
+      <div className="mcal-sticky-hdrs">
         {DAYS_HDR.map(d=><div key={d} className="mcal-day-hdr">{d}</div>)}
-        {rows.flat().map((d,i)=>{
-          const key=fmtKey(d);
-          const grants=byDate[key]||[];
-          const isToday=d.getTime()===today.getTime();
-          const isCurMo=d.getMonth()===mo;
-          const isWeekend=d.getDay()===0||d.getDay()===6;
-          const MAX=3;
-          const shown=grants.slice(0,MAX);
-          const extra=grants.length-MAX;
+      </div>
+      <div className="mcal-scroll">
+        {months.map((md,mi)=>{
+          const yr=md.getFullYear(),mo=md.getMonth();
+          const isCurMo=yr===today.getFullYear()&&mo===today.getMonth();
+          const startDow=(new Date(yr,mo,1).getDay()+6)%7;
+          const cells=Array.from({length:42},(_,i)=>new Date(yr,mo,1-startDow+i));
+          const rows=[];
+          for(let i=0;i<42;i+=7)rows.push(cells.slice(i,i+7));
+          while(rows.length>4&&rows[rows.length-1].every(d=>d.getMonth()!==mo))rows.pop();
           return(
-            <div key={i} className={`mcal-cell${isCurMo?'':' other-mo'}${isWeekend?' weekend':''}${isToday?' today':''}`}>
-              <span className="mcal-dn">{d.getDate()}</span>
-              <div className="mcal-chips">
-                {shown.map((g,gi)=>(
-                  <div key={gi} className={`mcal-chip ${chipCls(g.nextStep)}`}
-                    title={[g.foundation,g.grant,g.projectDates].filter(Boolean).join(' · ')}
-                    onClick={()=>onClickGrant(g)}>
-                    <span className="mcal-chip-txt">{g.foundation||g.grant||'—'}</span>
-                  </div>
-                ))}
-                {extra>0&&<div className="mcal-chip mcal-chip-more" title={grants.slice(MAX).map(g=>g.foundation||g.grant).join(', ')}>+{extra}</div>}
+            <div key={mi} className="mcal-month-section" ref={isCurMo?todayRef:null}>
+              <div className={`mcal-month-label${isCurMo?' current':''}`}>
+                {MONTHS[mo]}&nbsp;<span className="mcal-month-yr">{yr}</span>
+              </div>
+              <div className="mcal-month-grid">
+                {rows.flat().map((d,ci)=>{
+                  const key=fmtKey(d);
+                  const grants=byDate[key]||[];
+                  const isToday=d.getTime()===today.getTime();
+                  const isDayInMo=d.getMonth()===mo;
+                  const isWeekend=d.getDay()===0||d.getDay()===6;
+                  const MAX=3;
+                  const shown=grants.slice(0,MAX);
+                  const extra=grants.length-MAX;
+                  return(
+                    <div key={ci} className={`mcal-cell${isDayInMo?'':' other-mo'}${isWeekend?' weekend':''}${isToday?' today':''}`}>
+                      <span className="mcal-dn">{d.getDate()}</span>
+                      <div className="mcal-chips">
+                        {shown.map((g,gi)=>(
+                          <div key={gi} className={`mcal-chip ${chipCls(g.nextStep)}`}
+                            title={[g.foundation,g.grant,g.projectDates].filter(Boolean).join(' · ')}
+                            onClick={()=>onClickGrant(g)}>
+                            <span className="mcal-chip-txt">{g.foundation||g.grant||'—'}</span>
+                          </div>
+                        ))}
+                        {extra>0&&<div className="mcal-chip mcal-chip-more" title={grants.slice(MAX).map(g=>g.foundation||g.grant).join(', ')}>+{extra}</div>}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           );
