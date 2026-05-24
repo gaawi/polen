@@ -993,8 +993,9 @@ function DField({value,onChange,className,type,placeholder,style,label,multiline
 
   const open=e=>{e.stopPropagation();setLocal(value||'');setEditing(true);};
   const save=()=>{
-    const v=type==='number'?(local||local===0?parseFloat(local):null):local;
-    if(String(local||'')!==String(value||''))onChange(v);
+    const raw=type==='date'?(inputRef.current?.value||''):local;
+    const v=type==='number'?(raw||raw===0?parseFloat(raw):null):raw;
+    if(String(raw||'')!==String(value||''))onChange(v);
     setEditing(false);
   };
   const cancel=()=>setEditing(false);
@@ -1028,11 +1029,16 @@ function DField({value,onChange,className,type,placeholder,style,label,multiline
         ?<textarea ref={inputRef} value={local} onChange={e=>setLocal(e.target.value)}
             placeholder={placeholder} className="dfield-input dfield-ta"
             onKeyDown={e=>{if(e.key==='Escape')cancel();}}/>
-        :<input ref={inputRef} type={type||'text'} value={local}
-            onChange={e=>setLocal(e.target.value)}
-            placeholder={placeholder} className="dfield-input"
-            inputMode={type==='number'?'decimal':undefined}
-            onKeyDown={e=>{if(e.key==='Enter')save();if(e.key==='Escape')cancel();}}/>
+        :type==='date'
+          ?<input ref={inputRef} type="date" defaultValue={local}
+              placeholder={placeholder} className="dfield-input"
+              onKeyDown={e=>{if(e.key==='Enter')save();if(e.key==='Escape')cancel();}}
+              onBlur={save}/>
+          :<input ref={inputRef} type={type||'text'} value={local}
+              onChange={e=>setLocal(e.target.value)}
+              placeholder={placeholder} className="dfield-input"
+              inputMode={type==='number'?'decimal':undefined}
+              onKeyDown={e=>{if(e.key==='Enter')save();if(e.key==='Escape')cancel();}}/>
       }
       <span className="dfield-actions">
         <button className="dfield-btn dfield-cancel" onClick={cancel}><i className="fa-solid fa-xmark"/></button>
