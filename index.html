@@ -531,7 +531,7 @@ html.light .mcal-dn{color:#000;}
 /* Urgent (Apply) chips pulse to draw attention */
 @keyframes chip-pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,180,0,.4);}60%{box-shadow:0 0 0 3px rgba(255,180,0,0);}}
 .mcal-chip-urgent{animation:chip-pulse 2.2s ease-out infinite;}
-.mcal-chip-warn-ico{font-size:8px;flex-shrink:0;opacity:.9;}
+.mcal-chip-warn-ico{width:8px;height:8px;border-radius:50%;border:2.5px solid currentColor;display:inline-block;flex-shrink:0;}
 @media(max-width:768px){
   .mcal-cell{min-height:30px;padding:3px;}
   .mcal-chip{font-size:9px;padding:2px 3px 2px 4px;border-left-width:2px;gap:2px;}
@@ -1794,7 +1794,7 @@ function MonthCalendar({data,onClickGrant,todayRef}){
                       style={{gridColumnStart:colStart,gridColumnEnd:colEnd}}
                       title={[g.foundation,g.grant,g.projectDates].filter(Boolean).join(' · ')}
                       onClick={()=>onClickGrant(g)}>
-                      {isUrgent&&<i className="fa-regular fa-circle mcal-chip-warn-ico"/>}
+                      {isUrgent&&<span className="mcal-chip-warn-ico"/>}
                       <span className="mcal-chip-txt">{g.foundation||g.grant||'—'}</span>
                     </div>
                   );
