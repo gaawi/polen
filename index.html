@@ -189,9 +189,9 @@ body{font-family:var(--font-mono);background:var(--bg);color:var(--t);min-height
 .ns{display:inline-flex;align-items:center;gap:4px;padding:2px 8px 2px 6px;border-radius:2px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap;border-left:3px solid transparent;}
 .ns::before{content:'';width:4px;height:4px;border-radius:50%;background:currentColor;}
 .ns-send{background:var(--obg);color:var(--o);}
-.ns-apply{background:var(--acbg);color:var(--acl);border-left-color:var(--ac);}
+.ns-apply{background:var(--rbg);color:var(--r);border-left-color:var(--r);}
 .ns-check{background:var(--ybg);color:var(--y);border-left-color:var(--y);}
-.ns-waiting{background:var(--bbg);color:var(--b);border-left-color:var(--b);}
+.ns-waiting{background:var(--ybg);color:var(--y);border-left-color:var(--y);}
 .ns-received{background:var(--gbg);color:var(--g);border-left-color:var(--g);}
 .ns-denied{background:var(--rbg);color:var(--r);border-left-color:var(--r);}
 .ns-notsent{background:var(--grbg);color:var(--gr);border-left-color:var(--gr);}
@@ -497,8 +497,9 @@ html.dark .btn-icon-ai{background:#2e1065;color:#a78bfa;}
 
 /* ═══ Month Calendar View ═══ */
 .mcal-wrap{display:flex;flex-direction:column;}
-.mcal-today-btn{background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:3px 10px;font-size:10px;font-weight:700;cursor:pointer;color:var(--td);font-family:inherit;transition:border-color .12s,color .12s;white-space:nowrap;}
-.mcal-today-btn:hover{border-color:var(--ac);color:var(--t);}
+.mcal-today-float{position:fixed;bottom:24px;right:24px;z-index:50;background:var(--ac);color:#000;border:none;border-radius:20px;padding:7px 16px;font-size:11px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 3px 12px rgba(0,0,0,.35);transition:opacity .2s,transform .2s;letter-spacing:.02em;}
+.mcal-today-float:hover{opacity:.85;transform:translateY(-1px);}
+.mcal-today-float.hidden{opacity:0;pointer-events:none;transform:translateY(6px);}
 .mcal-sticky-hdrs{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:2px solid var(--bd);background:var(--s2);position:sticky;top:0;z-index:20;}
 .mcal-day-hdr{padding:6px 4px;text-align:center;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--tf);}
 /* Two-layer week row: days layer (numbers+borders) + chips layer (wider chips spanning 2 cols) */
@@ -511,7 +512,8 @@ html.dark .btn-icon-ai{background:#2e1065;color:#a78bfa;}
 html.light .mcal-cell.weekend{background:#fafafa;}
 .mcal-mo-tag{font-size:7px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--tf);line-height:1;flex-shrink:0;}
 .mcal-mo-tag.cur-mo{color:var(--acl);}
-.mcal-dn{font-size:13px;font-weight:900;color:var(--t);display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;line-height:1;flex-shrink:0;}
+.mcal-dn{font-size:14px;font-weight:900;color:#fff;display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;line-height:1;flex-shrink:0;}
+html.light .mcal-dn{color:#000;}
 .mcal-cell.today .mcal-dn{background:var(--ac);color:#000;}
 /* Chips sit just 2px below the day numbers row */
 .mcal-chips-layer{display:grid;grid-template-columns:repeat(7,1fr);grid-auto-flow:row;gap:2px;padding:1px 2px 4px;border-bottom:1px solid var(--bd);}
@@ -535,7 +537,7 @@ html.light .mcal-cell.weekend{background:#fafafa;}
   .mcal-chip{font-size:9px;padding:2px 3px 2px 4px;border-left-width:2px;gap:2px;}
   .mcal-chip-more{font-size:8px;}
   .mcal-chip-warn-ico{font-size:7px;}
-  .mcal-dn{font-size:11px;width:18px;height:18px;}
+  .mcal-dn{font-size:12px;width:20px;height:20px;}
   .mcal-mo-tag{font-size:6px;}
   .mcal-day-hdr{font-size:8px;padding:5px 2px;letter-spacing:0;}
 }
@@ -790,9 +792,9 @@ html.light .mcal-cell.weekend{background:#fafafa;}
 
 /* Clickable status select styled as badge */
 .ns-select{appearance:none;-webkit-appearance:none;border:none;border-left:3px solid transparent;cursor:pointer;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;padding:2px 8px 2px 6px;border-radius:2px;outline:none;font-family:var(--font-mono);text-align:center;}
-.ns-select.ns-apply{background:var(--acbg);color:var(--acl);border-left-color:var(--ac);}
+.ns-select.ns-apply{background:var(--rbg);color:var(--r);border-left-color:var(--r);}
 .ns-select.ns-check{background:var(--ybg);color:var(--y);border-left-color:var(--y);}
-.ns-select.ns-waiting{background:var(--bbg);color:var(--b);border-left-color:var(--b);}
+.ns-select.ns-waiting{background:var(--ybg);color:var(--y);border-left-color:var(--y);}
 .ns-select.ns-received{background:var(--gbg);color:var(--g);border-left-color:var(--g);}
 .ns-select.ns-denied{background:var(--rbg);color:var(--r);border-left-color:var(--r);}
 .ns-select.ns-notsent{background:var(--grbg);color:var(--gr);border-left-color:var(--gr);}
@@ -1701,6 +1703,14 @@ function SuggestionCard({s,i,onAccept,onReject}){
 // ── Month Calendar View ──
 function MonthCalendar({data,onClickGrant,todayRef}){
   const today=useMemo(()=>{const d=new Date();d.setHours(0,0,0,0);return d;},[]);
+  const[todayVisible,setTodayVisible]=React.useState(true);
+  useEffect(()=>{
+    const el=todayRef?.current;
+    if(!el)return;
+    const obs=new IntersectionObserver(([e])=>setTodayVisible(e.isIntersecting),{threshold:0});
+    obs.observe(el);
+    return()=>obs.disconnect();
+  },[todayRef?.current]);
   const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
   const MO3=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const DAYS_HDR=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
@@ -1732,10 +1742,8 @@ function MonthCalendar({data,onClickGrant,todayRef}){
   const fmtKey=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   const chipCls=s=>{
     if(s==='05 Received')return'mcal-chip-green';
-    if(s==='04 Denied'||s==='07 Missed Deadline')return'mcal-chip-red';
-    if(s==='03 Waiting Results')return'mcal-chip-blue';
-    if(s==='01 Apply on deadline'||s==='00 Send Proposal')return'mcal-chip-amber';
-    if(s==='02 Check')return'mcal-chip-yellow';
+    if(s==='04 Denied'||s==='07 Missed Deadline'||s==='01 Apply on deadline'||s==='00 Send Proposal')return'mcal-chip-red';
+    if(s==='03 Waiting Results'||s==='02 Check')return'mcal-chip-yellow';
     return'mcal-chip-gray';
   };
 
@@ -1796,6 +1804,11 @@ function MonthCalendar({data,onClickGrant,todayRef}){
           );
         })}
       </div>
+      <button
+        className={`mcal-today-float${todayVisible?' hidden':''}`}
+        onClick={()=>todayRef?.current?.scrollIntoView({behavior:'smooth',block:'start'})}>
+        Today
+      </button>
     </div>
   );
 }
@@ -2072,7 +2085,6 @@ function App({initialGrants}){
         <div style={{flex:1}}/>
         <div className="topbar-actions">
           <button className={`theme-btn${monthView?' edit-active':''}`} title="Month calendar" onClick={()=>{setMonthView(v=>!v);setEditMode(false);setActiveView(false);setCalendarView(false);setSuggView(false);setExpRow(null);}} style={monthView?{borderColor:'var(--b)',color:'var(--b)',background:'var(--bbg)'}:{}}><i className="fa-solid fa-calendar-days"/></button>
-          {monthView&&<button className="mcal-today-btn" onClick={()=>calTodayRef.current?.scrollIntoView({behavior:'smooth',block:'start'})}>Today</button>}
           <span style={{width:1,height:16,background:'var(--bd)',margin:'0 2px',flexShrink:0}}/>
           <button className={`theme-btn${editMode?' edit-active':''}`} title="Edit All" onClick={()=>{setEditMode(v=>!v);setActiveView(false);setCalendarView(false);setSuggView(false);setMonthView(false);}} style={editMode?{borderColor:'var(--y)',color:'var(--y)',background:'var(--ybg)'}:{}}><i className="fa-solid fa-pen"/></button>
           {editMode&&<>
