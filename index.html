@@ -478,6 +478,41 @@ html.dark .btn-icon-ai{background:#2e1065;color:#a78bfa;}
 .cal-empty{text-align:center;padding:40px 20px;color:var(--tf);font-size:13px;}
 .cal-empty-icon{font-size:32px;margin-bottom:8px;}
 
+/* ═══ Month Calendar View ═══ */
+.mcal-wrap{padding:16px 20px;max-width:1200px;margin:0 auto;}
+.mcal-header{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+.mcal-title{font-size:20px;font-weight:800;min-width:200px;color:var(--t);}
+.mcal-nav{background:var(--s2);border:1px solid var(--bd);border-radius:6px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t);font-size:12px;transition:border-color .12s;}
+.mcal-nav:hover{border-color:var(--ac);}
+.mcal-today-btn{background:var(--s2);border:1px solid var(--bd);border-radius:6px;padding:4px 12px;font-size:11px;font-weight:600;cursor:pointer;color:var(--td);font-family:inherit;transition:border-color .12s;}
+.mcal-today-btn:hover{border-color:var(--ac);color:var(--t);}
+.mcal-grid{display:grid;grid-template-columns:repeat(7,1fr);border-top:1px solid var(--bd);border-left:1px solid var(--bd);border-radius:8px;overflow:hidden;}
+.mcal-day-hdr{background:var(--s2);padding:7px 10px;text-align:center;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--tf);border-right:1px solid var(--bd);border-bottom:1px solid var(--bd);}
+.mcal-cell{min-height:110px;padding:7px 8px 6px;border-right:1px solid var(--bd);border-bottom:1px solid var(--bd);background:var(--s1);vertical-align:top;transition:background .1s;}
+.mcal-cell.other-mo{background:var(--s2);}
+.mcal-cell.weekend{background:color-mix(in srgb,var(--s1) 85%,var(--s2));}
+html.light .mcal-cell.weekend{background:#fafafa;}
+.mcal-cell.other-mo .mcal-dn{color:var(--tf);opacity:.4;}
+.mcal-dn{font-size:12px;font-weight:700;color:var(--td);display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;margin-bottom:4px;line-height:1;}
+.mcal-cell.today .mcal-dn{background:var(--ac);color:#000;}
+.mcal-chips{display:flex;flex-direction:column;gap:2px;}
+.mcal-chip{font-size:10px;font-weight:600;padding:2px 6px 2px 5px;border-radius:4px;cursor:pointer;overflow:hidden;line-height:1.4;border-left-width:3px;border-left-style:solid;transition:opacity .1s;}
+.mcal-chip:hover{opacity:.75;}
+.mcal-chip-txt{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.mcal-chip-amber{background:var(--acbg);border-color:var(--ac);color:var(--acl);}
+.mcal-chip-blue{background:var(--bbg);border-color:var(--b);color:var(--b);}
+.mcal-chip-green{background:var(--gbg);border-color:var(--g);color:var(--g);}
+.mcal-chip-red{background:var(--rbg);border-color:var(--r);color:var(--r);}
+.mcal-chip-gray{background:var(--s3);border-color:var(--bd2);color:var(--td);}
+@media(max-width:768px){
+  .mcal-wrap{padding:10px 8px;}
+  .mcal-title{font-size:16px;min-width:150px;}
+  .mcal-cell{min-height:60px;padding:4px 3px;}
+  .mcal-chip{font-size:8px;padding:1px 4px 1px 3px;}
+  .mcal-dn{font-size:11px;width:20px;height:20px;}
+  .mcal-day-hdr{font-size:9px;padding:5px 2px;text-align:center;}
+}
+
 /* ══════════════════════════════════════════════════
    iOS-NATIVE MOBILE EXPERIENCE
    Inspired by Apple Music / iOS Settings
@@ -1636,6 +1671,84 @@ function SuggestionCard({s,i,onAccept,onReject}){
     </div>
   );
 }
+// ── Month Calendar View ──
+function MonthCalendar({data,onGoToGrant}){
+  const todayRaw=new Date();todayRaw.setHours(0,0,0,0);
+  const today=todayRaw;
+  const[cur,setCur]=useState(new Date(today.getFullYear(),today.getMonth(),1));
+  const yr=cur.getFullYear(),mo=cur.getMonth();
+  const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const DAYS_HDR=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+  const startDow=(new Date(yr,mo,1).getDay()+6)%7; // Mon=0
+  const totalCells=42;
+  const cells=Array.from({length:totalCells},(_,i)=>new Date(yr,mo,1-startDow+i));
+
+  // Remove last row if all other-month
+  const rows=[];
+  for(let i=0;i<42;i+=7)rows.push(cells.slice(i,i+7));
+  while(rows.length>4&&rows[rows.length-1].every(d=>d.getMonth()!==mo))rows.pop();
+
+  const fmtKey=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+
+  const byDate=useMemo(()=>{
+    const m={};
+    data.forEach(g=>{
+      if(!g.deadline)return;
+      const k=g.deadline;
+      if(!m[k])m[k]=[];
+      m[k].push(g);
+    });
+    return m;
+  },[data]);
+
+  const chipCls=s=>{
+    if(s==='05 Received')return'mcal-chip-green';
+    if(s==='04 Denied')return'mcal-chip-red';
+    if(s==='03 Waiting Results')return'mcal-chip-blue';
+    if(s==='01 Apply on deadline'||s==='00 Send Proposal')return'mcal-chip-amber';
+    return'mcal-chip-gray';
+  };
+
+  const hasAny=Object.keys(byDate).some(k=>{const[y,m]=k.split('-').map(Number);return y===yr&&m-1===mo;});
+
+  return(
+    <div className="mcal-wrap">
+      <div className="mcal-header">
+        <button className="mcal-nav" onClick={()=>setCur(new Date(yr,mo-1,1))}><i className="fa-solid fa-chevron-left"/></button>
+        <span className="mcal-title">{MONTHS[mo]} {yr}</span>
+        <button className="mcal-nav" onClick={()=>setCur(new Date(yr,mo+1,1))}><i className="fa-solid fa-chevron-right"/></button>
+        <button className="mcal-today-btn" onClick={()=>setCur(new Date(today.getFullYear(),today.getMonth(),1))}>Today</button>
+        {!hasAny&&<span style={{fontSize:11,color:'var(--tf)',marginLeft:8}}>No deadlines this month</span>}
+      </div>
+      <div className="mcal-grid">
+        {DAYS_HDR.map(d=><div key={d} className="mcal-day-hdr">{d}</div>)}
+        {rows.flat().map((d,i)=>{
+          const key=fmtKey(d);
+          const grants=byDate[key]||[];
+          const isToday=d.getTime()===today.getTime();
+          const isCurMo=d.getMonth()===mo;
+          const isWeekend=d.getDay()===0||d.getDay()===6;
+          return(
+            <div key={i} className={`mcal-cell${isCurMo?'':' other-mo'}${isWeekend?' weekend':''}${isToday?' today':''}`}>
+              <span className="mcal-dn">{d.getDate()}</span>
+              <div className="mcal-chips">
+                {grants.map((g,gi)=>(
+                  <div key={gi} className={`mcal-chip ${chipCls(g.nextStep)}`}
+                    title={[g.foundation,g.grant,g.projectDates].filter(Boolean).join(' · ')}
+                    onClick={()=>onGoToGrant(g)}>
+                    <span className="mcal-chip-txt">{g.foundation||g.grant||'—'}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function SuggestionsView({suggestions,onAccept,onReject}){
   if(suggestions.length===0)return(
     <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',padding:'60px 20px',gap:12,color:'var(--tf)'}}>
@@ -1666,6 +1779,7 @@ function App({initialGrants}){
   const[editMode,setEditMode]=useState(false);
   const[activeView,setActiveView]=useState(false); // "Active Grants" view
   const[calendarView,setCalendarView]=useState(false); // "Upcoming/Calendar" view
+  const[monthView,setMonthView]=useState(false); // Google-calendar style month view
   const[isDark,setIsDark]=useState(()=>localStorage.getItem('polen-theme')==='dark');
   const[suggestions,setSuggestions]=useState([]);
   const[showSuggestions,setShowSuggestions]=useState(false);
@@ -1883,7 +1997,7 @@ function App({initialGrants}){
         <span className="nav-brand"><PolenLogo size={22}/> POLEN</span>
         <div style={{flex:1}}/>
         <div className="topbar-actions">
-          <button className={`theme-btn${editMode?' edit-active':''}`} title="Edit All" onClick={()=>{setEditMode(v=>!v);setActiveView(false);setCalendarView(false);setSuggView(false);}} style={editMode?{borderColor:'var(--y)',color:'var(--y)',background:'var(--ybg)'}:{}}><i className="fa-solid fa-pen"/></button>
+          <button className={`theme-btn${editMode?' edit-active':''}`} title="Edit All" onClick={()=>{setEditMode(v=>!v);setActiveView(false);setCalendarView(false);setSuggView(false);setMonthView(false);}} style={editMode?{borderColor:'var(--y)',color:'var(--y)',background:'var(--ybg)'}:{}}><i className="fa-solid fa-pen"/></button>
           {editMode&&<>
             <button className="theme-btn" title="Save" onClick={async()=>{const r=await saveToServer(data);setSaveMsg(r.msg);setTimeout(()=>setSaveMsg(null),2500);}} style={{borderColor:'var(--g)',color:'var(--g)',background:'var(--gbg)'}}><i className="fa-solid fa-floppy-disk"/></button>
             <button className="theme-btn" title="Export JSON" onClick={()=>exportJSON(data)} style={{borderColor:'var(--b)',color:'var(--b)'}}><i className="fa-solid fa-download"/></button>
@@ -1903,16 +2017,16 @@ function App({initialGrants}){
         <div className="chips-row">
           {/* Desktop: individual pills */}
           {[['all','All',stats.total,null],['apply','Apply',stats.apply,null],['03 Waiting Results','Waiting',stats.waiting,stats.waitingAmtByCur],['05 Received','Awarded',stats.received,null],['04 Denied','Denied',stats.denied,null]].map(([k,l,c,amtByCur])=>
-            <button key={k} className={`chip status-chip-desktop ${statusFilter===k&&!editMode&&!activeView&&!calendarView&&!suggView?'on':''}`}
-              onClick={()=>{setStatusFilter(k);setEditMode(false);setActiveView(false);setCalendarView(false);setSuggView(false);setExpRow(null);}}>
+            <button key={k} className={`chip status-chip-desktop ${statusFilter===k&&!editMode&&!activeView&&!calendarView&&!monthView&&!suggView?'on':''}`}
+              onClick={()=>{setStatusFilter(k);setEditMode(false);setActiveView(false);setCalendarView(false);setMonthView(false);setSuggView(false);setExpRow(null);}}>
               {l}{k!=='all'&&c>0&&<span style={{opacity:.65,marginLeft:4,fontSize:10}}>{c}</span>}{amtByCur&&Object.values(amtByCur).some(v=>v>0)&&<span style={{opacity:.55,marginLeft:4,fontSize:9}}>{fmtByCur(amtByCur)}</span>}
             </button>
           )}
           {/* Mobile: dropdown */}
-          <div className={`chip-sel-wrap status-sel-mobile${statusFilter!=='all'&&!editMode&&!activeView&&!calendarView&&!suggView?' active':''}`}>
-            <select className={`chip-sel${statusFilter!=='all'&&!editMode&&!activeView&&!calendarView&&!suggView?' active':''}`}
+          <div className={`chip-sel-wrap status-sel-mobile${statusFilter!=='all'&&!editMode&&!activeView&&!calendarView&&!monthView&&!suggView?' active':''}`}>
+            <select className={`chip-sel${statusFilter!=='all'&&!editMode&&!activeView&&!calendarView&&!monthView&&!suggView?' active':''}`}
               value={statusFilter}
-              onChange={e=>{setStatusFilter(e.target.value);setEditMode(false);setActiveView(false);setCalendarView(false);setSuggView(false);setExpRow(null);}}>
+              onChange={e=>{setStatusFilter(e.target.value);setEditMode(false);setActiveView(false);setCalendarView(false);setMonthView(false);setSuggView(false);setExpRow(null);}}>
               <option value="all">All ({stats.total})</option>
               <option value="apply">Apply ({stats.apply})</option>
               <option value="03 Waiting Results">Waiting ({stats.waiting})</option>
@@ -1920,14 +2034,15 @@ function App({initialGrants}){
               <option value="04 Denied">Denied ({stats.denied})</option>
             </select>
           </div>
-          <button className={`chip ${activeView&&!editMode&&!calendarView&&!suggView?'on':''}`} onClick={()=>{setActiveView(!activeView);setEditMode(false);setCalendarView(false);setSuggView(false);setExpRow(null);}} style={activeView?{background:'var(--gbg)',color:'var(--g)'}:{}}><i className="fa-solid fa-bolt"/> Active ({stats.active})</button>
-          <button className={`chip ${calendarView&&!editMode&&!suggView?'on':''}`} onClick={()=>{setCalendarView(!calendarView);setEditMode(false);setActiveView(false);setSuggView(false);setExpRow(null);}} style={calendarView?{background:'var(--obg)',color:'var(--o)'}:{}}><i className="fa-solid fa-calendar-days"/> Upcoming{calendarData.reduce((s,m)=>s+m.grants.length,0)>0&&<span style={{marginLeft:5,background:'var(--o)',color:'#fff',borderRadius:10,padding:'0 6px',fontSize:10,fontWeight:800}}>{calendarData.reduce((s,m)=>s+m.grants.length,0)}</span>}</button>
-          <button className={`chip ${suggView?'on':''}`} onClick={()=>{setSuggView(v=>!v);setEditMode(false);setActiveView(false);setCalendarView(false);setExpRow(null);}} style={suggView?{background:'var(--bbg)',color:'var(--b)'}:{}}>
+          <button className={`chip ${activeView&&!editMode&&!calendarView&&!monthView&&!suggView?'on':''}`} onClick={()=>{setActiveView(!activeView);setEditMode(false);setCalendarView(false);setMonthView(false);setSuggView(false);setExpRow(null);}} style={activeView?{background:'var(--gbg)',color:'var(--g)'}:{}}><i className="fa-solid fa-bolt"/> Active ({stats.active})</button>
+          <button className={`chip ${monthView&&!editMode?'on':''}`} onClick={()=>{setMonthView(v=>!v);setEditMode(false);setActiveView(false);setCalendarView(false);setSuggView(false);setExpRow(null);}} style={monthView?{background:'var(--bbg)',color:'var(--b)'}:{}}><i className="fa-solid fa-calendar"/> Month</button>
+          <button className={`chip ${calendarView&&!editMode&&!monthView&&!suggView?'on':''}`} onClick={()=>{setCalendarView(!calendarView);setEditMode(false);setActiveView(false);setMonthView(false);setSuggView(false);setExpRow(null);}} style={calendarView?{background:'var(--obg)',color:'var(--o)'}:{}}><i className="fa-solid fa-calendar-days"/> Upcoming{calendarData.reduce((s,m)=>s+m.grants.length,0)>0&&<span style={{marginLeft:5,background:'var(--o)',color:'#fff',borderRadius:10,padding:'0 6px',fontSize:10,fontWeight:800}}>{calendarData.reduce((s,m)=>s+m.grants.length,0)}</span>}</button>
+          <button className={`chip ${suggView?'on':''}`} onClick={()=>{setSuggView(v=>!v);setEditMode(false);setActiveView(false);setCalendarView(false);setMonthView(false);setExpRow(null);}} style={suggView?{background:'var(--bbg)',color:'var(--b)'}:{}}>
             <i className="fa-solid fa-robot"/> IA{suggestions.length>0&&<span style={{marginLeft:5,background:'var(--r)',color:'#fff',borderRadius:10,padding:'0 6px',fontSize:10,fontWeight:800}}>{suggestions.length}</span>}
           </button>
         </div>
         <span style={{fontSize:11,color:'var(--tf)',marginLeft:'auto',display:'flex',alignItems:'center',gap:8,flexWrap:'wrap',justifyContent:'flex-end'}}>
-          {editMode?`${data.length} entries`:suggView?`${suggestions.length} sugerencias IA pendientes`:calendarView?`${calendarData.reduce((s,m)=>s+m.grants.length,0)} programs · ${calendarData.length} seasons`:activeView?`${activeGroups.length} programs · ${activeGrants.length} active grants`:(()=>{
+          {editMode?`${data.length} entries`:suggView?`${suggestions.length} sugerencias IA pendientes`:monthView?'Month calendar':calendarView?`${calendarData.reduce((s,m)=>s+m.grants.length,0)} programs · ${calendarData.length} seasons`:activeView?`${activeGroups.length} programs · ${activeGrants.length} active grants`:(()=>{
             const curYr=new Date().getFullYear().toString();
             const reqByCur={};
             if(statusFilter==='03 Waiting Results'){
@@ -1952,6 +2067,8 @@ function App({initialGrants}){
           <EditSheet data={data} setData={setData} search={search}/>
         ):suggView?(
           <SuggestionsView suggestions={suggestions} onAccept={s=>acceptSuggestion(s,add,setSuggestions)} onReject={id=>rejectSuggestion(id,setSuggestions)}/>
+        ):monthView?(
+          <MonthCalendar data={data} onGoToGrant={g=>{const k=(g.foundation||'').trim()+'|||'+(g.grant||'').trim();setMonthView(false);setStatusFilter('all');setSearch('');setExpRow(k);}}/>
         ):calendarView?(
           <div className="cal-view">
             {calendarData.length===0?(
