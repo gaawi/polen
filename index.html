@@ -1794,7 +1794,7 @@ function MonthCalendar({data,onClickGrant,todayRef}){
                       style={{gridColumnStart:colStart,gridColumnEnd:colEnd}}
                       title={[g.foundation,g.grant,g.projectDates].filter(Boolean).join(' · ')}
                       onClick={()=>onClickGrant(g)}>
-                      {isUrgent&&<i className="fa-solid fa-triangle-exclamation mcal-chip-warn-ico"/>}
+                      {isUrgent&&<i className="fa-regular fa-circle mcal-chip-warn-ico"/>}
                       <span className="mcal-chip-txt">{g.foundation||g.grant||'—'}</span>
                     </div>
                   );
