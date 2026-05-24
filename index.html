@@ -337,6 +337,23 @@ html.dark .ec-link-ai{background:rgba(124,58,237,.15);color:#a78bfa;border-color
 .mf textarea{min-height:60px;resize:vertical;}
 .ma{display:flex;gap:6px;justify-content:flex-end;margin-top:14px;}
 
+/* Grant event modal (month calendar) */
+.gmodal-ov{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:400;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(6px);animation:gmodal-fade .15s ease-out;}
+.gmodal{position:relative;width:100%;max-width:540px;max-height:88vh;overflow-y:auto;border-radius:16px;animation:gmodal-up .2s ease-out;}
+.gmodal-close{position:absolute;top:14px;right:14px;z-index:10;background:var(--s3);border:1px solid var(--bd);border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--td);font-size:12px;transition:background .12s;}
+.gmodal-close:hover{background:var(--r);color:#fff;border-color:var(--r);}
+.gmodal .tl-entry{padding-left:0;}
+.gmodal .tl-dot,.gmodal .tl-line{display:none;}
+.gmodal .ec-card{margin-bottom:0;border-radius:16px;}
+@keyframes gmodal-fade{from{opacity:0}to{opacity:1}}
+@keyframes gmodal-up{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
+@media(max-width:768px){
+  .gmodal-ov{align-items:flex-end;padding:0;}
+  .gmodal{max-width:100%;max-height:92vh;border-radius:20px 20px 0 0;animation:gmodal-sheet .25s ease-out;}
+  .gmodal .ec-card{border-radius:0;}
+  @keyframes gmodal-sheet{from{transform:translateY(60px);opacity:.6}to{transform:translateY(0);opacity:1}}
+}
+
 /* Flat mode table (status filter) */
 .flat-table{width:100%;border-collapse:collapse;min-width:800px;}
 .flat-table th{background:var(--s2);padding:7px 10px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--tf);font-weight:700;border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:5;}
@@ -1681,7 +1698,7 @@ function SuggestionCard({s,i,onAccept,onReject}){
   );
 }
 // ── Month Calendar View ──
-function MonthCalendar({data,onGoToGrant}){
+function MonthCalendar({data,onClickGrant}){
   const todayRaw=new Date();todayRaw.setHours(0,0,0,0);
   const today=todayRaw;
   const[cur,setCur]=useState(new Date(today.getFullYear(),today.getMonth(),1));
@@ -1748,7 +1765,7 @@ function MonthCalendar({data,onGoToGrant}){
                 {shown.map((g,gi)=>(
                   <div key={gi} className={`mcal-chip ${chipCls(g.nextStep)}`}
                     title={[g.foundation,g.grant,g.projectDates].filter(Boolean).join(' · ')}
-                    onClick={()=>onGoToGrant(g)}>
+                    onClick={()=>onClickGrant(g)}>
                     <span className="mcal-chip-txt">{g.foundation||g.grant||'—'}</span>
                   </div>
                 ))}
@@ -1793,6 +1810,7 @@ function App({initialGrants}){
   const[activeView,setActiveView]=useState(false); // "Active Grants" view
   const[calendarView,setCalendarView]=useState(false); // "Upcoming/Calendar" view
   const[monthView,setMonthView]=useState(false); // Google-calendar style month view
+  const[calModalId,setCalModalId]=useState(null); // month calendar event modal
   const[isDark,setIsDark]=useState(()=>localStorage.getItem('polen-theme')==='dark');
   const[suggestions,setSuggestions]=useState([]);
   const[showSuggestions,setShowSuggestions]=useState(false);
@@ -2004,8 +2022,28 @@ function App({initialGrants}){
   const dupEntry=useCallback(id=>{setData(p=>{const src=p.find(g=>g.id===id);if(!src)return p;const copy={...src,id:Date.now(),notes:(src.notes||'')+' (copy)'};return[copy,...p];});},[]);
   const[expRow,setExpRow]=useState(null);
 
+  const calModalEntry=calModalId?data.find(g=>g.id===calModalId):null;
+  useEffect(()=>{
+    if(!calModalId)return;
+    const h=e=>{if(e.key==='Escape')setCalModalId(null);};
+    document.addEventListener('keydown',h);
+    return()=>document.removeEventListener('keydown',h);
+  },[calModalId]);
+
   return(
     <div className="app">
+      {calModalEntry&&(
+        <div className="gmodal-ov" onClick={()=>setCalModalId(null)}>
+          <div className="gmodal" onClick={ev=>ev.stopPropagation()}>
+            <button className="gmodal-close" onClick={()=>setCalModalId(null)} title="Close"><i className="fa-solid fa-xmark"/></button>
+            <AppEntry e={calModalEntry} isLast={true}
+              onChangeStatus={changeStatus}
+              onChangeField={changeField}
+              onDelete={()=>{delEntry(calModalEntry.id);setCalModalId(null);}}
+              onDuplicate={()=>dupEntry(calModalEntry.id)}/>
+          </div>
+        </div>
+      )}
       <div className="topbar">
         <span className="nav-brand"><PolenLogo size={22}/> POLEN</span>
         <div style={{flex:1}}/>
@@ -2081,7 +2119,7 @@ function App({initialGrants}){
         ):suggView?(
           <SuggestionsView suggestions={suggestions} onAccept={s=>acceptSuggestion(s,add,setSuggestions)} onReject={id=>rejectSuggestion(id,setSuggestions)}/>
         ):monthView?(
-          <MonthCalendar data={data} onGoToGrant={g=>{const k=(g.foundation||'').trim()+'|||'+(g.grant||'').trim();setMonthView(false);setStatusFilter('all');setSearch('');setExpRow(k);}}/>
+          <MonthCalendar data={data} onClickGrant={g=>setCalModalId(g.id)}/>
         ):calendarView?(
           <div className="cal-view">
             {calendarData.length===0?(
