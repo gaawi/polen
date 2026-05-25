@@ -200,13 +200,21 @@ body{font-family:var(--font-mono);background:var(--bg);color:var(--t);min-height
 
 /* LEVEL 3: History panel */
 .hist-panel{background:var(--bg);padding:8px 20px 8px 40px;border-top:1px solid var(--bd);}
-.entry-mini-row{display:flex;align-items:center;gap:8px;padding:8px 10px;cursor:pointer;border-radius:4px;transition:background .1s;border-bottom:1px solid var(--bd);}
+.entry-mini-row{display:flex;align-items:stretch;padding:10px 12px;cursor:pointer;transition:background .1s;border-bottom:1px solid var(--bd);}
 .entry-mini-row:last-child{border-bottom:none;}
 .entry-mini-row:hover{background:var(--s2);}
-.entry-mini-row .emr-year{font-size:10px;font-weight:700;color:var(--td);flex-shrink:0;min-width:32px;}
-.entry-mini-row .emr-dates{font-size:10px;color:var(--tf);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.entry-mini-row .emr-amt{font-size:10px;color:var(--td);font-variant-numeric:tabular-nums;flex-shrink:0;}
-.entry-mini-row .emr-chevron{font-size:8px;color:var(--tf);flex-shrink:0;}
+.emr-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px;}
+.emr-top{display:flex;align-items:center;gap:6px;}
+.emr-year{font-size:11px;font-weight:800;color:var(--t);flex-shrink:0;}
+.emr-dl{font-size:10px;color:var(--tf);flex-shrink:0;}
+.emr-proj{font-size:11px;color:var(--td);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.emr-amt-big{font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;margin-left:auto;flex-shrink:0;padding-right:4px;}
+.emr-amt-big.received{color:var(--g);}
+.emr-docs{display:flex;gap:4px;flex-wrap:wrap;}
+.emr-doc-btn{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:12px;border:1px solid var(--bd);background:var(--s2);color:var(--td);font-size:9px;font-weight:600;text-decoration:none;white-space:nowrap;transition:border-color .1s,color .1s;max-width:160px;}
+.emr-doc-btn span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.emr-doc-btn:hover{border-color:var(--ac);color:var(--t);}
+.emr-chevron{font-size:8px;color:var(--tf);flex-shrink:0;align-self:center;padding-left:4px;}
 .hist-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px 16px;margin-bottom:10px;}
 .hf{display:flex;flex-direction:column;}
 .hf .hl{font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--tf);margin-bottom:1px;}
@@ -275,8 +283,8 @@ html.light .ec-card{background:#fff;border-color:rgba(0,0,0,.07);box-shadow:0 1p
 .ec-year{font-size:18px;font-weight:800;color:var(--acl);line-height:1;margin-bottom:5px;display:flex;align-items:center;gap:6px;}
 .ec-name{font-size:20px;font-weight:800;color:var(--t);line-height:1.2;margin-bottom:3px;}
 .ec-grantname{font-size:12px;color:var(--td);line-height:1.4;margin-top:2px;}
-.ec-project{margin-top:6px;font-size:13px;font-weight:600;color:var(--t);}
-.ec-project span.cte .cte-val{font-size:13px;font-weight:600;color:var(--t);}
+.ec-project{margin-top:6px;font-size:13px;font-weight:600;color:var(--t);word-break:break-word;overflow-wrap:anywhere;}
+.ec-project span.cte .cte-val{font-size:13px;font-weight:600;color:var(--t);white-space:normal;word-break:break-word;overflow-wrap:anywhere;}
 .ec-project span.cte .cte-empty{font-size:12px;color:var(--tf);font-weight:400;}
 /* small link pill buttons */
 .ec-link-btn{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;text-decoration:none;cursor:pointer;border:1px solid var(--bd);background:var(--s2);color:var(--td);transition:all .15s;}
@@ -447,7 +455,7 @@ html.dark .btn-icon-ai{background:#2e1065;color:#a78bfa;}
 .active-2col-grant{font-size:11px;color:var(--td);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;}
 .active-2col-proj{font-size:10px;color:var(--tf);font-style:italic;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;}
 .active-2col-count{font-size:9px;color:var(--tf);flex-shrink:0;margin-left:auto;}
-.entry-mini-row .ns{flex-shrink:0;}
+.entry-mini-row .ns{flex-shrink:0;align-self:center;}
 
 /* ═══ Calendar / Upcoming View ═══ */
 .cal-view{padding:16px 20px;}
@@ -2248,10 +2256,16 @@ function App({initialGrants}){
                 </div>
                 {grp.entries.slice().sort((a,b)=>(b.deadline||'').localeCompare(a.deadline||'')).map(e=>(
                   <div key={e.id} className="entry-mini-row" onClick={()=>setCalModalId(e.id)}>
-                    <span className="emr-year">{e.deadline?e.deadline.substring(0,4):'—'}</span>
-                    <span className={`ns ${STEP_CSS[e.nextStep]||'ns-check'}`}>{STEP_SHORT[e.nextStep]||e.nextStep}</span>
-                    <span className="emr-dates">{e.projectDates||fmtDate(e.deadline)||''}</span>
-                    {(e.amountReceived||e.amount)&&<span className="emr-amt">{fmt(e.amountReceived||e.amount,e.currency||'USD')}</span>}
+                    <div className="emr-main">
+                      <div className="emr-top">
+                        <span className="emr-year">{e.deadline?e.deadline.substring(0,4):'—'}</span>
+                        <span className={`ns ${STEP_CSS[e.nextStep]||'ns-check'}`}>{STEP_SHORT[e.nextStep]||e.nextStep}</span>
+                        {e.deadline&&<span className="emr-dl">{fmtDateShort(e.deadline)}</span>}
+                        {(e.amountReceived||e.amount)&&<span className={`emr-amt-big${e.amountReceived?' received':''}`}>{fmt(e.amountReceived||e.amount,e.currency||'USD')}</span>}
+                      </div>
+                      {e.projectDates&&<div className="emr-proj">{e.projectDates}</div>}
+                      {e.documents?.length>0&&<div className="emr-docs">{e.documents.map((d,di)=>{const ti=DOC_TYPES.find(t=>t.value===d.type)||DOC_TYPES[DOC_TYPES.length-1];return(<a key={di} href={d.url} target="_blank" rel="noreferrer" className="emr-doc-btn" title={d.name} onClick={ev=>ev.stopPropagation()}><i className={`fa-solid ${ti.icon}`}/><span>{d.name}</span></a>);})}</div>}
+                    </div>
                     <i className="fa-solid fa-chevron-right emr-chevron"/>
                   </div>
                 ))}
@@ -2353,10 +2367,16 @@ function App({initialGrants}){
                         </div>
                         {grp.entries.slice().sort((a,b)=>(b.deadline||'').localeCompare(a.deadline||'')).map(e=>(
                           <div key={e.id} className="entry-mini-row" onClick={()=>setCalModalId(e.id)}>
-                            <span className="emr-year">{e.deadline?e.deadline.substring(0,4):'—'}</span>
-                            <span className={`ns ${STEP_CSS[e.nextStep]||'ns-check'}`}>{STEP_SHORT[e.nextStep]||e.nextStep}</span>
-                            <span className="emr-dates">{e.projectDates||fmtDate(e.deadline)||''}</span>
-                            {(e.amountReceived||e.amount)&&<span className="emr-amt">{fmt(e.amountReceived||e.amount,e.currency||'USD')}</span>}
+                            <div className="emr-main">
+                              <div className="emr-top">
+                                <span className="emr-year">{e.deadline?e.deadline.substring(0,4):'—'}</span>
+                                <span className={`ns ${STEP_CSS[e.nextStep]||'ns-check'}`}>{STEP_SHORT[e.nextStep]||e.nextStep}</span>
+                                {e.deadline&&<span className="emr-dl">{fmtDateShort(e.deadline)}</span>}
+                                {(e.amountReceived||e.amount)&&<span className={`emr-amt-big${e.amountReceived?' received':''}`}>{fmt(e.amountReceived||e.amount,e.currency||'USD')}</span>}
+                              </div>
+                              {e.projectDates&&<div className="emr-proj">{e.projectDates}</div>}
+                              {e.documents?.length>0&&<div className="emr-docs">{e.documents.map((d,di)=>{const ti=DOC_TYPES.find(t=>t.value===d.type)||DOC_TYPES[DOC_TYPES.length-1];return(<a key={di} href={d.url} target="_blank" rel="noreferrer" className="emr-doc-btn" title={d.name} onClick={ev=>ev.stopPropagation()}><i className={`fa-solid ${ti.icon}`}/><span>{d.name}</span></a>);})}</div>}
+                            </div>
                             <i className="fa-solid fa-chevron-right emr-chevron"/>
                           </div>
                         ))}
