@@ -533,10 +533,11 @@ html.light .mcal-dn{color:#000;}
 .mcal-cell.today{background:var(--ac);flex-direction:column;align-items:flex-start;justify-content:center;gap:1px;border-right:1px solid var(--bd);}
 .mcal-cell.today .mcal-dn{color:#000 !important;}
 .mcal-today-lbl{font-size:6px;font-weight:800;text-transform:uppercase;color:rgba(0,0,0,.55);letter-spacing:.4px;line-height:1;padding-left:2px;}
-.mcal-mo-sep{position:relative;height:44px;overflow:visible;}
-.mcal-mo-sep::before{content:'';position:absolute;left:0;bottom:0;width:calc(var(--bi,0)/7*100%);border-bottom:3px solid var(--t);pointer-events:none;}
-.mcal-mo-sep::after{content:'';position:absolute;left:calc(var(--bi,0)/7*100%);right:0;top:0;bottom:0;border-top:3px solid var(--t);border-left:3px solid var(--t);pointer-events:none;}
-.mcal-mo-sep-lbl{position:absolute;left:6px;bottom:6px;font-size:20px;font-weight:900;color:var(--t);line-height:1;letter-spacing:-.5px;}
+.mcal-cell.mo-end{border-bottom:2px solid var(--td);}
+.mcal-cell.mo-start{border-left:2px solid var(--td);border-top:2px solid var(--td);}
+.mcal-cell.mo-after{border-top:2px solid var(--td);}
+.mcal-mo-sep{position:relative;height:28px;}
+.mcal-mo-sep-lbl{position:absolute;left:6px;top:4px;font-size:18px;font-weight:900;color:var(--td);line-height:1;letter-spacing:-.5px;}
 /* Chips layer — column separators via gradient matching day-cell borders */
 .mcal-chips-layer{display:grid;grid-template-columns:repeat(7,1fr);grid-auto-flow:row;gap:2px;padding:1px 2px 4px;border-bottom:1px solid var(--bd);background-image:repeating-linear-gradient(to right,transparent,transparent calc(100% / 7 - 1px),var(--bd) calc(100% / 7 - 1px),var(--bd) calc(100% / 7));}
 /* Chip is flex so warning icon + text sit on one line */
@@ -562,8 +563,8 @@ html.light .mcal-dn{color:#000;}
   .mcal-dn{font-size:12px;width:20px;height:20px;}
   .mcal-mo-tag{font-size:6px;}
   .mcal-day-hdr{font-size:8px;padding:5px 2px;letter-spacing:0;}
-  .mcal-mo-sep{height:34px;}
-  .mcal-mo-sep-lbl{font-size:14px;bottom:4px;left:4px;}
+  .mcal-mo-sep{height:22px;}
+  .mcal-mo-sep-lbl{font-size:12px;top:3px;left:4px;}
 }
 
 /* ══════════════════════════════════════════════════
@@ -1791,19 +1792,29 @@ function MonthCalendar({data,onClickGrant,todayRef}){
           });
           return(
             <div key={wi} className="mcal-week-row" ref={isTodayWeek?todayRef:null}>
-              {(()=>{const bi=week.findIndex(d=>d.getDate()===1);if(bi<0)return null;const nm=week[bi];const lbl=MONTHS[nm.getMonth()]+(nm.getMonth()===0?` ${nm.getFullYear()}`:'');return <div className="mcal-mo-sep" style={{'--bi':bi}}><span className="mcal-mo-sep-lbl">{lbl}</span></div>;})()}
-              <div className="mcal-days-layer">
-                {week.map((d,di)=>{
-                  const isToday=d.getTime()===today.getTime();
-                  const isWeekend=d.getDay()===0||d.getDay()===6;
-                  return(
-                    <div key={di} className={`mcal-cell${isWeekend?' weekend':''}${isToday?' today':''}`}>
-                      <span className="mcal-dn">{d.getDate()}</span>
-                      {isToday&&<span className="mcal-today-lbl">today</span>}
-                    </div>
-                  );
-                })}
-              </div>
+              {(()=>{
+                const bi=week.findIndex(d=>d.getDate()===1);
+                const hasMo=bi>=0;
+                const moLbl=hasMo?(MONTHS[week[bi].getMonth()]+(week[bi].getMonth()===0?` ${week[bi].getFullYear()}`:'')):null;
+                return <>
+                  <div className="mcal-days-layer">
+                    {week.map((d,di)=>{
+                      const isToday=d.getTime()===today.getTime();
+                      const isWeekend=d.getDay()===0||d.getDay()===6;
+                      const moEnd=hasMo&&bi>0&&di<bi;
+                      const moStart=hasMo&&di===bi;
+                      const moAfter=hasMo&&di>bi;
+                      return(
+                        <div key={di} className={`mcal-cell${isWeekend?' weekend':''}${isToday?' today':''}${moEnd?' mo-end':''}${moStart?' mo-start':''}${moAfter?' mo-after':''}`}>
+                          <span className="mcal-dn">{d.getDate()}</span>
+                          {isToday&&<span className="mcal-today-lbl">today</span>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {hasMo&&<div className="mcal-mo-sep"><span className="mcal-mo-sep-lbl">{moLbl}</span></div>}
+                </>;
+              })()}
               <div className="mcal-chips-layer">
                 {weekChips.map(({di,g,extra},i)=>{
                   const colStart=di+1;
