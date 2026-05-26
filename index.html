@@ -1810,7 +1810,7 @@ function MonthCalendar({data,onClickGrant,todayRef}){
                 const bi=week.findIndex(d=>d.getDate()===1);
                 const hasMo=bi>=0;
                 const moLbl=hasMo?(MONTHS[week[bi].getMonth()]+(week[bi].getMonth()===0?` ${week[bi].getFullYear()}`:'')):null;
-                return <>
+                return <React.Fragment>
                   <div className="mcal-days-layer">
                     {week.map((d,di)=>{
                       const isToday=d.getTime()===today.getTime();
@@ -1827,7 +1827,7 @@ function MonthCalendar({data,onClickGrant,todayRef}){
                     })}
                   </div>
                   {hasMo&&<div className="mcal-mo-sep"><span className="mcal-mo-sep-lbl">{moLbl}</span></div>}
-                </>;
+                </React.Fragment>;
               })()}
               <div className="mcal-chips-layer">
                 {weekChips.map(({di,g,extra},i)=>{
@@ -2325,6 +2325,12 @@ function App({initialGrants}){
                 const relStr=days<0?`${Math.abs(days)}d ago`:days===0?'Today':days<=60?`${days}d`:`${Math.round(days/30)}mo`;
                 const latestStep=grp.primary.nextStep;
                 const dType=nd?nd.deadlineType:'';
+                const MO3X=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                const dlParts=nd&&nd.deadline?nd.deadline.split('-'):null;
+                const dlMo=dlParts?MO3X[+dlParts[1]-1]:'';
+                const dlDay=dlParts?+dlParts[2]:'';
+                const dlYr=dlParts?("'"+dlParts[0].slice(2)):'';
+                const isEst=dType&&dType!=='DDLNE!';
                 // Semáforo: year history dots
                 const semEntries=grp.entries.slice().sort((a,b)=>(a.deadline||'').localeCompare(b.deadline||''));
                 return(
@@ -2334,21 +2340,21 @@ function App({initialGrants}){
                     <td className="mob-line1">
                       <div className="dl-cell">
                         <span className="dl-chev" style={{transform:isExp?'rotate(90deg)':'rotate(0deg)'}}><i className="fa-solid fa-chevron-right"/></span>
-                        {nd&&nd.deadline?(()=>{
-                          const MO3X=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-                          const [yy,mm,dd]=nd.deadline.split('-');
-                          return(<>
+                        {dlParts?(
+                          <React.Fragment>
                             <div className={`dl-tile ${dc}`}>
-                              <span className="dlt-mo">{MO3X[+mm-1]}</span>
-                              <span className="dlt-day">{+dd}</span>
-                              <span className="dlt-yr">'{yy.slice(2)}</span>
+                              <span className="dlt-mo">{dlMo}</span>
+                              <span className="dlt-day">{dlDay}</span>
+                              <span className="dlt-yr">{dlYr}</span>
                             </div>
                             <div className="dl-meta">
                               <span className={`fd-rel ${dc}`}>{relStr}</span>
-                              {dType&&dType!=='DDLNE!'&&<span className="dl-est-badge">EST</span>}
+                              {isEst&&<span className="dl-est-badge">EST</span>}
                             </div>
-                          </>);
-                        })():(<span className="g-deadline" style={{color:'var(--tf)'}}>—</span>)}
+                          </React.Fragment>
+                        ):(
+                          <span className="g-deadline" style={{color:'var(--tf)'}}>—</span>
+                        )}
                       </div>
                     </td>
                     {/* Line 2: Foundation */}
