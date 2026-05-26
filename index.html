@@ -363,9 +363,9 @@ html.dark .ec-link-ai{background:rgba(124,58,237,.15);color:#a78bfa;border-color
 @keyframes gmodal-fade{from{opacity:0}to{opacity:1}}
 @keyframes gmodal-up{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
 @media(max-width:768px){
-  .gmodal-ov{align-items:flex-end;padding:0;}
-  .gmodal{max-width:100%;max-height:92vh;border-radius:20px 20px 0 0;animation:gmodal-sheet .25s ease-out;}
-  .gmodal .ec-card{border-radius:0;padding:16px;}
+  .gmodal-ov{align-items:flex-end;padding:0;width:100vw;}
+  .gmodal{width:100%;max-width:100%;max-height:92vh;border-radius:20px 20px 0 0;animation:gmodal-sheet .25s ease-out;overflow:hidden;}
+  .gmodal .ec-card{border-radius:0;padding:16px;width:100%;box-sizing:border-box;}
   @keyframes gmodal-sheet{from{transform:translateY(60px);opacity:.6}to{transform:translateY(0);opacity:1}}
 }
 
@@ -530,9 +530,13 @@ html.light .mcal-cell.weekend{background:#fafafa;}
 .mcal-mo-tag.cur-mo{color:var(--acl);}
 .mcal-dn{font-size:14px;font-weight:900;color:#fff;display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;line-height:1;flex-shrink:0;}
 html.light .mcal-dn{color:#000;}
-.mcal-cell.today{background:var(--acbg);flex-direction:column;align-items:flex-start;justify-content:center;gap:1px;border-right:1px solid var(--bd);}
-.mcal-cell.today .mcal-dn{color:var(--ac);}
-.mcal-today-lbl{font-size:6px;font-weight:800;text-transform:uppercase;color:var(--acl);letter-spacing:.4px;line-height:1;padding-left:2px;}
+.mcal-cell.today{background:var(--ac);flex-direction:column;align-items:flex-start;justify-content:center;gap:1px;border-right:1px solid var(--bd);}
+.mcal-cell.today .mcal-dn{color:#000 !important;}
+.mcal-today-lbl{font-size:6px;font-weight:800;text-transform:uppercase;color:rgba(0,0,0,.55);letter-spacing:.4px;line-height:1;padding-left:2px;}
+.mcal-mo-sep{position:relative;height:44px;overflow:visible;}
+.mcal-mo-sep::before{content:'';position:absolute;left:0;bottom:0;width:calc(var(--bi,0)/7*100%);border-bottom:3px solid var(--t);pointer-events:none;}
+.mcal-mo-sep::after{content:'';position:absolute;left:calc(var(--bi,0)/7*100%);right:0;top:0;bottom:0;border-top:3px solid var(--t);border-left:3px solid var(--t);pointer-events:none;}
+.mcal-mo-sep-lbl{position:absolute;left:6px;bottom:6px;font-size:20px;font-weight:900;color:var(--t);line-height:1;letter-spacing:-.5px;}
 /* Chips layer — column separators via gradient matching day-cell borders */
 .mcal-chips-layer{display:grid;grid-template-columns:repeat(7,1fr);grid-auto-flow:row;gap:2px;padding:1px 2px 4px;border-bottom:1px solid var(--bd);background-image:repeating-linear-gradient(to right,transparent,transparent calc(100% / 7 - 1px),var(--bd) calc(100% / 7 - 1px),var(--bd) calc(100% / 7));}
 /* Chip is flex so warning icon + text sit on one line */
@@ -558,6 +562,8 @@ html.light .mcal-dn{color:#000;}
   .mcal-dn{font-size:12px;width:20px;height:20px;}
   .mcal-mo-tag{font-size:6px;}
   .mcal-day-hdr{font-size:8px;padding:5px 2px;letter-spacing:0;}
+  .mcal-mo-sep{height:34px;}
+  .mcal-mo-sep-lbl{font-size:14px;bottom:4px;left:4px;}
 }
 
 /* ══════════════════════════════════════════════════
@@ -1785,14 +1791,13 @@ function MonthCalendar({data,onClickGrant,todayRef}){
           });
           return(
             <div key={wi} className="mcal-week-row" ref={isTodayWeek?todayRef:null}>
+              {(()=>{const bi=week.findIndex(d=>d.getDate()===1);if(bi<0)return null;const nm=week[bi];const lbl=MONTHS[nm.getMonth()]+(nm.getMonth()===0?` ${nm.getFullYear()}`:'');return <div className="mcal-mo-sep" style={{'--bi':bi}}><span className="mcal-mo-sep-lbl">{lbl}</span></div>;})()}
               <div className="mcal-days-layer">
                 {week.map((d,di)=>{
                   const isToday=d.getTime()===today.getTime();
                   const isWeekend=d.getDay()===0||d.getDay()===6;
-                  const isFirst=d.getDate()===1;
                   return(
                     <div key={di} className={`mcal-cell${isWeekend?' weekend':''}${isToday?' today':''}`}>
-                      {isFirst&&<div className={`mcal-mo-tag${d.getMonth()===today.getMonth()&&d.getFullYear()===today.getFullYear()?' cur-mo':''}`}>{MO3[d.getMonth()]}{d.getMonth()===0?` ${d.getFullYear()}`:''}</div>}
                       <span className="mcal-dn">{d.getDate()}</span>
                       {isToday&&<span className="mcal-today-lbl">today</span>}
                     </div>
