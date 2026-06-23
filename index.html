@@ -1183,6 +1183,7 @@ function fmtDateShort(d){const dt=parseDeadline(d);if(!dt)return'—';return dt.
 // Thermometer
 const MO={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
 function pDate(s){if(!s)return null;const m=s.trim().replace(/\./g,'').match(/([A-Za-z]+)\s+(\d{1,2}),?\s*(\d{2,4})/);if(m){const mo=MO[m[1].toLowerCase().substring(0,3)];if(mo!==undefined){let y=parseInt(m[3]);if(y<100)y+=2000;return new Date(y,mo,parseInt(m[2]));}}return null;}
+function toLocalISO(d){if(!d)return'';const y=d.getFullYear();const m=String(d.getMonth()+1).padStart(2,'0');const dd=String(d.getDate()).padStart(2,'0');return`${y}-${m}-${dd}`;}
 function pPeriod(p){if(!p)return null;const pts=p.split(/\s*(?:–|—|to|-)\s*/);if(pts.length<2)return null;const s=pDate(pts[0]),e=pDate(pts[pts.length-1]);return s&&e?{start:s,end:e}:null;}
 function Thermo({period,deadline,reportDeadline}){
   const p=pPeriod(period);if(!p)return null;
@@ -1228,7 +1229,7 @@ function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
     const src=isEditing?draft.eligiblePeriod:e.eligiblePeriod;
     if(!src)return{start:'',end:''};
     const pts=src.split(/\s*(?:–|—|to|-)\s*/);
-    const toISO=s=>{const d=pDate(s);return d?d.toISOString().substring(0,10):''};
+    const toISO=s=>{const d=pDate(s);return d?toLocalISO(d):''};
     return{start:toISO(pts[0]||''),end:pts.length>1?toISO(pts[pts.length-1]):''};
   },[e.eligiblePeriod,draft.eligiblePeriod,isEditing]);
   const setDraftField=(k,v)=>setDraft(p=>({...p,[k]:v}));
@@ -1653,7 +1654,7 @@ function EditSheet({data,setData,search}){
   const parsePeriodDates=(period)=>{
     if(!period)return{start:'',end:''};
     const pts=period.split(/\s*(?:–|—|to|-)\s*/);
-    const toISO=(s)=>{const d=pDate(s);return d?d.toISOString().substring(0,10):''};
+    const toISO=(s)=>{const d=pDate(s);return d?toLocalISO(d):''};
     return{start:toISO(pts[0]||''),end:pts.length>1?toISO(pts[pts.length-1]):''}
   };
   const del=(id)=>{
