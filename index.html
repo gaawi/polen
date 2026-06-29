@@ -196,6 +196,8 @@ body{font-family:var(--font-mono);background:var(--bg);color:var(--t);min-height
 .dl-meta .fd-rel{font-size:9px;font-weight:600;white-space:nowrap;}
 .dl-est-badge{font-size:7px;font-weight:800;padding:1px 5px;border-radius:3px;text-transform:uppercase;letter-spacing:.4px;color:var(--y);background:var(--ybg);border:1px solid var(--y);}
 .g-name{font-weight:600;max-width:320px;white-space:normal;word-break:break-word;line-height:1.3;}
+.g-name-2l{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.proj-2l{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.3;white-space:normal;word-break:break-word;}
 .g-year{font-size:12px;font-weight:700;color:var(--ac);}
 .g-amt{font-variant-numeric:tabular-nums;font-weight:700;color:var(--g);}
 
@@ -386,10 +388,12 @@ textarea.ec-ei{resize:vertical;min-height:72px;line-height:1.5;}
 .task-add-row input[type=text]{flex:1;min-width:120px;}
 .task-add-btn{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:6px;border:none;background:var(--ac);color:#000;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0;}
 /* Task alert pill in lists */
-.task-alert{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:800;padding:1px 6px;border-radius:10px;white-space:nowrap;vertical-align:middle;}
-.task-alert.soon,.task-alert.past{background:var(--rbg);color:var(--r);}
-.task-alert.upcoming{background:var(--ybg);color:var(--y);}
-.task-alert.future{background:var(--bbg);color:var(--b);}
+.task-alert{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:800;padding:2px 8px;border-radius:5px;white-space:nowrap;vertical-align:middle;border:1px solid transparent;border-left-width:3px;text-transform:uppercase;letter-spacing:.2px;}
+.task-alert i{font-size:9px;}
+.task-alert.soon,.task-alert.past{background:var(--rbg);color:var(--r);border-color:var(--r);animation:task-pulse 2s ease-out infinite;}
+.task-alert.upcoming{background:var(--ybg);color:var(--y);border-color:var(--y);}
+.task-alert.future{background:var(--bbg);color:var(--b);border-color:var(--b);}
+@keyframes task-pulse{0%,100%{box-shadow:0 0 0 0 rgba(220,50,50,.35);}60%{box-shadow:0 0 0 4px rgba(220,50,50,0);}}
 /* Header bell + badge */
 .hdr-bell{position:relative;}
 .hdr-bell-badge{position:absolute;top:-5px;right:-5px;min-width:15px;height:15px;padding:0 3px;border-radius:8px;background:var(--r);color:#fff;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;line-height:1;box-sizing:border-box;}
@@ -1616,6 +1620,9 @@ function DocsSection({e,onChangeField}){
 function TasksSection({e,onChangeField}){
   const[txt,setTxt]=useState('');
   const[dl,setDl]=useState('');
+  const[editId,setEditId]=useState(null);
+  const[eTxt,setETxt]=useState('');
+  const[eDl,setEDl]=useState('');
   const tasks=(e.tasks||[]).slice().sort((a,b)=>{
     if(!!a.done!==!!b.done)return a.done?1:-1;
     return(a.deadline||'9999').localeCompare(b.deadline||'9999');
@@ -1628,20 +1635,32 @@ function TasksSection({e,onChangeField}){
   };
   const toggle=id=>commit((e.tasks||[]).map(t=>t.id===id?{...t,done:!t.done}:t));
   const del=id=>commit((e.tasks||[]).filter(t=>t.id!==id));
+  const startEdit=t=>{setEditId(t.id);setETxt(t.text);setEDl(t.deadline||'');};
+  const saveEdit=()=>{if(!eTxt.trim()){setEditId(null);return;}commit((e.tasks||[]).map(t=>t.id===editId?{...t,text:eTxt.trim(),deadline:eDl||''}:t));setEditId(null);};
   return(
     <div className="ec-row ec-tasks-row" style={{alignItems:'flex-start'}}>
       <i className="fa-solid fa-list-check ec-ico"/>
       <span className="ec-lbl">Tasks</span>
       <div className="ec-val tasks-sec">
         {tasks.length>0&&tasks.map(t=>(
+          editId===t.id?(
+            <div key={t.id} className="task-add-row" onClick={ev=>ev.stopPropagation()} style={{marginTop:0,paddingBottom:8,borderBottom:'1px solid var(--bd)'}}>
+              <input autoFocus className="ec-ei" type="text" value={eTxt} onChange={ev=>setETxt(ev.target.value)} onKeyDown={ev=>{if(ev.key==='Enter')saveEdit();if(ev.key==='Escape')setEditId(null);}}/>
+              <input className="ec-ei short" type="date" style={{width:150}} value={eDl} onChange={ev=>setEDl(ev.target.value)}/>
+              <button className="task-add-btn" onClick={saveEdit}><i className="fa-solid fa-check"/> Save</button>
+              <button className="ec-cancel-btn" style={{padding:'5px 10px',fontSize:11}} onClick={()=>setEditId(null)}>Cancel</button>
+            </div>
+          ):(
           <div key={t.id} className="task-item">
             <button className={`task-chk${t.done?' done':''}`} title={t.done?'Mark not done':'Mark done'} onClick={ev=>{ev.stopPropagation();toggle(t.id);}}>{t.done&&<i className="fa-solid fa-check"/>}</button>
             <div className="task-body">
               <span className={`task-text${t.done?' done':''}`}>{t.text}</span>
               {t.deadline&&<div className="task-meta"><span className={`task-dl ${t.done?'future':taskCls(t.deadline)}`}>{fmtDateShort(t.deadline)} · {taskRel(t.deadline)}</span></div>}
             </div>
+            <button className="task-del" title="Edit task" onClick={ev=>{ev.stopPropagation();startEdit(t);}}><i className="fa-solid fa-pen" style={{fontSize:10}}/></button>
             <button className="task-del" title="Delete task" onClick={ev=>{ev.stopPropagation();del(t.id);}}><i className="fa-solid fa-xmark"/></button>
           </div>
+          )
         ))}
         <div className="task-add-row" onClick={ev=>ev.stopPropagation()}>
           <input className="ec-ei" type="text" value={txt} placeholder="New task, e.g. Subsanar proyecto" onChange={ev=>setTxt(ev.target.value)} onKeyDown={ev=>{if(ev.key==='Enter')addTask();}}/>
@@ -2483,7 +2502,7 @@ function App({initialGrants}){
                         <span className={`ns ${STEP_CSS[e.nextStep]||'ns-check'}`}>{STEP_SHORT[e.nextStep]||e.nextStep}</span>
                         {e.deadline&&<span className="emr-dl">{fmtDateShort(e.deadline)}</span>}
                         {(e.amountReceived||e.amount)&&<span className={`emr-amt-big${e.amountReceived?' received':''}`}>{fmt(e.amountReceived||e.amount,e.currency||'USD')}</span>}
-                        {(()=>{const ti=pendingTaskInfo(e);return ti?<span className={`task-alert ${ti.cls}`} title={`${ti.count} pending task${ti.count>1?'s':''}`}><i className="fa-solid fa-list-check"/>{ti.count}{ti.nearest.deadline?` · ${taskRel(ti.nearest.deadline)}`:''}</span>:null;})()}
+                        {(()=>{const ti=pendingTaskInfo(e);return ti?<span className={`task-alert ${ti.cls}`} title={ti.nearest.text}><i className="fa-solid fa-triangle-exclamation"/>{ti.count} pending task{ti.count>1?'s':''}{ti.nearest.deadline?` · ${taskRel(ti.nearest.deadline)}`:''}</span>:null;})()}
                       </div>
                       {e.projectDates&&<div className="emr-proj">{e.projectDates}</div>}
                       {e.documents?.length>0&&<div className="emr-docs">{e.documents.map((d,di)=>{const ti=DOC_TYPES.find(t=>t.value===d.type)||DOC_TYPES[DOC_TYPES.length-1];return(<a key={di} href={d.url} target="_blank" rel="noreferrer" className="emr-doc-btn" title={d.name} onClick={ev=>ev.stopPropagation()}><i className={`fa-solid ${ti.icon}`}/><span>{d.name}</span></a>);})}</div>}
@@ -2559,18 +2578,20 @@ function App({initialGrants}){
                     </td>
                     {/* Line 3: Grant program + semáforo */}
                     <td className="flat-gname">
-                      <span className="g-name" style={{display:'inline'}}>{grp.grant||'—'}{grp.grant&&<CopyBtn text={grp.grant}/>}</span>
-                      <span className="prog-sem" style={{marginLeft:6}}>
-                        {semEntries.map(e=>{
-                          const yr=e.deadline?e.deadline.substring(2,4):'?';
-                          const cls=e.nextStep==='05 Received'?'received':e.nextStep==='04 Denied'?'denied':e.nextStep==='03 Waiting Results'?'waiting':e.nextStep==='07 Missed Deadline'?'missed':e.nextStep==='08 Not Eligible'?'notelig':e.nextStep==='02 Check'?'check':'apply';
-                          return <span key={e.id} className="sem-yr"><span className={`sem-dot ${cls}`}/><span className="sem-lbl">{yr}</span></span>;
-                        })}
-                      </span>
-                      {grpPendTasks.length>0&&<span className={`task-alert ${grpTaskCls}`} style={{marginLeft:6}} title={`${grpPendTasks.length} pending task${grpPendTasks.length>1?'s':''}`}><i className="fa-solid fa-list-check"/>{grpPendTasks.length}{grpTaskNearest&&grpTaskNearest.deadline?` · ${taskRel(grpTaskNearest.deadline)}`:''}</span>}
+                      <span className="g-name g-name-2l">{grp.grant||'—'}{grp.grant&&<CopyBtn text={grp.grant}/>}</span>
+                      <div style={{display:'flex',alignItems:'center',gap:6,flexWrap:'wrap',marginTop:3}}>
+                        <span className="prog-sem">
+                          {semEntries.map(e=>{
+                            const yr=e.deadline?e.deadline.substring(2,4):'?';
+                            const cls=e.nextStep==='05 Received'?'received':e.nextStep==='04 Denied'?'denied':e.nextStep==='03 Waiting Results'?'waiting':e.nextStep==='07 Missed Deadline'?'missed':e.nextStep==='08 Not Eligible'?'notelig':e.nextStep==='02 Check'?'check':'apply';
+                            return <span key={e.id} className="sem-yr"><span className={`sem-dot ${cls}`}/><span className="sem-lbl">{yr}</span></span>;
+                          })}
+                        </span>
+                        {grpPendTasks.length>0&&<span className={`task-alert ${grpTaskCls}`} title={grpTaskNearest?grpTaskNearest.text:''}><i className="fa-solid fa-triangle-exclamation"/>{grpPendTasks.length} pending task{grpPendTasks.length>1?'s':''}{grpTaskNearest&&grpTaskNearest.deadline?` · ${taskRel(grpTaskNearest.deadline)}`:''}</span>}
+                      </div>
                       {grp.primary.projectDates&&<div style={{fontSize:10,color:'var(--tf)',marginTop:2,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis',display:'none'}} className="proj-mob">{grp.primary.projectDates}</div>}
                     </td>
-                    <td className="desk-only" style={{fontSize:12,fontWeight:600,color:'var(--t)',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis',maxWidth:280}}>{grp.primary.projectDates||''}</td>
+                    <td className="desk-only" style={{maxWidth:280}}><div className="proj-2l" style={{fontSize:12,fontWeight:600,color:'var(--t)'}}>{grp.primary.projectDates||''}</div></td>
                     {/* Desktop-only separate cells */}
                     <td className="desk-only"><span className={`ns ${STEP_CSS[latestStep]||'ns-check'}`}>{STEP_SHORT[latestStep]||latestStep}</span></td>
                     <td className="desk-only" style={{fontVariantNumeric:'tabular-nums',fontSize:11,color:'var(--td)'}}>{grp.primary.amount?fmt(grp.primary.amount,grp.primary.currency||'USD'):''}</td>
