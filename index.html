@@ -363,6 +363,54 @@ textarea.ec-ei{resize:vertical;min-height:72px;line-height:1.5;}
 .ec-fv{font-size:13px;color:var(--t);}
 .ec-fv.muted{color:var(--tf);font-style:italic;}
 .ec-edit-row{display:flex;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--bd);justify-content:flex-end;}
+/* ═══ Tasks ═══ */
+/* task urgency colors reuse: soon=red, upcoming=amber, future=blue, past(overdue)=red */
+.task-chk{width:18px;height:18px;border-radius:5px;border:2px solid var(--tf);background:none;cursor:pointer;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:10px;transition:all .12s;padding:0;}
+.task-chk:hover{border-color:var(--g);}
+.task-chk.done{background:var(--g);border-color:var(--g);}
+/* Tasks section in modal */
+.tasks-sec{margin-top:4px;}
+.task-item{display:flex;align-items:flex-start;gap:9px;padding:8px 0;border-bottom:1px solid var(--bd);}
+.task-item:last-child{border-bottom:none;}
+.task-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
+.task-text{font-size:13px;color:var(--t);font-weight:500;line-height:1.3;word-break:break-word;}
+.task-text.done{text-decoration:line-through;color:var(--tf);font-weight:400;}
+.task-meta{display:flex;align-items:center;gap:6px;}
+.task-dl{font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;white-space:nowrap;}
+.task-dl.soon,.task-dl.past{background:var(--rbg);color:var(--r);}
+.task-dl.upcoming{background:var(--ybg);color:var(--y);}
+.task-dl.future{background:var(--bbg);color:var(--b);}
+.task-del{background:none;border:none;color:var(--tf);cursor:pointer;font-size:11px;padding:3px 5px;opacity:.5;flex-shrink:0;border-radius:4px;}
+.task-del:hover{opacity:1;color:var(--r);background:var(--rbg);}
+.task-add-row{display:flex;gap:6px;align-items:center;margin-top:8px;flex-wrap:wrap;}
+.task-add-row input[type=text]{flex:1;min-width:120px;}
+.task-add-btn{display:inline-flex;align-items:center;gap:4px;padding:5px 12px;border-radius:6px;border:none;background:var(--ac);color:#000;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0;}
+/* Task alert pill in lists */
+.task-alert{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:800;padding:1px 6px;border-radius:10px;white-space:nowrap;vertical-align:middle;}
+.task-alert.soon,.task-alert.past{background:var(--rbg);color:var(--r);}
+.task-alert.upcoming{background:var(--ybg);color:var(--y);}
+.task-alert.future{background:var(--bbg);color:var(--b);}
+/* Header bell + badge */
+.hdr-bell{position:relative;}
+.hdr-bell-badge{position:absolute;top:-5px;right:-5px;min-width:15px;height:15px;padding:0 3px;border-radius:8px;background:var(--r);color:#fff;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;line-height:1;box-sizing:border-box;}
+/* Tasks panel: desktop sidebar / mobile modal */
+.tpanel-ov{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:450;animation:gmodal-fade .15s ease-out;}
+.tpanel{position:fixed;top:0;right:0;bottom:0;width:380px;max-width:90vw;background:var(--s1);border-left:1px solid var(--bd);box-shadow:-6px 0 24px rgba(0,0,0,.25);z-index:451;display:flex;flex-direction:column;animation:tpanel-in .22s ease-out;}
+@keyframes tpanel-in{from{transform:translateX(100%)}to{transform:translateX(0)}}
+.tpanel-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--bd);flex-shrink:0;}
+.tpanel-title{font-size:15px;font-weight:800;color:var(--t);display:flex;align-items:center;gap:8px;}
+.tpanel-body{flex:1;overflow-y:auto;padding:8px 0;}
+.tpanel-empty{text-align:center;color:var(--tf);font-size:13px;padding:40px 20px;}
+.tpanel-grp-hdr{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--tf);padding:10px 18px 4px;}
+.tpanel-task{display:flex;align-items:flex-start;gap:10px;padding:10px 18px;cursor:pointer;border-bottom:1px solid var(--bd);transition:background .1s;}
+.tpanel-task:hover{background:var(--s2);}
+.tpanel-task-body{flex:1;min-width:0;}
+.tpanel-task-text{font-size:13px;color:var(--t);font-weight:600;line-height:1.3;word-break:break-word;}
+.tpanel-task-text.done{text-decoration:line-through;color:var(--tf);font-weight:400;}
+.tpanel-task-sub{font-size:10px;color:var(--td);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+@media(max-width:768px){
+  .tpanel{top:auto;left:0;right:0;bottom:0;width:100%;max-width:100%;height:auto;max-height:85vh;border-left:none;border-top:1px solid var(--bd);border-radius:20px 20px 0 0;animation:gmodal-sheet .25s ease-out;}
+}
 .ec-cta-primary{flex:1;padding:12px;background:var(--ac);color:#000;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-family:inherit;text-decoration:none;transition:opacity .15s;}
 .ec-cta-primary:hover{opacity:.88;}
 .ec-cta-sec{padding:12px 14px;background:var(--s2);color:var(--t);border:1px solid var(--bd);border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:inherit;}
@@ -1184,6 +1232,9 @@ function fmtDateShort(d){const dt=parseDeadline(d);if(!dt)return'—';return dt.
 const MO={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
 function pDate(s){if(!s)return null;const m=s.trim().replace(/\./g,'').match(/([A-Za-z]+)\s+(\d{1,2}),?\s*(\d{2,4})/);if(m){const mo=MO[m[1].toLowerCase().substring(0,3)];if(mo!==undefined){let y=parseInt(m[3]);if(y<100)y+=2000;return new Date(y,mo,parseInt(m[2]));}}return null;}
 function toLocalISO(d){if(!d)return'';const y=d.getFullYear();const m=String(d.getMonth()+1).padStart(2,'0');const dd=String(d.getDate()).padStart(2,'0');return`${y}-${m}-${dd}`;}
+function taskCls(deadline){if(!deadline)return'future';return dlClass(daysUntil(deadline));}
+function taskRel(deadline){if(!deadline)return'';const d=daysUntil(deadline);return d<0?`${Math.abs(d)}d ago`:d===0?'Today':d<=60?`${d}d`:fmtDateShort(deadline);}
+function pendingTaskInfo(e){const ts=(e&&e.tasks||[]).filter(t=>!t.done);if(!ts.length)return null;const withDl=ts.filter(t=>t.deadline).sort((a,b)=>a.deadline.localeCompare(b.deadline));const nearest=withDl[0]||ts[0];return{count:ts.length,nearest,cls:nearest.deadline?taskCls(nearest.deadline):'future'};}
 function pPeriod(p){if(!p)return null;const pts=p.split(/\s*(?:–|—|to|-)\s*/);if(pts.length<2)return null;const s=pDate(pts[0]),e=pDate(pts[pts.length-1]);return s&&e?{start:s,end:e}:null;}
 function Thermo({period,deadline,reportDeadline}){
   const p=pPeriod(period);if(!p)return null;
@@ -1460,6 +1511,9 @@ function AppEntry({e,isLast,onChangeStatus,onChangeField,onDelete,onDuplicate}){
         {/* ── Attachments ── */}
         <DocsSection e={e} onChangeField={onChangeField}/>
 
+        {/* ── Tasks ── */}
+        <TasksSection e={e} onChangeField={onChangeField}/>
+
         {/* ── Edit mode save/cancel bar ── */}
         {isEditing&&(
           <div className="ec-edit-row" onClick={ev=>ev.stopPropagation()}>
@@ -1553,6 +1607,47 @@ function DocsSection({e,onChangeField}){
           <input ref={fileRef} type="file" multiple style={{display:'none'}} onChange={ev=>handleFiles(ev.target.files)} onClick={ev=>ev.stopPropagation()}/>
         </div>
         {err&&<div style={{fontSize:10,color:'var(--r)',width:'100%',marginTop:2}}>{err}</div>}
+      </div>
+    </div>
+  );
+}
+
+// ── Tasks within a grant (e.g. "Subsanar proyecto" + deadline) ──
+function TasksSection({e,onChangeField}){
+  const[txt,setTxt]=useState('');
+  const[dl,setDl]=useState('');
+  const tasks=(e.tasks||[]).slice().sort((a,b)=>{
+    if(!!a.done!==!!b.done)return a.done?1:-1;
+    return(a.deadline||'9999').localeCompare(b.deadline||'9999');
+  });
+  const commit=arr=>onChangeField(e.id,'tasks',arr);
+  const addTask=()=>{
+    if(!txt.trim())return;
+    commit([...(e.tasks||[]),{id:Date.now(),text:txt.trim(),deadline:dl||'',done:false}]);
+    setTxt('');setDl('');
+  };
+  const toggle=id=>commit((e.tasks||[]).map(t=>t.id===id?{...t,done:!t.done}:t));
+  const del=id=>commit((e.tasks||[]).filter(t=>t.id!==id));
+  return(
+    <div className="ec-row ec-tasks-row" style={{alignItems:'flex-start'}}>
+      <i className="fa-solid fa-list-check ec-ico"/>
+      <span className="ec-lbl">Tasks</span>
+      <div className="ec-val tasks-sec">
+        {tasks.length>0&&tasks.map(t=>(
+          <div key={t.id} className="task-item">
+            <button className={`task-chk${t.done?' done':''}`} title={t.done?'Mark not done':'Mark done'} onClick={ev=>{ev.stopPropagation();toggle(t.id);}}>{t.done&&<i className="fa-solid fa-check"/>}</button>
+            <div className="task-body">
+              <span className={`task-text${t.done?' done':''}`}>{t.text}</span>
+              {t.deadline&&<div className="task-meta"><span className={`task-dl ${t.done?'future':taskCls(t.deadline)}`}>{fmtDateShort(t.deadline)} · {taskRel(t.deadline)}</span></div>}
+            </div>
+            <button className="task-del" title="Delete task" onClick={ev=>{ev.stopPropagation();del(t.id);}}><i className="fa-solid fa-xmark"/></button>
+          </div>
+        ))}
+        <div className="task-add-row" onClick={ev=>ev.stopPropagation()}>
+          <input className="ec-ei" type="text" value={txt} placeholder="New task, e.g. Subsanar proyecto" onChange={ev=>setTxt(ev.target.value)} onKeyDown={ev=>{if(ev.key==='Enter')addTask();}}/>
+          <input className="ec-ei short" type="date" style={{width:150}} value={dl} onChange={ev=>setDl(ev.target.value)}/>
+          <button className="task-add-btn" onClick={addTask}><i className="fa-solid fa-plus"/> Add</button>
+        </div>
       </div>
     </div>
   );
@@ -1959,6 +2054,7 @@ function App({initialGrants}){
   const[suggestions,setSuggestions]=useState([]);
   const[showSuggestions,setShowSuggestions]=useState(false);
   const[suggView,setSuggView]=useState(false);
+  const[showTasks,setShowTasks]=useState(false);
   useEffect(()=>{document.documentElement.classList.toggle('light',!isDark);},[isDark]);
   useEffect(()=>{loadSuggestions().then(setSuggestions);},[]);
 
@@ -2166,6 +2262,14 @@ function App({initialGrants}){
   const dupEntry=useCallback(id=>{setData(p=>{const src=p.find(g=>g.id===id);if(!src)return p;const copy={...src,id:Date.now(),notes:(src.notes||'')+' (copy)'};return[copy,...p];});},[]);
   const[expRow,setExpRow]=useState(null);
 
+  const toggleTask=useCallback((entryId,taskId)=>setData(p=>p.map(g=>g.id===entryId?{...g,tasks:(g.tasks||[]).map(t=>t.id===taskId?{...t,done:!t.done}:t)}:g)),[]);
+  // All pending tasks across grants, sorted by deadline (no-deadline last)
+  const allPendingTasks=useMemo(()=>{
+    const out=[];
+    data.forEach(en=>(en.tasks||[]).forEach(t=>{if(!t.done)out.push({task:t,entry:en});}));
+    out.sort((a,b)=>(a.task.deadline||'9999-99').localeCompare(b.task.deadline||'9999-99'));
+    return out;
+  },[data]);
   const calModalEntry=calModalId?data.find(g=>g.id===calModalId):null;
   useEffect(()=>{
     if(!calModalId)return;
@@ -2188,6 +2292,31 @@ function App({initialGrants}){
           </div>
         </div>
       )}
+      {showTasks&&(
+        <React.Fragment>
+          <div className="tpanel-ov" onClick={()=>setShowTasks(false)}/>
+          <div className="tpanel">
+            <div className="tpanel-hdr">
+              <span className="tpanel-title"><i className="fa-solid fa-list-check" style={{color:'var(--o)'}}/> Tasks <span style={{fontSize:12,color:'var(--tf)',fontWeight:600}}>{allPendingTasks.length}</span></span>
+              <button className="gmodal-close" style={{position:'static'}} onClick={()=>setShowTasks(false)} title="Close"><i className="fa-solid fa-xmark"/></button>
+            </div>
+            <div className="tpanel-body">
+              {allPendingTasks.length===0?(
+                <div className="tpanel-empty"><i className="fa-solid fa-check" style={{fontSize:28,color:'var(--g)',display:'block',marginBottom:10}}/>No pending tasks. All clear!</div>
+              ):allPendingTasks.map(({task,entry})=>(
+                <div key={task.id} className="tpanel-task" onClick={()=>{setCalModalId(entry.id);setShowTasks(false);}}>
+                  <button className={`task-chk${task.done?' done':''}`} onClick={ev=>{ev.stopPropagation();toggleTask(entry.id,task.id);}} title="Mark done">{task.done&&<i className="fa-solid fa-check"/>}</button>
+                  <div className="tpanel-task-body">
+                    <div className="tpanel-task-text">{task.text}</div>
+                    <div className="tpanel-task-sub">{entry.foundation||'—'}{entry.grant?` · ${entry.grant}`:''}</div>
+                  </div>
+                  {task.deadline&&<span className={`task-dl ${taskCls(task.deadline)}`} style={{alignSelf:'center'}}>{taskRel(task.deadline)}</span>}
+                </div>
+              ))}
+            </div>
+          </div>
+        </React.Fragment>
+      )}
       <div className="topbar">
         <span className="nav-brand"><PolenLogo size={22}/> POLEN</span>
         <div style={{flex:1}}/>
@@ -2202,6 +2331,10 @@ function App({initialGrants}){
             {saveMsg&&<span style={{fontSize:10,color:'var(--g)',fontWeight:700}}>{saveMsg}</span>}
           </>}
           <span style={{width:1,height:16,background:'var(--bd)',margin:'0 2px',flexShrink:0}}/>
+          <button className="theme-btn hdr-bell" title="Tasks" onClick={()=>setShowTasks(true)} style={allPendingTasks.length>0?{borderColor:'var(--o)',color:'var(--o)'}:{}}>
+            <i className="fa-solid fa-list-check"/>
+            {allPendingTasks.length>0&&<span className="hdr-bell-badge">{allPendingTasks.length}</span>}
+          </button>
           <button className="theme-btn btn-reload" onClick={()=>window.location.reload()} title="Reload"><i className="fa-solid fa-rotate-right"/></button>
           <button className="theme-btn btn-signout" onClick={doSignOut} title="Sign out"><i className="fa-solid fa-right-from-bracket"/></button>
           <button className="theme-btn" title="Toggle theme" onClick={()=>{setIsDark(d=>{const n=!d;localStorage.setItem('polen-theme',n?'dark':'light');return n;})}}>{isDark?<i className="fa-solid fa-sun"/>:<i className="fa-solid fa-moon"/>}</button>
@@ -2350,6 +2483,7 @@ function App({initialGrants}){
                         <span className={`ns ${STEP_CSS[e.nextStep]||'ns-check'}`}>{STEP_SHORT[e.nextStep]||e.nextStep}</span>
                         {e.deadline&&<span className="emr-dl">{fmtDateShort(e.deadline)}</span>}
                         {(e.amountReceived||e.amount)&&<span className={`emr-amt-big${e.amountReceived?' received':''}`}>{fmt(e.amountReceived||e.amount,e.currency||'USD')}</span>}
+                        {(()=>{const ti=pendingTaskInfo(e);return ti?<span className={`task-alert ${ti.cls}`} title={`${ti.count} pending task${ti.count>1?'s':''}`}><i className="fa-solid fa-list-check"/>{ti.count}{ti.nearest.deadline?` · ${taskRel(ti.nearest.deadline)}`:''}</span>:null;})()}
                       </div>
                       {e.projectDates&&<div className="emr-proj">{e.projectDates}</div>}
                       {e.documents?.length>0&&<div className="emr-docs">{e.documents.map((d,di)=>{const ti=DOC_TYPES.find(t=>t.value===d.type)||DOC_TYPES[DOC_TYPES.length-1];return(<a key={di} href={d.url} target="_blank" rel="noreferrer" className="emr-doc-btn" title={d.name} onClick={ev=>ev.stopPropagation()}><i className={`fa-solid ${ti.icon}`}/><span>{d.name}</span></a>);})}</div>}
@@ -2391,6 +2525,10 @@ function App({initialGrants}){
                 const isEst=dType&&dType!=='DDLNE!';
                 // Semáforo: year history dots
                 const semEntries=grp.entries.slice().sort((a,b)=>(a.deadline||'').localeCompare(b.deadline||''));
+                // Pending tasks across all entries in this program
+                const grpPendTasks=grp.entries.flatMap(en=>(en.tasks||[]).filter(t=>!t.done).map(t=>({...t,_eid:en.id})));
+                const grpTaskNearest=grpPendTasks.filter(t=>t.deadline).sort((a,b)=>a.deadline.localeCompare(b.deadline))[0]||grpPendTasks[0];
+                const grpTaskCls=grpTaskNearest&&grpTaskNearest.deadline?taskCls(grpTaskNearest.deadline):'future';
                 return(
                   <React.Fragment key={grp.key}>
                   <tr className={isExp?'g-sel':''} onClick={()=>setExpRow(isExp?null:grp.key)} style={{cursor:'pointer'}}>
@@ -2429,6 +2567,7 @@ function App({initialGrants}){
                           return <span key={e.id} className="sem-yr"><span className={`sem-dot ${cls}`}/><span className="sem-lbl">{yr}</span></span>;
                         })}
                       </span>
+                      {grpPendTasks.length>0&&<span className={`task-alert ${grpTaskCls}`} style={{marginLeft:6}} title={`${grpPendTasks.length} pending task${grpPendTasks.length>1?'s':''}`}><i className="fa-solid fa-list-check"/>{grpPendTasks.length}{grpTaskNearest&&grpTaskNearest.deadline?` · ${taskRel(grpTaskNearest.deadline)}`:''}</span>}
                       {grp.primary.projectDates&&<div style={{fontSize:10,color:'var(--tf)',marginTop:2,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis',display:'none'}} className="proj-mob">{grp.primary.projectDates}</div>}
                     </td>
                     <td className="desk-only" style={{fontSize:12,fontWeight:600,color:'var(--t)',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis',maxWidth:280}}>{grp.primary.projectDates||''}</td>
