@@ -1004,10 +1004,12 @@ html.light .period-date{color-scheme:light;}
         <div class="login-logo-sub">Grant Tracker</div>
       </div>
     </div>
-    <input id="li-email" type="email" placeholder="Email" autocomplete="email"/>
+    <input id="li-email" type="email" placeholder="Email" autocomplete="email" autocapitalize="none" autocorrect="off" spellcheck="false"/>
     <input id="li-pass" type="password" placeholder="Password" autocomplete="current-password"/>
     <button id="li-btn" onclick="doLogin()"><span id="li-btn-text">Sign in</span></button>
+    <button id="li-magic" onclick="doMagicLink()" style="width:100%;margin-top:8px;padding:9px;background:none;border:1px solid var(--bd);border-radius:2px;color:var(--td);font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font-mono);display:flex;align-items:center;justify-content:center;gap:6px;">Email me a login link</button>
     <div id="li-err" class="login-err"></div>
+    <div id="li-ok" class="login-err" style="color:#4caf50"></div>
   </div>
 </div>
 <div id="loading-screen">
@@ -1024,6 +1026,8 @@ html.light .period-date{color-scheme:light;}
 const SUPABASE_URL  = 'https://aqehbiyjofsxavndjfjj.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFxZWhiaXlqb2ZzeGF2bmRqZmpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3NjUwMzUsImV4cCI6MjA5NDM0MTAzNX0.WgMseUQ6YbtZPjjx1i_VuRXTpSI7n9OD6QLUImmmPU0';
 const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+// When a session appears (e.g. via magic-link redirect), boot the app
+_sb.auth.onAuthStateChange((event,session)=>{if(session&&!window._appStarted)boot();});
 
 // ── Auth helpers ──
 function showSpinner(){
@@ -1055,6 +1059,19 @@ async function doLogin(){
   const {error}=await _sb.auth.signInWithPassword({email,password:pass});
   if(error){err.textContent=error.message;hideSpinner();}
   else{boot();}  // session is now set — boot() will find it and load the app
+}
+async function doMagicLink(){
+  const err=document.getElementById('li-err');
+  const ok=document.getElementById('li-ok');
+  const email=document.getElementById('li-email').value.trim();
+  err.textContent='';ok.textContent='';
+  if(!email){err.textContent='Enter your email first';return;}
+  const btn=document.getElementById('li-magic');
+  btn.disabled=true;btn.textContent='Sending…';
+  const {error}=await _sb.auth.signInWithOtp({email,options:{shouldCreateUser:false,emailRedirectTo:window.location.href.split('#')[0]}});
+  btn.disabled=false;btn.textContent='Email me a login link';
+  if(error){err.textContent=error.message;}
+  else{ok.textContent='Check your inbox — tap the link to sign in.';}
 }
 document.getElementById('li-email').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('li-pass').focus();});
 document.getElementById('li-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
