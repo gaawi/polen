@@ -2628,6 +2628,10 @@ function App({initialGrants}){
                       {grp.denied>0&&<span className="ms ms-r" style={{fontSize:8}}>✗{grp.denied}</span>}
                       {grp.primary.amount&&(grp.totalAmt===0||statusFilter==='03 Waiting Results')&&<span style={{fontVariantNumeric:'tabular-nums',fontSize:9,color:'var(--td)'}}>{fmt(grp.primary.amount,grp.primary.currency||'USD')}</span>}
                       {grp.totalAmt>0&&statusFilter!=='03 Waiting Results'&&<span style={{fontVariantNumeric:'tabular-nums',fontWeight:700,color:'var(--g)',fontSize:9}}>{fmtByCur(grp.totalAmtByCur)}</span>}
+                      {(grp.primary.web||grp.primary.bases)&&<span style={{display:'inline-flex',gap:6,marginLeft:'auto'}}>
+                        {grp.primary.web&&<a href={grp.primary.web} target="_blank" rel="noreferrer" className="btn-icon btn-icon-web" onClick={e=>e.stopPropagation()} title="Ver Convocatoria"><i className="fa-solid fa-arrow-up-right-from-square"/></a>}
+                        {grp.primary.bases&&<a href={grp.primary.bases} target="_blank" rel="noreferrer" className="btn-icon btn-icon-pdf" onClick={e=>e.stopPropagation()} title="Ver Bases (PDF)"><i className="fa-solid fa-file-pdf"/></a>}
+                      </span>}
                     </td>
                   </tr>
                   {isExp&&(
