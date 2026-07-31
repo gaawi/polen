@@ -1081,7 +1081,11 @@ function doSignOut(){_sb.auth.signOut().then(()=>location.reload());}
 async function loadFromSupabase(){
   const {data,error}=await _sb.from('grants_blob').select('data').eq('id',1).single();
   if(error&&error.code!=='PGRST116'){console.error('load',error);return[];}
-  return (data&&data.data)||[];
+  const rows=(data&&data.data)||[];
+  // Coerce numeric fields — legacy/imported rows may store amounts as strings,
+  // which would break sums (string concatenation) in the stats pills.
+  const num=v=>{if(v===null||v===undefined||v==='')return null;const n=parseFloat(v);return isNaN(n)?null:n;};
+  return rows.map(r=>({...r,amount:num(r.amount),amountReceived:num(r.amountReceived)}));
 }
 async function saveToServer(grants){
   const {error}=await _sb.from('grants_blob').upsert({id:1,data:grants},{onConflict:'id'});
