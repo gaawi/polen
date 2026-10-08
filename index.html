@@ -1139,18 +1139,18 @@ async function saveToServer(grants){
 }
 // Status must be one of the fixed workflow steps — never free text. Any
 // stray value (e.g. a reminder pasted via an AI suggestion or JSON import)
-// is coerced back to a safe default, and its text preserved as a task so
+// is coerced back to a safe default, and its text preserved in Notes so
 // nothing is lost.
 const VALID_STEPS=['00 Send Proposal','01 Apply on deadline','02 Check','03 Waiting Results','04 Denied','05 Received','06 Not Applied','07 Missed Deadline','08 Not Eligible'];
 function coerceGrantStatus(g){
   if(!g||typeof g!=='object')return g;
   if(g.nextStep&&VALID_STEPS.includes(g.nextStep))return g;
   const stray=g.nextStep==null?'':String(g.nextStep).trim();
-  const tasks=Array.isArray(g.tasks)?g.tasks.slice():[];
-  if(stray&&!VALID_STEPS.includes(stray)&&!tasks.some(t=>t&&t.text===stray)){
-    tasks.push({id:Date.now()+Math.floor(Math.random()*1e6),text:stray,done:false});
+  let notes=g.notes||'';
+  if(stray&&!VALID_STEPS.includes(stray)&&!notes.includes(stray)){
+    notes=notes?`${notes}\n${stray}`:stray;
   }
-  return {...g,nextStep:'02 Check',tasks};
+  return {...g,nextStep:'02 Check',notes};
 }
 
 // Private Donors live in the SAME table but a separate row (id=2) — fully
