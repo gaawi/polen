@@ -1130,13 +1130,29 @@ async function loadFromSupabase(){
   // Coerce numeric fields — legacy/imported rows may store amounts as strings,
   // which would break sums (string concatenation) in the stats pills.
   const num=v=>{if(v===null||v===undefined||v==='')return null;const n=parseFloat(v);return isNaN(n)?null:n;};
-  return rows.map(r=>({...r,amount:num(r.amount),amountReceived:num(r.amountReceived)}));
+  return rows.map(r=>coerceGrantStatus({...r,amount:num(r.amount),amountReceived:num(r.amountReceived)}));
 }
 async function saveToServer(grants){
   const {error}=await _sb.from('grants_blob').upsert({id:1,data:grants},{onConflict:'id'});
   if(error){console.error('save',error);return{ok:false,msg:error.message};}
   return{ok:true,msg:'Saved '+grants.length+' entries'};
 }
+// Status must be one of the fixed workflow steps — never free text. Any
+// stray value (e.g. a reminder pasted via an AI suggestion or JSON import)
+// is coerced back to a safe default, and its text preserved as a task so
+// nothing is lost.
+const VALID_STEPS=['00 Send Proposal','01 Apply on deadline','02 Check','03 Waiting Results','04 Denied','05 Received','06 Not Applied','07 Missed Deadline','08 Not Eligible'];
+function coerceGrantStatus(g){
+  if(!g||typeof g!=='object')return g;
+  if(g.nextStep&&VALID_STEPS.includes(g.nextStep))return g;
+  const stray=g.nextStep==null?'':String(g.nextStep).trim();
+  const tasks=Array.isArray(g.tasks)?g.tasks.slice():[];
+  if(stray&&!VALID_STEPS.includes(stray)&&!tasks.some(t=>t&&t.text===stray)){
+    tasks.push({id:Date.now()+Math.floor(Math.random()*1e6),text:stray,done:false});
+  }
+  return {...g,nextStep:'02 Check',tasks};
+}
+
 // Private Donors live in the SAME table but a separate row (id=2) — fully
 // isolated from the grants tracker (id=1); no schema migration required.
 async function loadDonorsFromSupabase(){
@@ -1185,7 +1201,7 @@ async function acceptSuggestion(sug,addFn,setSuggestions){
     reportDeadline:gd.reportDeadline||'',
     season:gd.season||''
   };
-  addFn(newGrant);
+  addFn(coerceGrantStatus(newGrant));
   await _sb.from('suggestions').update({status:'accepted'}).eq('id',sug.id);
   setSuggestions(p=>p.filter(s=>s.id!==sug.id));
 }
@@ -2584,7 +2600,7 @@ function App({initialGrants}){
           {editMode&&<>
             <button className="theme-btn" title="Save" onClick={async()=>{const r=await saveToServer(data);setSaveMsg(r.msg);setTimeout(()=>setSaveMsg(null),2500);}} style={{borderColor:'var(--g)',color:'var(--g)',background:'var(--gbg)'}}><i className="fa-solid fa-floppy-disk"/></button>
             <button className="theme-btn" title="Export JSON" onClick={()=>exportJSON(data)} style={{borderColor:'var(--b)',color:'var(--b)'}}><i className="fa-solid fa-download"/></button>
-            <label className="theme-btn" title="Import JSON" style={{borderColor:'var(--y)',color:'var(--y)',cursor:'pointer'}}><i className="fa-solid fa-upload"/><input type="file" accept=".json" style={{display:'none'}} onChange={e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(Array.isArray(d)){setData(d);setSaveMsg('Imported '+d.length);setTimeout(()=>setSaveMsg(null),2000);}}catch(err){alert('Invalid JSON');}};rd.readAsText(f);e.target.value='';}}/></label>
+            <label className="theme-btn" title="Import JSON" style={{borderColor:'var(--y)',color:'var(--y)',cursor:'pointer'}}><i className="fa-solid fa-upload"/><input type="file" accept=".json" style={{display:'none'}} onChange={e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(Array.isArray(d)){setData(d.map(coerceGrantStatus));setSaveMsg('Imported '+d.length);setTimeout(()=>setSaveMsg(null),2000);}}catch(err){alert('Invalid JSON');}};rd.readAsText(f);e.target.value='';}}/></label>
             {saveMsg&&<span style={{fontSize:10,color:'var(--g)',fontWeight:700}}>{saveMsg}</span>}
           </>}
           <span style={{width:1,height:16,background:'var(--bd)',margin:'0 2px',flexShrink:0}}/>
