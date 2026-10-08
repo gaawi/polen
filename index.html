@@ -984,6 +984,22 @@ html.light .period-date{color-scheme:light;}
 #loading-screen{position:fixed;inset:0;background:var(--bg);display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;z-index:9998;}
 .loading-spinner{width:28px;height:28px;border:2px solid var(--bd);border-top-color:var(--ac);border-radius:50%;animation:spin .8s linear infinite;}
 .loading-text{font-size:11px;color:var(--td);font-weight:500;text-transform:uppercase;letter-spacing:.1em;}
+/* ── Private Donors ── */
+.donor-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:12px 16px;border-bottom:1px solid var(--bd);}
+.donor-row{cursor:pointer;}
+.donor-row:hover td{background:var(--s2);}
+.dstat{appearance:none;-webkit-appearance:none;border:none;border-left:3px solid transparent;cursor:pointer;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;padding:3px 20px 3px 7px;border-radius:2px;outline:none;font-family:var(--font-mono);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5'%3E%3Cpath d='M0 0l4 5 4-5z' fill='currentColor' opacity='.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 6px center;}
+.dst-research{background:var(--s3);color:var(--td);border-left-color:var(--tf);}
+.dst-tocontact{background:var(--ybg);color:var(--y);border-left-color:var(--y);}
+.dst-contacted{background:var(--bbg);color:var(--b);border-left-color:var(--b);}
+.dst-conversation{background:var(--acbg);color:var(--ac);border-left-color:var(--ac);}
+.dst-applied{background:var(--obg);color:var(--o);border-left-color:var(--o);}
+.dst-funded{background:var(--gbg);color:var(--g);border-left-color:var(--g);}
+.dst-noteligible{background:var(--rbg);color:var(--r);border-left-color:var(--r);}
+.dprio-dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0;}
+.dappl{font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;background:var(--acbg);color:var(--ac);white-space:nowrap;}
+.donor-fu-soon{color:var(--o);font-weight:700;}
+.donor-fu-over{color:var(--r);font-weight:700;}
 </style>
 </head>
 <body>
@@ -1092,6 +1108,18 @@ async function saveToServer(grants){
   if(error){console.error('save',error);return{ok:false,msg:error.message};}
   return{ok:true,msg:'Saved '+grants.length+' entries'};
 }
+// Private Donors live in the SAME table but a separate row (id=2) — fully
+// isolated from the grants tracker (id=1); no schema migration required.
+async function loadDonorsFromSupabase(){
+  const {data,error}=await _sb.from('grants_blob').select('data').eq('id',2).single();
+  if(error&&error.code!=='PGRST116'){console.error('donors load',error);return[];}
+  return (data&&data.data)||[];
+}
+async function saveDonorsToServer(donors){
+  const {error}=await _sb.from('grants_blob').upsert({id:2,data:donors},{onConflict:'id'});
+  if(error){console.error('donors save',error);return{ok:false,msg:error.message};}
+  return{ok:true,msg:'Saved '+donors.length+' donors'};
+}
 function exportJSON(d){
   const blob=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
@@ -1165,6 +1193,12 @@ async function uploadDoc(grantId, file){
   return`${SUPABASE_URL}/storage/v1/object/public/grant-docs/${path}`;
 }
 const STEP_CSS={'00 Send Proposal':'ns-apply','01 Apply on deadline':'ns-apply','02 Check':'ns-check','03 Waiting Results':'ns-waiting','04 Denied':'ns-denied','05 Received':'ns-received','06 Not Applied':'ns-notsent','07 Missed Deadline':'ns-missed','08 Not Eligible':'ns-notelig'};
+// ── Private Donors (CRM) constants ──
+const DONOR_STATUS=['Research','To Contact','Contacted','In Conversation','Applied','Funded','Not Eligible'];
+const DONOR_STATUS_CSS={'Research':'dst-research','To Contact':'dst-tocontact','Contacted':'dst-contacted','In Conversation':'dst-conversation','Applied':'dst-applied','Funded':'dst-funded','Not Eligible':'dst-noteligible'};
+const DONOR_PRIORITY=['High','Medium','Low'];
+const DONOR_APPLICANTS=['ADAR','CreArtBox','Guillermo','Josefina'];
+const donorPrioColor=p=>p==='High'?'var(--r)':p==='Medium'?'var(--y)':'var(--tf)';
 
 function CopyBtn({text}){
   const[copied,setCopied]=useState(false);
@@ -2074,6 +2108,143 @@ function SuggestionsView({suggestions,onAccept,onReject}){
   );
 }
 
+// ── Private Donors: detail / add-edit modal ──
+function DonorModal({donor,onClose,onSave,onDelete}){
+  const blank={id:Date.now(),name:'',website:'',location:'',applicant:'',interests:'',typicalAmount:'',contactName:'',contactEmail:'',status:'Research',priority:'Medium',lastContact:'',nextFollowup:'',notes:''};
+  const[f,setF]=useState({...blank,...(donor||{})});
+  const s=(k,v)=>setF(p=>({...p,[k]:v}));
+  const isNew=!donor;
+  return(
+    <div className="modal-ov" onClick={onClose}>
+      <div className="modal" onClick={e=>e.stopPropagation()}>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:6}}>
+          <h3 style={{margin:0}}>{isNew?'Add Donor':'Edit Donor'}</h3>
+          {!isNew&&onDelete&&<button className="btn btn-sec" style={{color:'var(--r)',borderColor:'var(--r)'}} title="Delete donor" onClick={()=>{if(window.confirm('Delete this donor permanently?')){onDelete(f.id);onClose();}}}><i className="fa-solid fa-trash"/></button>}
+        </div>
+        <div className="mf"><label>Foundation / Donor Name *</label><input value={f.name} onChange={e=>s('name',e.target.value)} placeholder="Foundation or donor name"/></div>
+        <div style={{display:'flex',gap:8}}>
+          <div className="mf" style={{flex:1}}><label>Website</label><input value={f.website} onChange={e=>s('website',e.target.value)} placeholder="https://..."/></div>
+          <div className="mf" style={{flex:1}}><label>Country / Location</label><input value={f.location} onChange={e=>s('location',e.target.value)} placeholder="e.g. New York, US"/></div>
+        </div>
+        <div style={{display:'flex',gap:8}}>
+          <div className="mf" style={{flex:1}}><label>Potential Applicant</label><select value={f.applicant} onChange={e=>s('applicant',e.target.value)}><option value="">—</option>{DONOR_APPLICANTS.map(a=><option key={a} value={a}>{a}</option>)}</select></div>
+          <div className="mf" style={{flex:1}}><label>Typical Grant Amount</label><input value={f.typicalAmount} onChange={e=>s('typicalAmount',e.target.value)} placeholder="e.g. $10k–50k"/></div>
+        </div>
+        <div className="mf"><label>Funding Interests</label><input value={f.interests} onChange={e=>s('interests',e.target.value)} placeholder="Music, Education, Contemporary Art, Community…"/></div>
+        <div style={{display:'flex',gap:8}}>
+          <div className="mf" style={{flex:1}}><label>Status</label><select value={f.status} onChange={e=>s('status',e.target.value)}>{DONOR_STATUS.map(st=><option key={st} value={st}>{st}</option>)}</select></div>
+          <div className="mf" style={{flex:1}}><label>Priority</label><select value={f.priority} onChange={e=>s('priority',e.target.value)}>{DONOR_PRIORITY.map(p=><option key={p} value={p}>{p}</option>)}</select></div>
+        </div>
+        <div style={{display:'flex',gap:8}}>
+          <div className="mf" style={{flex:1}}><label>Contact Name</label><input value={f.contactName} onChange={e=>s('contactName',e.target.value)} placeholder="Program officer…"/></div>
+          <div className="mf" style={{flex:1}}><label>Contact Email</label><input type="email" value={f.contactEmail} onChange={e=>s('contactEmail',e.target.value)} placeholder="name@foundation.org"/></div>
+        </div>
+        <div style={{display:'flex',gap:8}}>
+          <div className="mf" style={{flex:1}}><label>Last Contact Date</label><input type="date" value={f.lastContact} onChange={e=>s('lastContact',e.target.value)}/></div>
+          <div className="mf" style={{flex:1}}><label>Next Follow-up Date</label><input type="date" value={f.nextFollowup} onChange={e=>s('nextFollowup',e.target.value)}/></div>
+        </div>
+        <div className="mf"><label>Notes</label><textarea value={f.notes} onChange={e=>s('notes',e.target.value)} style={{minHeight:90}}/></div>
+        <div className="ma">
+          <button className="btn btn-sec" onClick={onClose}>Cancel</button>
+          <button className="btn btn-pri" onClick={()=>{if(f.name.trim()){onSave(f);onClose();}}}>{isNew?'Add Donor':'Save'}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Private Donors: table view ──
+function DonorsView({donors,onAdd,onUpdate,onDelete}){
+  const[q,setQ]=useState('');
+  const[statusF,setStatusF]=useState('all');
+  const[applF,setApplF]=useState('all');
+  const[sortCol,setSortCol]=useState('priority');
+  const[sortDir,setSortDir]=useState('asc');
+  const[openId,setOpenId]=useState(null);
+  const[showAdd,setShowAdd]=useState(false);
+  const PRIO_ORDER={High:0,Medium:1,Low:2};
+  const rows=useMemo(()=>{
+    let r=donors.slice();
+    if(statusF!=='all')r=r.filter(d=>(d.status||'Research')===statusF);
+    if(applF!=='all')r=r.filter(d=>d.applicant===applF);
+    if(q){const s=q.toLowerCase();r=r.filter(d=>['name','location','interests','contactName','contactEmail','notes','typicalAmount','applicant'].some(k=>(d[k]||'').toLowerCase().includes(s)));}
+    r.sort((a,b)=>{
+      let av,bv;
+      if(sortCol==='priority'){av=PRIO_ORDER[a.priority]??9;bv=PRIO_ORDER[b.priority]??9;}
+      else if(sortCol==='status'){av=DONOR_STATUS.indexOf(a.status);bv=DONOR_STATUS.indexOf(b.status);}
+      else if(sortCol==='nextFollowup'){av=a.nextFollowup||'9999-99-99';bv=b.nextFollowup||'9999-99-99';}
+      else{av=(a[sortCol]||'').toLowerCase();bv=(b[sortCol]||'').toLowerCase();}
+      if(av<bv)return sortDir==='asc'?-1:1;
+      if(av>bv)return sortDir==='asc'?1:-1;
+      return 0;
+    });
+    return r;
+  },[donors,q,statusF,applF,sortCol,sortDir]);
+  const openDonor=openId?donors.find(d=>d.id===openId):null;
+  const setSort=c=>{if(sortCol===c)setSortDir(d=>d==='asc'?'desc':'asc');else{setSortCol(c);setSortDir('asc');}};
+  const arrow=c=>sortCol===c?(sortDir==='asc'?' ▲':' ▼'):'';
+  const todayStr=new Date().toISOString().slice(0,10);
+  const soonStr=new Date(Date.now()+14*864e5).toISOString().slice(0,10);
+  return(
+    <div style={{paddingBottom:40}}>
+      <div className="donor-toolbar">
+        <input className="search" placeholder="Search donors, location, interests, contact…" value={q} onChange={e=>setQ(e.target.value)} style={{flex:'1 1 200px',minWidth:150}}/>
+        <select className="chip-sel" value={statusF} onChange={e=>setStatusF(e.target.value)}><option value="all">All status</option>{DONOR_STATUS.map(st=><option key={st} value={st}>{st}</option>)}</select>
+        <select className="chip-sel" value={applF} onChange={e=>setApplF(e.target.value)}><option value="all">All applicants</option>{DONOR_APPLICANTS.map(a=><option key={a} value={a}>{a}</option>)}</select>
+        <span style={{fontSize:11,color:'var(--tf)'}}>{rows.length} donor{rows.length!==1?'s':''}</span>
+        <button className="btn btn-pri" style={{marginLeft:'auto'}} onClick={()=>setShowAdd(true)}>+ Add Donor</button>
+      </div>
+      <div style={{overflowX:'auto',WebkitOverflowScrolling:'touch'}}>
+      <table className="flat-table">
+        <thead><tr>
+          <th style={{width:28}} title="Priority" onClick={()=>setSort('priority')}>{sortCol==='priority'?arrow('priority').trim()||'!':'!'}</th>
+          <th onClick={()=>setSort('name')} style={{cursor:'pointer'}}>Donor / Foundation{arrow('name')}</th>
+          <th className="desk-only" style={{width:110}}>Applicant</th>
+          <th onClick={()=>setSort('status')} style={{cursor:'pointer',width:130}}>Status{arrow('status')}</th>
+          <th className="desk-only">Location</th>
+          <th className="desk-only" style={{width:110}}>Typical</th>
+          <th onClick={()=>setSort('nextFollowup')} className="desk-only" style={{cursor:'pointer',width:110}}>Follow-up{arrow('nextFollowup')}</th>
+          <th style={{width:60}}></th>
+        </tr></thead>
+        <tbody>
+          {rows.length===0?(
+            <tr><td colSpan={8} style={{textAlign:'center',padding:36,color:'var(--tf)'}}>{donors.length===0?'No donors yet. Click “+ Add Donor” to start your CRM.':'No donors match these filters.'}</td></tr>
+          ):rows.map(d=>{
+            const fu=d.nextFollowup;
+            const fuCls=fu?(fu<todayStr?'donor-fu-over':fu<=soonStr?'donor-fu-soon':''):'';
+            return(
+            <tr key={d.id} className="donor-row" onClick={()=>setOpenId(d.id)}>
+              <td style={{textAlign:'center'}}><span className="dprio-dot" style={{background:donorPrioColor(d.priority)}} title={(d.priority||'Low')+' priority'}/></td>
+              <td>
+                <div style={{fontWeight:700,color:'var(--t)'}}>{d.name||'—'}</div>
+                {d.interests&&<div style={{fontSize:10,color:'var(--tf)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',maxWidth:320}}>{d.interests}</div>}
+              </td>
+              <td className="desk-only">{d.applicant&&<span className="dappl">{d.applicant}</span>}</td>
+              <td onClick={e=>e.stopPropagation()}>
+                <select className={`dstat ${DONOR_STATUS_CSS[d.status]||'dst-research'}`} value={d.status||'Research'} onChange={e=>onUpdate(d.id,'status',e.target.value)}>
+                  {DONOR_STATUS.map(st=><option key={st} value={st}>{st}</option>)}
+                </select>
+              </td>
+              <td className="desk-only" style={{fontSize:11,color:'var(--td)'}}>{d.location||'—'}</td>
+              <td className="desk-only" style={{fontSize:11,color:'var(--td)'}}>{d.typicalAmount||'—'}</td>
+              <td className={`desk-only ${fuCls}`} style={{fontSize:11,fontVariantNumeric:'tabular-nums'}}>{fu||'—'}</td>
+              <td onClick={e=>e.stopPropagation()}>
+                <div style={{display:'flex',gap:5,justifyContent:'flex-end'}}>
+                  {d.website&&<a href={d.website} target="_blank" rel="noreferrer" className="btn-icon btn-icon-web" title="Open website"><i className="fa-solid fa-arrow-up-right-from-square"/></a>}
+                  {d.contactEmail&&<a href={'mailto:'+d.contactEmail} className="btn-icon btn-icon-pdf" title={'Email '+d.contactEmail} onClick={e=>e.stopPropagation()}><i className="fa-solid fa-envelope"/></a>}
+                </div>
+              </td>
+            </tr>
+          );})}
+        </tbody>
+      </table>
+      </div>
+      {showAdd&&<DonorModal onClose={()=>setShowAdd(false)} onSave={d=>onAdd(d)}/>}
+      {openDonor&&<DonorModal donor={openDonor} onClose={()=>setOpenId(null)} onSave={d=>onUpdate(d.id,d)} onDelete={onDelete}/>}
+    </div>
+  );
+}
+
 // ── APP ──
 function App({initialGrants}){
   const[data,setData]=useState(()=>initialGrants.map(g=>({...g})));
@@ -2095,8 +2266,25 @@ function App({initialGrants}){
   const[showSuggestions,setShowSuggestions]=useState(false);
   const[suggView,setSuggView]=useState(false);
   const[showTasks,setShowTasks]=useState(false);
+  const[donorsView,setDonorsView]=useState(false);
+  const[donors,setDonors]=useState([]);
   useEffect(()=>{document.documentElement.classList.toggle('light',!isDark);},[isDark]);
   useEffect(()=>{loadSuggestions().then(setSuggestions);},[]);
+
+  // Private Donors: load once, auto-save (debounced) on change — stored in a
+  // separate Supabase row so it never touches the grants data.
+  const skipDonorSave=useRef(true);
+  const donorSaveTimer=useRef(null);
+  useEffect(()=>{loadDonorsFromSupabase().then(d=>{skipDonorSave.current=true;setDonors(d);});},[]);
+  useEffect(()=>{
+    if(skipDonorSave.current){skipDonorSave.current=false;return;}
+    if(donorSaveTimer.current)clearTimeout(donorSaveTimer.current);
+    donorSaveTimer.current=setTimeout(()=>{saveDonorsToServer(donors);},1500);
+    return()=>{if(donorSaveTimer.current)clearTimeout(donorSaveTimer.current);};
+  },[donors]);
+  const addDonor=d=>setDonors(p=>[{...d,id:d.id||Date.now()},...p]);
+  const updateDonor=(id,patchOrKey,val)=>setDonors(p=>p.map(d=>d.id===id?(typeof patchOrKey==='object'?{...d,...patchOrKey}:{...d,[patchOrKey]:val}):d));
+  const deleteDonor=id=>setDonors(p=>p.filter(d=>d.id!==id));
 
   // Auto-save: localStorage instantly + server after 2s debounce
   const saveTimer=useRef(null);
@@ -2361,9 +2549,9 @@ function App({initialGrants}){
         <span className="nav-brand"><PolenLogo size={22}/> POLEN</span>
         <div style={{flex:1}}/>
         <div className="topbar-actions">
-          <button className={`theme-btn${monthView?' edit-active':''}`} title="Month calendar" onClick={()=>{setMonthView(v=>!v);setEditMode(false);setActiveView(false);setCalendarView(false);setSuggView(false);setExpRow(null);}} style={monthView?{borderColor:'var(--b)',color:'var(--b)',background:'var(--bbg)'}:{}}><i className="fa-solid fa-calendar-days"/></button>
+          <button className={`theme-btn${monthView?' edit-active':''}`} title="Month calendar" onClick={()=>{setMonthView(v=>!v);setEditMode(false);setActiveView(false);setCalendarView(false);setSuggView(false);setDonorsView(false);setExpRow(null);}} style={monthView?{borderColor:'var(--b)',color:'var(--b)',background:'var(--bbg)'}:{}}><i className="fa-solid fa-calendar-days"/></button>
           <span style={{width:1,height:16,background:'var(--bd)',margin:'0 2px',flexShrink:0}}/>
-          <button className={`theme-btn${editMode?' edit-active':''}`} title="Edit All" onClick={()=>{setEditMode(v=>!v);setActiveView(false);setCalendarView(false);setSuggView(false);setMonthView(false);}} style={editMode?{borderColor:'var(--y)',color:'var(--y)',background:'var(--ybg)'}:{}}><i className="fa-solid fa-pen"/></button>
+          <button className={`theme-btn${editMode?' edit-active':''}`} title="Edit All" onClick={()=>{setEditMode(v=>!v);setActiveView(false);setCalendarView(false);setSuggView(false);setMonthView(false);setDonorsView(false);}} style={editMode?{borderColor:'var(--y)',color:'var(--y)',background:'var(--ybg)'}:{}}><i className="fa-solid fa-pen"/></button>
           {editMode&&<>
             <button className="theme-btn" title="Save" onClick={async()=>{const r=await saveToServer(data);setSaveMsg(r.msg);setTimeout(()=>setSaveMsg(null),2500);}} style={{borderColor:'var(--g)',color:'var(--g)',background:'var(--gbg)'}}><i className="fa-solid fa-floppy-disk"/></button>
             <button className="theme-btn" title="Export JSON" onClick={()=>exportJSON(data)} style={{borderColor:'var(--b)',color:'var(--b)'}}><i className="fa-solid fa-download"/></button>
@@ -2387,16 +2575,16 @@ function App({initialGrants}){
         <div className="chips-row">
           {/* Desktop: individual pills */}
           {[['all','All',stats.total,null],['apply','Apply',stats.apply,null],['03 Waiting Results','Waiting',stats.waiting,stats.waitingAmtByCur],['05 Received','Awarded',stats.received,null],['04 Denied','Denied',stats.denied,null]].map(([k,l,c,amtByCur])=>
-            <button key={k} className={`chip status-chip-desktop ${statusFilter===k&&!editMode&&!activeView&&!calendarView&&!monthView&&!suggView?'on':''}`}
-              onClick={()=>{setStatusFilter(k);setEditMode(false);setActiveView(false);setCalendarView(false);setMonthView(false);setSuggView(false);setExpRow(null);}}>
+            <button key={k} className={`chip status-chip-desktop ${statusFilter===k&&!editMode&&!activeView&&!calendarView&&!monthView&&!suggView&&!donorsView?'on':''}`}
+              onClick={()=>{setStatusFilter(k);setEditMode(false);setActiveView(false);setCalendarView(false);setMonthView(false);setSuggView(false);setDonorsView(false);setExpRow(null);}}>
               {l}{k!=='all'&&c>0&&<span style={{opacity:.65,marginLeft:4,fontSize:10}}>{c}</span>}{amtByCur&&Object.values(amtByCur).some(v=>v>0)&&<span style={{opacity:.55,marginLeft:4,fontSize:9}}>{fmtByCur(amtByCur)}</span>}
             </button>
           )}
           {/* Mobile: dropdown */}
-          <div className={`chip-sel-wrap status-sel-mobile${statusFilter!=='all'&&!editMode&&!activeView&&!calendarView&&!monthView&&!suggView?' active':''}`}>
-            <select className={`chip-sel${statusFilter!=='all'&&!editMode&&!activeView&&!calendarView&&!monthView&&!suggView?' active':''}`}
+          <div className={`chip-sel-wrap status-sel-mobile${statusFilter!=='all'&&!editMode&&!activeView&&!calendarView&&!monthView&&!suggView&&!donorsView?' active':''}`}>
+            <select className={`chip-sel${statusFilter!=='all'&&!editMode&&!activeView&&!calendarView&&!monthView&&!suggView&&!donorsView?' active':''}`}
               value={statusFilter}
-              onChange={e=>{setStatusFilter(e.target.value);setEditMode(false);setActiveView(false);setCalendarView(false);setMonthView(false);setSuggView(false);setExpRow(null);}}>
+              onChange={e=>{setStatusFilter(e.target.value);setEditMode(false);setActiveView(false);setCalendarView(false);setMonthView(false);setSuggView(false);setDonorsView(false);setExpRow(null);}}>
               <option value="all">All ({stats.total})</option>
               <option value="apply">Apply ({stats.apply})</option>
               <option value="03 Waiting Results">Waiting ({stats.waiting})</option>
@@ -2404,14 +2592,17 @@ function App({initialGrants}){
               <option value="04 Denied">Denied ({stats.denied})</option>
             </select>
           </div>
-          <button className={`chip ${activeView&&!editMode&&!calendarView&&!monthView&&!suggView?'on':''}`} onClick={()=>{setActiveView(!activeView);setEditMode(false);setCalendarView(false);setMonthView(false);setSuggView(false);setExpRow(null);}} style={activeView?{background:'var(--gbg)',color:'var(--g)'}:{}}><i className="fa-solid fa-bolt"/> Active ({stats.active})</button>
-          <button className={`chip ${calendarView&&!editMode&&!monthView&&!suggView?'on':''}`} onClick={()=>{setCalendarView(!calendarView);setEditMode(false);setActiveView(false);setMonthView(false);setSuggView(false);setExpRow(null);}} style={calendarView?{background:'var(--obg)',color:'var(--o)'}:{}}><i className="fa-solid fa-calendar-days"/> Upcoming{calendarData.reduce((s,m)=>s+m.grants.length,0)>0&&<span style={{marginLeft:5,background:'var(--o)',color:'#fff',borderRadius:10,padding:'0 6px',fontSize:10,fontWeight:800}}>{calendarData.reduce((s,m)=>s+m.grants.length,0)}</span>}</button>
-          <button className={`chip ${suggView?'on':''}`} onClick={()=>{setSuggView(v=>!v);setEditMode(false);setActiveView(false);setCalendarView(false);setMonthView(false);setExpRow(null);}} style={suggView?{background:'var(--bbg)',color:'var(--b)'}:{}}>
+          <button className={`chip ${activeView&&!editMode&&!calendarView&&!monthView&&!suggView?'on':''}`} onClick={()=>{setActiveView(!activeView);setEditMode(false);setCalendarView(false);setMonthView(false);setSuggView(false);setDonorsView(false);setExpRow(null);}} style={activeView?{background:'var(--gbg)',color:'var(--g)'}:{}}><i className="fa-solid fa-bolt"/> Active ({stats.active})</button>
+          <button className={`chip ${calendarView&&!editMode&&!monthView&&!suggView?'on':''}`} onClick={()=>{setCalendarView(!calendarView);setEditMode(false);setActiveView(false);setMonthView(false);setSuggView(false);setDonorsView(false);setExpRow(null);}} style={calendarView?{background:'var(--obg)',color:'var(--o)'}:{}}><i className="fa-solid fa-calendar-days"/> Upcoming{calendarData.reduce((s,m)=>s+m.grants.length,0)>0&&<span style={{marginLeft:5,background:'var(--o)',color:'#fff',borderRadius:10,padding:'0 6px',fontSize:10,fontWeight:800}}>{calendarData.reduce((s,m)=>s+m.grants.length,0)}</span>}</button>
+          <button className={`chip ${suggView?'on':''}`} onClick={()=>{setSuggView(v=>!v);setEditMode(false);setActiveView(false);setCalendarView(false);setMonthView(false);setDonorsView(false);setExpRow(null);}} style={suggView?{background:'var(--bbg)',color:'var(--b)'}:{}}>
             <i className="fa-solid fa-robot"/> IA{suggestions.length>0&&<span style={{marginLeft:5,background:'var(--r)',color:'#fff',borderRadius:10,padding:'0 6px',fontSize:10,fontWeight:800}}>{suggestions.length}</span>}
+          </button>
+          <button className={`chip ${donorsView?'on':''}`} onClick={()=>{setDonorsView(v=>!v);setEditMode(false);setActiveView(false);setCalendarView(false);setMonthView(false);setSuggView(false);setExpRow(null);}} style={donorsView?{background:'var(--acbg)',color:'var(--ac)'}:{}}>
+            <i className="fa-solid fa-hand-holding-heart"/> Donors{donors.length>0&&<span style={{marginLeft:5,opacity:.65,fontSize:10}}>{donors.length}</span>}
           </button>
         </div>
         <span style={{fontSize:11,color:'var(--tf)',marginLeft:'auto',display:'flex',alignItems:'center',gap:8,flexWrap:'wrap',justifyContent:'flex-end'}}>
-          {editMode?`${data.length} entries`:suggView?`${suggestions.length} sugerencias IA pendientes`:monthView?'':calendarView?`${calendarData.reduce((s,m)=>s+m.grants.length,0)} programs · ${calendarData.length} seasons`:activeView?`${activeGroups.length} programs · ${activeGrants.length} active grants`:(()=>{
+          {donorsView?`${donors.length} private donor${donors.length!==1?'s':''}`:editMode?`${data.length} entries`:suggView?`${suggestions.length} sugerencias IA pendientes`:monthView?'':calendarView?`${calendarData.reduce((s,m)=>s+m.grants.length,0)} programs · ${calendarData.length} seasons`:activeView?`${activeGroups.length} programs · ${activeGrants.length} active grants`:(()=>{
             const curYr=new Date().getFullYear().toString();
             const reqByCur={};
             if(statusFilter==='03 Waiting Results'){
@@ -2432,7 +2623,9 @@ function App({initialGrants}){
       </div>
 
       <div className="main-area">
-        {editMode?(
+        {donorsView?(
+          <DonorsView donors={donors} onAdd={addDonor} onUpdate={updateDonor} onDelete={deleteDonor}/>
+        ):editMode?(
           <EditSheet data={data} setData={setData} search={search}/>
         ):suggView?(
           <SuggestionsView suggestions={suggestions} onAccept={s=>acceptSuggestion(s,add,setSuggestions)} onReject={id=>rejectSuggestion(id,setSuggestions)}/>
