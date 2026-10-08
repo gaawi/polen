@@ -777,6 +777,9 @@ html.light .mcal-dn{color:#000;}
     padding-top:6px;border-top:1px solid var(--bd);
   }
   .flat-table td.mob-right .ns,.flat-table td.mob-right .ns-select{font-size:10px;padding:3px 10px;}
+  /* A long/custom status must wrap inside the card instead of bleeding off-screen */
+  .flat-table td.mob-right .ns{white-space:normal;overflow-wrap:anywhere;text-align:left;min-width:0;flex:0 1 auto;max-width:100%;}
+  .flat-table td.mob-right .ns::before{flex-shrink:0;}
   .flat-table td.mob-right .ms{font-size:10px;padding:2px 8px;border-radius:10px;}
   .flat-table td.mob-hide{display:none;}
 
