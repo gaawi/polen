@@ -5,9 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Polen">
+<meta name="theme-color" content="#f6f1e7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e0d0a" media="(prefers-color-scheme: dark)">
 <meta name="robots" content="noindex, nofollow">
 <title>Polen — Grant Tracker</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='5' fill='%23d39400'/><circle cx='16' cy='6' r='2.8' fill='%23d39400'/><circle cx='24.7' cy='11' r='2.8' fill='%23d39400'/><circle cx='24.7' cy='21' r='2.8' fill='%23d39400'/><circle cx='16' cy='26' r='2.8' fill='%23d39400'/><circle cx='7.3' cy='21' r='2.8' fill='%23d39400'/><circle cx='7.3' cy='11' r='2.8' fill='%23d39400'/></svg>">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=1">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <style>
@@ -742,6 +746,28 @@ html.light .mcal-dn{color:#000;}
     white-space:normal!important;overflow:visible!important;max-width:none!important;
     width:100%;margin-bottom:6px;line-height:1.3;
   }
+
+  /* Grant cards: date tile on the LEFT, title + program to its RIGHT
+     (instead of each wrapping onto its own line). */
+  .flat-table tr.g-row{
+    display:grid;
+    grid-template-columns:auto minmax(0,1fr);
+    grid-template-areas:"date title" "date program" "right right";
+    align-items:start;column-gap:12px;
+  }
+  .flat-table tr.g-row td.mob-line1{grid-area:date;margin-bottom:0;align-self:center;width:auto;}
+  .flat-table tr.g-row td.flat-fname{grid-area:title;margin-bottom:1px;align-self:end;}
+  .flat-table tr.g-row td.flat-gname{grid-area:program;align-self:start;margin-bottom:0;}
+  .flat-table tr.g-row td.mob-right{grid-area:right;margin-top:10px;}
+  /* Stack the relative-time under the date tile so the left column stays narrow */
+  .flat-table tr.g-row td.mob-line1 .dl-cell{
+    display:grid;grid-template-columns:auto auto;
+    grid-template-areas:"chev tile" "chev meta";
+    column-gap:6px;row-gap:3px;align-items:start;
+  }
+  .flat-table tr.g-row td.mob-line1 .dl-chev{grid-area:chev;align-self:center;margin-top:0;}
+  .flat-table tr.g-row td.mob-line1 .dl-tile{grid-area:tile;}
+  .flat-table tr.g-row td.mob-line1 .dl-meta{grid-area:meta;padding-top:0;flex-direction:row;align-items:center;}
 
   /* Hide desktop-only, show mobile combined */
   .flat-table td.desk-only{display:none!important;}
@@ -2764,7 +2790,7 @@ function App({initialGrants}){
                 const grpTaskCls=grpTaskNearest&&grpTaskNearest.deadline?taskCls(grpTaskNearest.deadline):'future';
                 return(
                   <React.Fragment key={grp.key}>
-                  <tr className={isExp?'g-sel':''} onClick={()=>setExpRow(isExp?null:grp.key)} style={{cursor:'pointer'}}>
+                  <tr className={`g-row${isExp?' g-sel':''}`} onClick={()=>setExpRow(isExp?null:grp.key)} style={{cursor:'pointer'}}>
                     {/* Line 1: deadline tile (mobile: combined with status/amount) */}
                     <td className="mob-line1">
                       <div className="dl-cell">
